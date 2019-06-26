@@ -2,10 +2,13 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import yaml from 'yamljs';
 
 dotenv.config();
 
 const app = express();
+const swaggerdoc = yaml.load('./swagger.yaml');
 
 app.use(cors());
 
@@ -13,6 +16,7 @@ app.use(require('morgan')('dev'));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerdoc));
 
 app.use('/', (req, res) => {
   res.status(200).json({

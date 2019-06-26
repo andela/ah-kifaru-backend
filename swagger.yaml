@@ -1,0 +1,40 @@
+openapi: 3.0.0
+
+info:
+  version: "1.0"
+  title: ErrorSwag
+  description: "Create a community of like minded authors to foster inspiration and innovation by leveraging the modern web."
+
+servers:
+  - url: http://localhost:3000
+
+tags: 
+  - name : "welcome"
+    description: "API for quick api welcome test"
+    
+paths:
+  /:
+    get: 
+      tags: 
+        - welcome
+      summary : Test get request
+      responses:
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response"
+
+  
+components:
+  
+  schemas:
+
+    response:
+      type: object
+      properties:
+        status:
+          type: number
+        message:
+          type: string
