@@ -6,8 +6,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "lint": "eslint **/*.js",
-        "lint:fix": "prettier-eslint *.{js,json} --write",
-        "prettier": "prettier **/**/*.{js,json} --write",
+        "lint:fix": "prettier-eslint **/*.{js,json} --write",
+        "prettier": "prettier **/*.{js,json} --write",
         "start": "",
         "start:dev": "nodemon --exec babel-node src/index"
     },
@@ -20,7 +20,7 @@
         "*.js": [
             "npm run lint:fix",
             "npm run prettier",
-            "git add"
+            "git add ."
         ]
     },
     "author": "Andela Simulations Programme",
