@@ -21,7 +21,6 @@ describe('Testing Unit Test Setup with Mocha', () => {
       .request(app)
       .get(appUrl)
       .end((error, response) => {
-        expect(response.body).to.be.a('object');
         expect(response.body.message).to.equal(
           'Welcome to the Kifaru backend page'
         );
