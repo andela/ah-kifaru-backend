@@ -4,19 +4,18 @@ import app from '../index';
 
 chai.use(chaiHttp);
 
-describe('Testing home endpoint', () => {
-  it('It should return status of 200 on successful page load', done => {
+describe('Testing Unit Test Setup with Mocha', () => {
+  it('It should ensure that a response status of 200 was given by the server', done => {
     const appUrl = '/';
     chai
       .request(app)
       .get(appUrl)
       .end((error, response) => {
-        expect(response.body).to.be.a('object');
         expect(response.status).to.equal(200);
         done();
       });
   });
-  it('It should return a message on successful page load', done => {
+  it('It should ensure that a message was shown on the browser on successful server response', done => {
     const appUrl = '/';
     chai
       .request(app)
