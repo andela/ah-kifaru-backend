@@ -1,5 +1,6 @@
+## Badges
 [![Build Status](https://travis-ci.com/andela/ah-kifaru-backend.svg?branch=develop)](https://travis-ci.com/andela/ah-kifaru-backend)
-`## Badges
+[![Build Status](https://travis-ci.com/andela/ah-kifaru-backend.svg?branch=develop)](https://travis-ci.com/andela/ah-kifaru-backend)
 [![](https://img.shields.io/badge/Reviewed%20by-Hound-brightgreen.svg)](https://houndci.com)`
 
 =======
