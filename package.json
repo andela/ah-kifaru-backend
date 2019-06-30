@@ -4,12 +4,13 @@
     "description": "A Social platform for the creative at heart",
     "main": "index.js",
     "scripts": {
-        "test": "mocha --require @babel/register --require @babel/polyfill src/test --exit",
+        "test": "nyc mocha --require @babel/register --require @babel/polyfill src/test --exit",
         "lint": "eslint **/*.js",
         "lint:fix": "prettier-eslint \"**/*.{js,json}\" --write",
         "prettier": "prettier **/*.{js,json} --write",
         "start": "",
-        "start:dev": "nodemon --exec babel-node src/index"
+        "start:dev": "nodemon --exec babel-node src/index",
+        "coverage": "nyc report --reporter=text-lcov | coveralls"
     },
     "husky": {
         "hooks": {
@@ -63,6 +64,7 @@
         "@babel/register": "^7.4.4",
         "chai": "^4.2.0",
         "chai-http": "^4.3.0",
+        "coveralls": "^3.0.4",
         "eslint": "^5.16.0",
         "eslint-config-airbnb-base": "^13.1.0",
         "eslint-config-prettier": "^5.1.0",
@@ -71,6 +73,7 @@
         "husky": "^2.5.0",
         "mocha": "^6.1.4",
         "nodemon": "^1.19.1",
+        "nyc": "^14.1.1",
         "prettier": "^1.18.2",
         "prettier-eslint": "^9.0.0",
         "prettier-eslint-cli": "^5.0.0"
