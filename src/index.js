@@ -42,7 +42,6 @@ app.use('*', (req, res) => {
 
 // finally, let's start our server...
 const server = app.listen(process.env.PORT || 3000, () => {
-  console.log('process started on port ', server.address().port);
   process.stdout.write(`Listening on port ${server.address().port}`);
 });
 
