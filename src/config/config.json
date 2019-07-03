@@ -1,0 +1,25 @@
+{
+  "development": {
+    "username": "tobechukwuobitube",
+    "password": null,
+    "database": "sims",
+    "host": "127.0.0.1",
+    "port": "5432",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "tobechukwuobitube",
+    "password": null,
+    "database": "articles-test",
+    "port": "5432",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "tobechukwuobitube",
+    "password": null,
+    "database": "articles-production",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "operatorsAliases": false
+  }
+}
