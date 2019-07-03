@@ -16,8 +16,12 @@
         "start:dev": "nodemon --exec babel-node src/index"
     },
     "nyc": {
-        "exclude": ["**/*.spec.js", "**/test/utils", "**/helpers/passport/" ]
-      },
+        "exclude": [
+            "**/*.spec.js",
+            "**/test/utils",
+            "**/helpers/passport/"
+        ]
+    },
     "husky": {
         "hooks": {
             "pre-commit": "lint-staged"

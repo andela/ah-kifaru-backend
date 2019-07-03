@@ -229,63 +229,32 @@ describe('Test user login, signup and account verification', () => {
 });
 
 describe('GET api/v1/users', () => {
-  const superAdmin = {
-    email: 'jonsnow@got.com',
-    password: 'password'
-  };
-
-  let superAdminToken;
-  before(done => {
-    chai
-      .request(app)
-      .post('/api/v1/auth/login')
-      .send(superAdmin)
-      .end((err, res) => {
-        superAdminToken = res.body.data.token;
-        done();
-      });
-  });
-
   it('should successfully get a list of all users', done => {
     const userUrl = '/api/v1/auth/users';
     chai
       .request(app)
       .get(userUrl)
-      .set('Authorization', superAdminToken)
       .end((err, res) => {
         expect(res.status).to.equal(200);
+        expect(res.body.data).to.be.an('array');
+        expect(res.body.data).to.have.lengthOf(4);
         done();
       });
   });
+});
 
-  it('should not activate a user with an invalid token', done => {
-    const userUrl = '/api/v1/auth/users';
-    const invalidToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsImlhdCI6MTU1NTc3MDA1M30.6J7Lmugkww_bSoqKArodoQM4su96QtUrhxA500OxEpg';
-    chai
-      .request(app)
-      .get(userUrl)
-      .set('Authorization', invalidToken)
-      .end((err, res) => {
-        expect(res.status).to.equal(400);
-        done();
-      });
-  });
-
-  it('should return error if database error occurs', done => {
-    const findAllStub = sinon.stub(BaseRepository, 'findAndCountAll');
-    findAllStub.rejects();
-    const userUrl = '/api/v1/auth/users';
-    chai
-      .request(app)
-      .get(userUrl)
-      .set('Authorization', superAdminToken)
-      .end((err, res) => {
-        expect(res.status).to.equal(500);
-        findAllStub.restore();
-        done();
-      });
-  });
+it('should return error if database error occurs', done => {
+  const findAllStub = sinon.stub(BaseRepository, 'findAndCountAll');
+  findAllStub.rejects();
+  const userUrl = '/api/v1/auth/users';
+  chai
+    .request(app)
+    .get(userUrl)
+    .end((err, res) => {
+      expect(res.status).to.equal(500);
+      findAllStub.restore();
+      done();
+    });
 });
 
 describe('PATCH api/v1/users/follow', () => {
