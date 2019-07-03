@@ -4,10 +4,27 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import yaml from 'yamljs';
+import passport from 'passport';
+import cookieSession from 'cookie-session';
+
+import Routes from './routes/v1/index';
+import './helpers/passport/google';
+import './helpers/passport/github';
 
 dotenv.config();
 
 const app = express();
+
+app.use(
+  cookieSession({
+    maxAge: process.env.maxAge,
+    keys: process.env.cookieKey
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 const swaggerdoc = yaml.load('./swagger.yaml');
 
 app.use(cors());
@@ -18,7 +35,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerdoc));
 
-app.use('/', (req, res) => {
+app.use(passport.initialize());
+
+Routes(app);
+
+app.use('*', (req, res) => {
   res.status(200).json({
     message: `Welcome to the Kifaru backend page`
   });
