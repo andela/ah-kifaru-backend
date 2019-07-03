@@ -14,7 +14,7 @@ const decodeToken = (req, res, next, token) => {
 const authMiddleware = (req, res, next) => {
   let token =
     req.headers['x-access-token'] ||
-    req.headers.Authorization ||
+    req.headers.authorization ||
     req.headers.token ||
     req.params.token;
 
