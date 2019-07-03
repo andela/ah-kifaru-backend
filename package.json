@@ -8,7 +8,7 @@
         "lint": "eslint **/*.js",
         "lint:fix": "prettier-eslint \"**/*.{js,json}\" --write",
         "prettier": "prettier **/*.{js,json} --write",
-        "coverage": "nyc report --reporter=text-lcov | coveralls"
+        "coverage": "nyc report --reporter=text-lcov | coveralls",
         "build:server": "babel src --copy-files --out-dir build",
         "build": "npm run build:server",
         "start": "node build/index.js",
