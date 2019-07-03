@@ -6,11 +6,13 @@ info:
   description: "Create a community of like minded authors to foster inspiration and innovation by leveraging the modern web."
 
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:3000/api/v1
 
 tags: 
   - name : "welcome"
     description: "API for quick api welcome test"
+  - name : "auth"
+    description: "API for login, signup and account verification"
     
 paths:
   /:
@@ -25,8 +27,102 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/response"
-
-  
+  /auth/login:
+    post:
+      tags:
+      - "auth"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+        - in: "query"
+          name: "email"
+          schema:
+            type: "string"
+            required: true
+          description: The user's email for login
+        - in: "query"
+          name: "password"
+          schema:
+            type: "string"
+            required: true
+          description: The password for login in clear text
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response"
+        401:
+          description: "failed operation"
+  /auth/signup:
+    post:
+      tags:
+      - "auth"
+      summary: "Create a new user into the system"
+      description: ""
+      operationId: "signupUser"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+        - in: "query"
+          name: "email"
+          description: "The user's email for signup"
+          schema:
+            type: "string"
+            required: true
+        - in: "query"
+          name: "username"
+          schema:
+            type: "string"
+            required: true
+          description: "The username for signup"
+        - in: "query"
+          name: "password"
+          description: "The password for signup in clear text"
+          schema:
+            type: "string"
+            required: true
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response"
+        400:
+          description: "failed operation"
+  /auth/verify/{token}:
+    patch:
+      tags:
+      - "auth"
+      summary: "Verifies a user's account"
+      description: ""
+      operationId: "verifyUser"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+        - in: "path"
+          name: "token"
+          description: "The token sent to the users email."
+          schema:
+            type: "string"
+            required: true
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response"
+        400:
+          description: "failed operation"
 components:
   
   schemas:
