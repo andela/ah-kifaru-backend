@@ -3,7 +3,6 @@
 [![](https://img.shields.io/badge/Reviewed%20by-Hound-brightgreen.svg)](https://houndci.com)
 [![Coverage Status](https://coveralls.io/repos/github/andela/ah-kifaru-backend/badge.svg?branch=develop)](https://coveralls.io/github/andela/ah-kifaru-backend?branch=develop)
 
-=======
 
 Authors Haven - A Social platform for the creative at heart.
 =======

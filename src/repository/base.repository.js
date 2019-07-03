@@ -23,7 +23,7 @@ class BaseRepository {
    * @returns {object} returns an database object
    * @memberof BaseRepository
    */
-  static async create(model, options) {
+  static create(model, options) {
     return model.create(options);
   }
 
@@ -34,8 +34,30 @@ class BaseRepository {
    * @returns {object} - returns an database object
    * @memberof BaseRepository
    */
-  static async findOneByField(model, options) {
+  static findOneByField(model, options) {
     return model.findOne({ where: options });
+  }
+
+  /**
+   * @static
+   * @param {*} model
+   * @param {*} options
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static findOne(model, options) {
+    return model.findByPk(options);
+  }
+
+  /**
+   * @static
+   * @param {*} model
+   * @param {*} options
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static findAll(model) {
+    return model.findAll();
   }
 
   /**
@@ -59,34 +81,8 @@ class BaseRepository {
    * @returns {object} - returns an database object
    * @memberof BaseRepository
    */
-  static async update(model, fields, options) {
+  static update(model, fields, options) {
     return model.update(fields, { where: options });
-  }
-
-  /**
-   *
-   *
-   * @static
-   * @param {object} model - database model
-   * @param {object} options - column options
-   * @returns {object} - returns a database object
-   * @memberof BaseRepository
-   */
-  static async findAll(model, options) {
-    return model.findAll({ ...options });
-  }
-
-  /**
-   *
-   *
-   * @static
-   * @param {object} model - database model
-   * @param {object} options - column options
-   * @returns {object} - returns a database object
-   * @memberof BaseRepository
-   */
-  static async findItAll(model, options) {
-    return model.findAll({ raw: true, where: { ...options } });
   }
 
   /**
@@ -100,6 +96,19 @@ class BaseRepository {
    */
   static async findAndCountAll(model, options) {
     return model.findAndCountAll({ ...options });
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} model - database model
+   * @param {object} options - column options
+   * @returns {object} - returns a database object
+   * @memberof BaseRepository
+   */
+  static async findItAll(model, options) {
+    return model.findAll({ raw: true, where: { ...options } });
   }
 
   /**
@@ -129,17 +138,6 @@ class BaseRepository {
         where: associatedOptions
       }
     });
-  }
-
-  /**
-   * @static
-   * @param {*} model
-   * @param {*} options
-   * @returns {object} - returns an database object
-   * @memberof BaseRepository
-   */
-  static findOne(model, options) {
-    return model.findByPk(options);
   }
 }
 

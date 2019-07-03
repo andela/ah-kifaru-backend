@@ -8,6 +8,10 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       title: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      description: {
         type: Sequelize.STRING
       },
       body: {
@@ -16,12 +20,12 @@ module.exports = {
       image: {
         type: Sequelize.STRING
       },
-      published: {
-        type: Sequelize.BOOLEAN
+      slug: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
       publishedDate: {
-        type: Sequelize.DATE,
-        field: 'published_date'
+        type: Sequelize.DATE
       },
       status: {
         type: Sequelize.ENUM('draft', 'active', 'deactivated'),
@@ -30,25 +34,19 @@ module.exports = {
       authorId: {
         type: Sequelize.INTEGER
       },
-      slug: {
-        type: Sequelize.STRING
-      },
-      description: {
-        type: Sequelize.STRING
-      },
       createdAt: {
+        type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: new Date(),
-        type: Sequelize.DATE
+        defaultValue: new Date()
       },
       updatedAt: {
+        type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: new Date(),
-        type: Sequelize.DATE
+        defaultValue: new Date()
       }
     });
   },
-  down: (queryInterface /* , Sequelize */) => {
+  down: queryInterface => {
     return queryInterface.dropTable('Articles');
   }
 };

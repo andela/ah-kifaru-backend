@@ -4,6 +4,11 @@ import sinon from 'sinon';
 import app from '../index';
 import BaseRepository from '../repository/base.repository';
 import { createUser, createArticle, generateArticle } from './utils/helpers';
+import {
+  articleSample,
+  articleSample2,
+  articleWithNoTitle
+} from './mockdata/articledata';
 import db from '../database/models';
 import helper from '../helpers/utils';
 
@@ -17,6 +22,7 @@ describe('PATCH api/v1/articles/bookmark', () => {
   beforeEach(async () => {
     await db.Bookmark.destroy({ cascade: true, truncate: true });
     await db.User.destroy({ cascade: true, truncate: true });
+    await db.Article.destroy({ cascade: true, truncate: true });
   });
   it('should bookmark an article', async () => {
     const firstUser = await createUser();
@@ -24,7 +30,7 @@ describe('PATCH api/v1/articles/bookmark', () => {
     const theArticle = await createArticle(
       await generateArticle({ authorId: secondUser.id })
     );
-    const numberOfArticles = await BaseRepository.findAll(db.Article);
+    const numberOfArticles = await BaseRepository.findItAll(db.Article);
     const numberOfBookmarks = await BaseRepository.findAndCountAll(
       db.Bookmark,
       {
@@ -211,5 +217,248 @@ describe('GET api/v1/articles', () => {
         findAllStub.restore();
         done();
       });
+  });
+});
+describe('POST/GET/PUT/DELETE ACTIVITIES ON ARTICLES CONTROLLER', () => {
+  const token = helper.jwtSigner({
+    id: 2,
+    username: 'Grace',
+    email: 'grace@grace.com'
+  });
+
+  describe('POST /api/v1/articles', () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    it('should create article successfully with valid user input', async () => {
+      const response = await chai
+        .request(app)
+        .post(ARTICLES_API)
+        .set('x-access-token', token)
+        .send(articleSample);
+      expect(response.status).to.equal(201);
+      expect(response.body.data).to.have.property('id');
+      expect(response.body.data.id).to.be.a('number');
+      expect(response.body.data).to.have.property('title');
+      expect(response.body.data.title).to.equal(articleSample.title);
+      expect(response.body.data).to.have.property('description');
+      expect(response.body.data.description).to.equal(
+        articleSample.description
+      );
+      expect(response.body.data).to.have.property('body');
+      expect(response.body.data.body).to.equal(articleSample.body);
+      expect(response.body.data).to.have.property('image');
+      expect(response.body.data.image).to.equal(articleSample.image);
+      expect(response.body.data).to.have.property('slug');
+      expect(response.body.data).to.have.property('authorId');
+      expect(response.body.data).to.have.property('publishedDate');
+      expect(response.body.data).to.have.property('createdAt');
+      expect(response.body.data).to.have.property('updatedAt');
+    });
+
+    it('should throw a 500 server error when creating an article without a title', async () => {
+      const response = await chai
+        .request(app)
+        .post(ARTICLES_API)
+        .set('x-access-token', token)
+        .send(articleWithNoTitle);
+      expect(response.status).to.equal(500);
+      expect(response.message).to.equal(response.message);
+    });
+  });
+
+  describe('GET /api/v1/artices', () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    let articles;
+    beforeEach(async () => {
+      articles = await BaseRepository.create(db.Article, articleSample);
+      articles = await BaseRepository.create(db.Article, articleSample2);
+      articles = await BaseRepository.findAll(db.Article);
+    });
+
+    it('should fetch all successfully created articles', async () => {
+      const response = await chai
+        .request(app)
+        .get(ARTICLES_API)
+        .set('x-access-token', token);
+      expect(response.body.data.length).to.equal(articles.length);
+      expect(response.status).to.equal(200);
+      expect(response.body.data[0]).to.have.property('id');
+      expect(response.body.data[0].id).to.be.a('number');
+      expect(response.body.data[0]).to.have.property('title');
+      expect(response.body.data[0].title).to.equal(articleSample.title);
+      expect(response.body.data[0]).to.have.property('description');
+      expect(response.body.data[0].description).to.equal(
+        articleSample.description
+      );
+      expect(response.body.data[0]).to.have.property('body');
+      expect(response.body.data[0].body).to.equal(articleSample.body);
+      expect(response.body.data[0]).to.have.property('image');
+      expect(response.body.data[0].image).to.equal(articleSample.image);
+      expect(response.body.data[0]).to.have.property('slug');
+      expect(response.body.data[0].slug).to.not.equal(
+        response.body.data[1].slug
+      );
+      expect(response.body.data[0]).to.have.property('authorId');
+      expect(response.body.data[0]).to.have.property('publishedDate');
+      expect(response.body.data[0]).to.have.property('createdAt');
+      expect(response.body.data[0]).to.have.property('updatedAt');
+    });
+  });
+
+  describe('GET /api/v1/articles/:articleId', () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    it('should successfully get a specific article', async () => {
+      const validArticle = await BaseRepository.create(
+        db.Article,
+        articleSample
+      );
+      const response = await chai
+        .request(app)
+        .get(`${ARTICLES_API}/${validArticle.id}`)
+        .set('x-access-token', token);
+      expect(response.body.data).to.have.property('id');
+      expect(response.body.data.id).to.equal(validArticle.id);
+      expect(response.body.data.id).to.be.a('number');
+      expect(response.body.data).to.have.property('title');
+      expect(response.body.data.title).to.equal(articleSample.title);
+      expect(response.body.data).to.have.property('description');
+      expect(response.body.data.description).to.equal(
+        articleSample.description
+      );
+      expect(response.body.data).to.have.property('body');
+      expect(response.body.data.body).to.equal(articleSample.body);
+      expect(response.body.data).to.have.property('image');
+      expect(response.body.data.image).to.equal(articleSample.image);
+      expect(response.body.data).to.have.property('slug');
+      expect(response.body.data).to.have.property('authorId');
+      expect(response.body.data).to.have.property('publishedDate');
+      expect(response.body.data).to.have.property('createdAt');
+      expect(response.body.data).to.have.property('updatedAt');
+    });
+
+    it('should throw a 404 error when a specific article is not found', async () => {
+      const validArticle = await BaseRepository.create(
+        db.Article,
+        articleSample
+      );
+      const response = await chai
+        .request(app)
+        .get(`${ARTICLES_API}/000010000100`)
+        .set('x-access-token', token)
+        .send(!validArticle);
+      expect(response.status).to.equal(404);
+      expect(response.body.message).to.equal(
+        'The requested article was not found'
+      );
+    });
+  });
+
+  describe('PUT /api/v1/articles/:articleId', () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    it('should successfully update a specific article', async () => {
+      const validArticle = await BaseRepository.create(
+        db.Article,
+        articleSample
+      );
+      const response = await chai
+        .request(app)
+        .put(`${ARTICLES_API}/${validArticle.id}`)
+        .set('x-access-token', token)
+        .send({
+          title: articleSample.title,
+          description: articleSample.description,
+          body: articleSample.body,
+          image: articleSample.image
+        });
+      expect(response.status).to.equal(200);
+      expect(response.body.message).to.equal('Article successfully updated');
+      expect(response.body.data).to.have.property('id');
+      expect(response.body.data.id).to.be.a('number');
+      expect(response.body.data).to.have.property('title');
+      expect(response.body.data.title).to.equal(articleSample.title);
+      expect(response.body.data).to.have.property('description');
+      expect(response.body.data.description).to.equal(
+        articleSample.description
+      );
+      expect(response.body.data).to.have.property('body');
+      expect(response.body.data.body).to.equal(articleSample.body);
+      expect(response.body.data).to.have.property('image');
+      expect(response.body.data.image).to.equal(articleSample.image);
+      expect(response.body.data).to.have.property('slug');
+      expect(response.body.data.slug).to.equal(articleSample.slug);
+      expect(response.body.data).to.have.property('authorId');
+      expect(response.body.data).to.have.property('publishedDate');
+      expect(response.body.data).to.have.property('createdAt');
+      expect(response.body.data).to.have.property('updatedAt');
+    });
+
+    it('should throw a 404 error when a specific article is not found', async () => {
+      const validArticle = await BaseRepository.create(
+        db.Article,
+        articleSample
+      );
+      const response = await chai
+        .request(app)
+        .get(`${ARTICLES_API}/000010000100`)
+        .set('x-access-token', token)
+        .send(!validArticle);
+      expect(response.status).to.equal(404);
+      expect(response.body.message).to.equal(
+        'The requested article was not found'
+      );
+    });
+  });
+
+  describe('DELETE /api/v1/articles/:articleId', () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    it('should successfully delete an article', async () => {
+      const validArticle = await BaseRepository.create(
+        db.Article,
+        articleSample
+      );
+      const response = await chai
+        .request(app)
+        .delete(`${ARTICLES_API}/${validArticle.id}`)
+        .set('x-access-token', token);
+      expect(response.status).to.equal(200);
+      expect(response.body.message).to.equal('Article successfully deleted');
+    });
+
+    it('should throw a 404 error when a specific article is not found', async () => {
+      const validArticle = await BaseRepository.create(
+        db.Article,
+        articleSample
+      );
+      const response = await chai
+        .request(app)
+        .get(`${ARTICLES_API}/000010000100`)
+        .set('x-access-token', token)
+        .send(!validArticle);
+      expect(response.status).to.equal(404);
+      expect(response.body.message).to.equal(
+        'The requested article was not found'
+      );
+    });
   });
 });

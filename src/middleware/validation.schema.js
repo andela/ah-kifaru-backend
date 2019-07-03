@@ -22,6 +22,7 @@ const followeeId = Joi.number()
 
 const articleId = Joi.number()
   .integer()
+  .positive()
   .required();
 
 const bookmarkArticle = {
@@ -35,6 +36,26 @@ const followOrUnfollow = {
     followeeId
   }
 };
+
+const title = Joi.string()
+  .min(3)
+  .trim()
+  .required();
+
+const description = Joi.string()
+  .min(3)
+  .trim()
+  .required();
+
+const content = Joi.string()
+  .min(3)
+  .trim()
+  .required();
+
+const image = Joi.string()
+  .min(3)
+  .trim()
+  .required();
 
 const createAccountSchema = {
   body: {
@@ -82,6 +103,27 @@ const ratingSchema = {
   }
 };
 
+const articleSchema = {
+  body: {
+    title,
+    description,
+    content,
+    image
+  }
+};
+
+const updateArticleSchema = {
+  params: {
+    articleId
+  },
+  body: {
+    title,
+    description,
+    content,
+    image
+  }
+};
+
 export default {
   '/signup': createAccountSchema,
   '/login': loginSchema,
@@ -91,5 +133,7 @@ export default {
   '/user/:id': updateProfileSchema,
   '/bookmark': bookmarkArticle,
   '/unbookmark': bookmarkArticle,
-  '/:articleId/ratings': ratingSchema
+  '/:articleId/ratings': ratingSchema,
+  '/articles': articleSchema,
+  '/articles/:articleId': updateArticleSchema
 };

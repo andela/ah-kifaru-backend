@@ -1,37 +1,46 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-export default (sequelize, DataTypes) => {
-  const Article = sequelize.define(
-    'Article',
-    {
-      title: DataTypes.STRING,
-      body: DataTypes.TEXT,
-      image: DataTypes.STRING,
-      published: DataTypes.BOOLEAN,
-      publisheddate: {
-        type: DataTypes.DATE,
-        field: 'published_date',
-        defaultValue: new Date()
-      },
-      status: {
-        type: DataTypes.ENUM('draft', 'active', 'deactivated'),
-        defaultValue: 'draft'
-      },
-      authorId: DataTypes.INTEGER,
-      slug: DataTypes.STRING,
-      description: DataTypes.STRING
+module.exports = (sequelize, DataTypes) => {
+  const Article = sequelize.define('Article', {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: [2]
+      }
     },
-    {}
-  );
+    description: DataTypes.STRING,
+    body: DataTypes.TEXT,
+    image: DataTypes.STRING,
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
+    publishedDate: {
+      type: DataTypes.DATE,
+      defaultValue: new Date()
+    },
+    status: {
+      type: DataTypes.ENUM('draft', 'active', 'deactivated'),
+      defaultValue: 'draft'
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: new Date()
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: new Date()
+    }
+  });
+
   Article.associate = models => {
     Article.belongsTo(models.User, {
       through: 'Articles',
-      foreignKey: 'authorId'
+      foreignKey: 'id',
+      as: 'authorId'
     });
-  };
-  Article.associate = models => {
     Article.belongsToMany(models.User, {
       through: 'Bookmarks',
       foreignKey: 'articleId',

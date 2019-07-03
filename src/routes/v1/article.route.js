@@ -6,10 +6,9 @@ import validationMiddleware from '../../middleware/validation.middleware';
 import paginationValidations from '../../middleware/pagination.validation';
 import RatingsController from '../../controllers/rating.controller';
 
-const validateRequest = validationMiddleware();
-
 const router = Router();
 router.get('/', paginationValidations, ArticleController.fetchAllArticles);
+const validateRequest = validationMiddleware();
 
 router.get(
   '/bookmark',
@@ -37,6 +36,36 @@ router.patch(
   validateRequest,
   articleMiddleware,
   RatingsController.rateArticles
+);
+
+router.post(
+  '/',
+  authMiddleware,
+  validateRequest,
+  ArticleController.createArticle
+);
+
+router.get('/', ArticleController.fetchAllArticles);
+
+router.get(
+  '/:articleId',
+  articleMiddleware,
+  ArticleController.fetchSpecificArticle
+);
+
+router.put(
+  '/:articleId',
+  authMiddleware,
+  validateRequest,
+  articleMiddleware,
+  ArticleController.updateOneArticle
+);
+
+router.delete(
+  '/:articleId',
+  authMiddleware,
+  articleMiddleware,
+  ArticleController.deleteArticle
 );
 
 export default router;
