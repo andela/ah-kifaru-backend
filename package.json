@@ -8,9 +8,11 @@
         "lint": "eslint **/*.js",
         "lint:fix": "prettier-eslint \"**/*.{js,json}\" --write",
         "prettier": "prettier **/*.{js,json} --write",
-        "start": "",
-        "start:dev": "nodemon --exec babel-node src/index",
         "coverage": "nyc report --reporter=text-lcov | coveralls"
+        "build:server": "babel src --copy-files --out-dir build",
+        "build": "npm run build:server",
+        "start": "node build/index.js",
+        "start:dev": "nodemon --exec babel-node src/index"
     },
     "husky": {
         "hooks": {
