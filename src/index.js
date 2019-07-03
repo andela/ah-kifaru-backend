@@ -5,10 +5,13 @@ import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import yaml from 'yamljs';
 
+import userRoutes from './routes/user.route';
+
 dotenv.config();
 
 const app = express();
 const swaggerdoc = yaml.load('./swagger.yaml');
+const API_VERSION = '/api/v1';
 
 app.use(cors());
 
@@ -17,6 +20,9 @@ app.use(require('morgan')('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerdoc));
+
+// registered routes
+app.use(`${API_VERSION}/auth`, userRoutes);
 
 app.use('/', (req, res) => {
   res.status(200).json({
