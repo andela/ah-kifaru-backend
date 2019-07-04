@@ -3,7 +3,7 @@ node_js:
   - 'stable'
 cache:
   directories:
-    - "node_modules"
+    - 'node_modules'
 install:
   - npm install
 services:
@@ -14,8 +14,8 @@ env:
     - JWT_SECRET=prfhdfdh
 before_script:
   - psql -c 'create database errorswag;' -U postgres
-  - psql -c "CREATE USER kifaru WITH PASSWORD null;" -U postgres
-  - npm run build
+  # - psql -c "CREATE USER kifaru WITH PASSWORD null;" -U postgres
+  # - npm run build
   - npm install -g sequelize-cli
   - sequelize db:migrate
   - sequelize db:seed:all
@@ -23,4 +23,3 @@ script:
   - npm test
 after_success:
   - npm run coverage
-

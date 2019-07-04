@@ -1,8 +1,152 @@
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
+import jwt from 'jsonwebtoken';
 import app from '../index';
+import { getUser, createUser } from './utils/helpers';
+import db from '../database/models';
+import baseRepository from '../repository/base.repository';
+
+const users = '/api/v1/user';
 
 chai.use(chaiHttp);
+
+const server = () => chai.request(app);
+
+describe('USER CAN FOLLOW OTHER USERS', () => {
+  beforeEach(async () => {
+    await db.User.destroy({ cascade: true, truncate: true });
+  });
+
+  it.only('should be able to follow other users', async () => {
+    const firstUser = await createUser(await getUser());
+    const secondUser = await createUser(await getUser());
+    await createUser(await getUser());
+    const token = jwt.sign(firstUser, process.env.JWT_SECRET);
+
+    const res = await server()
+      .patch(`${users}/follow`)
+      .set('token', token)
+      .send({ followeeId: secondUser.id });
+    expect(res.status).to.equal(200);
+  });
+
+  it.only('should not be able to follow a user twice at the same time', async () => {
+    const firstUser = await createUser(await getUser());
+    const secondUser = await createUser(await getUser());
+    await baseRepository.create(db.Follower, {
+      followerId: firstUser.id,
+      followeeId: secondUser.id
+    });
+    await createUser(await getUser());
+    const token = jwt.sign(firstUser, process.env.JWT_SECRET);
+
+    const res = await server()
+      .patch(`${users}/follow`)
+      .set('token', token)
+      .send({ followeeId: secondUser.id });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.equal(
+      `You were already following the user with id = ${secondUser.id}`
+    );
+  });
+
+  it.only('user should not be able to themselve', async () => {
+    const firstUser = await createUser(await getUser());
+    await createUser(await getUser());
+    const token = jwt.sign(firstUser, process.env.JWT_SECRET);
+
+    const res = await server()
+      .patch(`${users}/follow`)
+      .set('token', token)
+      .send({ followeeId: firstUser.id });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.equal(`You cannot follow or unfollow yourself`);
+  });
+
+  it.only('throw validation error if id of the user is not supplied', async () => {
+    const firstUser = await createUser(await getUser());
+    await createUser(await getUser());
+    const token = jwt.sign(firstUser, process.env.JWT_SECRET);
+
+    const res = await server()
+      .patch(`${users}/follow`)
+      .set('token', token);
+    expect(res.status).to.equal(400);
+  });
+
+  it.only('throw validation error if id of the user supplied is not a number', async () => {
+    const firstUser = await createUser(await getUser());
+    await createUser(await getUser());
+    const token = jwt.sign(firstUser, process.env.JWT_SECRET);
+
+    const res = await server()
+      .patch(`${users}/follow`)
+      .set('token', token);
+    expect(res.status).to.equal(400);
+  });
+
+  it.only('should not be able to follow a non-existing user', async () => {
+    const firstUser = await createUser(await getUser());
+    await createUser(await getUser());
+    const token = jwt.sign(firstUser, process.env.JWT_SECRET);
+
+    const res = await server()
+      .patch(`${users}/follow`)
+      .set('token', token)
+      .send({ followeeId: 8053032 });
+    expect(res.status).to.equal(400);
+  });
+});
+
+describe('USER CAN UNFOLLOW OTHER USERS', () => {
+  beforeEach(async () => {
+    await db.User.destroy({ cascade: true, truncate: true });
+  });
+
+  it.only('user can unfollow users they followed', async () => {
+    const firstUser = await createUser(await getUser());
+    const secondUser = await createUser(await getUser());
+    await baseRepository.create(db.Follower, {
+      followerId: firstUser.id,
+      followeeId: secondUser.id
+    });
+
+    const token = jwt.sign(firstUser, process.env.JWT_SECRET);
+    const res = await server()
+      .patch(`${users}/unfollow`)
+      .set('token', token)
+      .send({ followeeId: secondUser.id });
+    expect(res.status).to.equal(200);
+    expect(res.body.message).to.equal(
+      `You have succesfully unfollowed user with id =${secondUser.id}`
+    );
+  });
+
+  it.only('user cannot unfollow themselve', async () => {
+    const firstUser = await createUser(await getUser());
+
+    const token = jwt.sign(firstUser, process.env.JWT_SECRET);
+    const res = await server()
+      .patch(`${users}/unfollow`)
+      .set('token', token)
+      .send({ followeeId: firstUser.id });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.equal(`You cannot follow or unfollow yourself`);
+  });
+
+  it.only('should not be able to unfollow a user it was not following', async () => {
+    const firstUser = await createUser(await getUser());
+    const secondUser = await createUser(await getUser());
+
+    const token = jwt.sign(firstUser, process.env.JWT_SECRET);
+    const res = await server()
+      .patch(`${users}/unfollow`)
+      .set('token', token)
+      .send({ followeeId: secondUser.id });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.equal(`You were not following this user`);
+  });
+});
 
 describe('Test user login, signup and account verification', () => {
   let validToken;

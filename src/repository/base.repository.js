@@ -3,6 +3,20 @@
  */
 class BaseRepository {
   /**
+   * @param {object} model - database model
+   * @param {object} field - parameters specific to the row in the database
+   * @param {object} options - data to supply to the columns if the data does not exist
+   * @returns {*} - data of the user, and a boolean for whether or not it was just created
+   * @memberof BaseRepository
+   */
+  static async findOrCreate(model, field, options) {
+    return model.findOrCreate({
+      where: field,
+      defaults: options
+    });
+  }
+
+  /**
    * @static
    * @param {*} model - database model
    * @param {object} options - database objects
@@ -22,6 +36,19 @@ class BaseRepository {
    */
   static async findOneByField(model, options) {
     return model.findOne({ where: options });
+  }
+
+  /**
+   * @static
+   * @param {object} model - database model
+   * @param {object} options - data to sprcific to the rows to be deleted in the database
+   * @returns {*} - data of the user, and a boolean for whether or not it was just created
+   * @memberof BaseRepository
+   */
+  static async remove(model, options) {
+    return model.destroy({
+      where: options
+    });
   }
 
   /**

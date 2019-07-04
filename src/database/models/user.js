@@ -29,9 +29,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE
     }
   });
-
-  User.associate = (/* models */) => {
-    // associations can be defined here
+  User.associate = models => {
+    User.belongsToMany(models.User, {
+      through: 'Followers',
+      as: 'users',
+      foreignKey: 'followerId'
+    });
+  };
+  User.associate = models => {
+    User.belongsToMany(models.User, {
+      through: 'Followers',
+      as: 'users',
+      foreignKey: 'followeeId'
+    });
   };
   return User;
 };

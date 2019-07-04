@@ -172,6 +172,83 @@ class UserController {
       return responseGenerator.sendError(res, 500, error.message);
     }
   }
+
+  /**
+   * @static
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   * @returns {object}- returns information about the follow status of the requested user
+   * @memberof UserController
+   */
+  static async followUser(req, res) {
+    try {
+      //  Please inform team to change the id of the decrypted user to id when been parsed with req object
+      const { followeeId } = req.body;
+      const { id: followerId } = req.token;
+      const details = { followeeId, followerId };
+      const followedUser = await BaseRepository.findOrCreate(
+        db.Follower,
+        details
+      );
+      const [user, created] = followedUser;
+
+      if (created) {
+        return responseGenerator.sendSuccess(
+          res,
+          200,
+          null,
+          `You just followed the user with id = ${followeeId}`
+        );
+      }
+      return responseGenerator.sendError(
+        res,
+        400,
+        `You were already following the user with id = ${followeeId}`
+      );
+    } catch (err) {
+      return responseGenerator.sendError(res, 500, err.message);
+    }
+  }
+
+  /**
+   * @static
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   * @returns {object}- returns information about the follow status of the requested user
+   * @memberof UserController
+   */
+  static async unfollowUser(req, res) {
+    try {
+      const { followeeId } = req.body;
+      const { id: followerId } = req.token;
+
+      const details = {
+        followerId,
+        followeeId
+      };
+
+      const followExist = await BaseRepository.findOneByField(
+        db.Follower,
+        details
+      );
+      if (!followExist) {
+        return responseGenerator.sendError(
+          res,
+          400,
+          `You were not following this user`
+        );
+      }
+      await BaseRepository.remove(db.Follower, details);
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        null,
+        `You have succesfully unfollowed user with id =${followeeId}`
+      );
+    } catch (err) {
+      return responseGenerator.sendError(res, 500, err.message);
+    }
+  }
 }
 
 export default UserController;
