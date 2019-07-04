@@ -1,7 +1,7 @@
 {
-    "name": "ErrorSwag",
-    "description": "A platform for technical writers and readers to share their thought and craft",
-    "env": {
-        "NODE_ENV": "production"
-    }
+  "name": "ErrorSwag",
+  "description": "A platform for technical writers and readers to share their thought and craft",
+  "env": {
+    "NODE_ENV": "production"
+  }
 }

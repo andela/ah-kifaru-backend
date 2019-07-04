@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import yaml from 'yamljs';
 
+import Routes from './routes/v1/index';
+
 dotenv.config();
 
 const app = express();
@@ -18,7 +20,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerdoc));
 
-app.use('/', (req, res) => {
+Routes(app);
+
+app.use('*', (req, res) => {
   res.status(200).json({
     message: `Welcome to the Kifaru backend page`
   });
