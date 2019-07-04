@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import yaml from 'yamljs';
+import authRoutes from './routes/userRoutes';
 
 dotenv.config();
 
@@ -17,10 +18,10 @@ app.use(require('morgan')('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerdoc));
-
-app.use('/', (req, res) => {
+app.use('/api/v1', authRoutes);
+app.get('/', (req, res) => {
   res.status(200).json({
-    message: `Welcome to the Kifaru backend page`
+    message: 'Welcome to the Kifaru backend page'
   });
 });
 

@@ -1,0 +1,54 @@
+{
+  "processes": {
+    "0eec7f7e-d049-4926-a470-6d52e8249000": {
+      "parent": null,
+      "children": ["83885ab5-4bd9-430a-b29f-d2fccae11d9d"]
+    },
+    "83885ab5-4bd9-430a-b29f-d2fccae11d9d": {
+      "parent": "0eec7f7e-d049-4926-a470-6d52e8249000",
+      "children": []
+    }
+  },
+  "files": {
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/test/index.spec.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/index.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/routes/userRoutes.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/controllers/userControllers.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/database/models/index.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/database/models/users.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/helpers/generateToken.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/helpers/utils/mailer.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/helpers/utils/eMsgs.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/helpers/helpers.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/middleware/auth.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/middleware/usersValidations.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ],
+    "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/src/test/test.spec.js": [
+      "83885ab5-4bd9-430a-b29f-d2fccae11d9d"
+    ]
+  },
+  "externalIds": {}
+}
