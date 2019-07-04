@@ -1,6 +1,5 @@
-const articles = require('./articles');
-// const todoItems = require('./todoitems');
+import articles from './articles';
 
-module.exports = {
+export default {
   articles
 };

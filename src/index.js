@@ -14,11 +14,13 @@ app.use(cors());
 
 app.use(require('morgan')('dev'));
 
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerdoc));
 
-app.use('/', (req, res) => {
+require('./routes')(app);
+
+app.get('/', (req, res) => {
   res.status(200).json({
     message: `Welcome to the Kifaru backend page`
   });

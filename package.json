@@ -4,7 +4,8 @@
     "description": "A Social platform for the creative at heart",
     "main": "index.js",
     "scripts": {
-        "test": "nyc mocha --require @babel/register --require @babel/polyfill src/test --exit",
+        "test": "nyc mocha --require @babel/register src/test --exit",
+        "test:w": "nyc mocha --require @babel/register src/test --watch --exit",
         "lint": "eslint **/*.js",
         "lint:fix": "prettier-eslint \"**/*.{js,json}\" --write",
         "prettier": "prettier **/*.{js,json} --write",
@@ -78,6 +79,9 @@
         "nyc": "^14.1.1",
         "prettier": "^1.18.2",
         "prettier-eslint": "^9.0.0",
-        "prettier-eslint-cli": "^5.0.0"
+        "prettier-eslint-cli": "^5.0.0",
+        "rewire": "^4.0.1",
+        "sinon": "^7.3.2",
+        "slug": "^1.1.0"
     }
 }

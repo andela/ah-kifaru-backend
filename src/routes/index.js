@@ -1,6 +1,7 @@
-const articlesController = require('../controllers').articles;
-// import todosController from '../controllers/todos';
-// const todoItemsController = require('../controllers').todoItems;
+import dotenv from 'dotenv';
+import articlesController from '../controllers/articles';
+
+dotenv.config();
 
 module.exports = app => {
   app.get('/api', (req, res) =>
@@ -9,7 +10,9 @@ module.exports = app => {
     })
   );
 
-  app.post('/api/todos', articlesController.create);
-  app.get('/api/todos', articlesController.list);
-  // app.post('/api/todos/:todoId/items', todoItemsController.create);
+  app.post('/api/v1/articles', articlesController.create);
+  app.get('/api/v1/articles', articlesController.list);
+  app.get('/api/v1/articles/:articleId', articlesController.retrieve);
+  app.put('/api/v1/articles/:articleId', articlesController.update);
+  app.delete('/api/v1/articles/:articleId', articlesController.destroy);
 };

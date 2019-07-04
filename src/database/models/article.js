@@ -1,4 +1,8 @@
-module.exports = (sequelize, DataTypes) => {
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+export default (sequelize, DataTypes) => {
   const Article = sequelize.define(
     'Article',
     {
@@ -7,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
       content: DataTypes.TEXT,
       image: DataTypes.STRING,
       slug: DataTypes.STRING,
-      published: DataTypes.BOOLEAN
+      published: { type: DataTypes.BOOLEAN, defaultValue: true },
+      active: { type: DataTypes.BOOLEAN, defaultValue: true }
     },
     {}
   );
