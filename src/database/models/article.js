@@ -16,8 +16,13 @@ export default (sequelize, DataTypes) => {
     },
     {}
   );
-  Article.associate = function(models) {
+  Article.associate = models => {
     // associations can be defined here
+    const { Ratings } = models;
+    Article.hasMany(Ratings, {
+      foriegnKey: 'articleId',
+      as: 'ratings'
+    });
   };
   return Article;
 };
