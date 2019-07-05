@@ -117,7 +117,6 @@ class UserController {
               `Your account has been deactivated. Kindly contact support for help.`
             );
           }
-
           return responseGenerator.sendSuccess(res, 200, {
             username,
             email,
