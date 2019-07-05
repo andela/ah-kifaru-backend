@@ -1,7 +1,7 @@
 {
-  "uuid": "0eec7f7e-d049-4926-a470-6d52e8249000",
+  "uuid": "ec25c0c9-2d30-4b13-a362-c83badc159de",
   "parent": null,
-  "pid": 21496,
+  "pid": 64590,
   "argv": [
     "/usr/local/bin/node",
     "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/node_modules/.bin/mocha",
@@ -10,13 +10,14 @@
     "--require",
     "@babel/polyfill",
     "src/test",
-    "--exit"
+    "--exit",
+    "--timeout=5000ms"
   ],
   "execArgv": [],
   "cwd": "/Users/olorunwalawrence/Desktop/ah-kifaru-backend",
-  "time": 1562235753953,
-  "ppid": 21494,
-  "root": "7f18b7e1-d8d7-4d1a-8917-d786484af37c",
-  "coverageFilename": "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/.nyc_output/0eec7f7e-d049-4926-a470-6d52e8249000.json",
+  "time": 1562494834138,
+  "ppid": 64588,
+  "root": "54b3cad2-74f8-491f-83b5-933118f9e013",
+  "coverageFilename": "/Users/olorunwalawrence/Desktop/ah-kifaru-backend/.nyc_output/ec25c0c9-2d30-4b13-a362-c83badc159de.json",
   "files": []
 }

@@ -4,7 +4,7 @@
     "description": "A Social platform for the creative at heart",
     "main": "index.js",
     "scripts": {
-        "test": "nyc mocha --require @babel/register --require @babel/polyfill src/test --exit",
+        "test": "nyc mocha --require @babel/register --require @babel/polyfill src/test --exit --timeout=5000ms" ,
         "lint": "eslint **/*.js",
         "lint:fix": "prettier-eslint \"**/*.{js,json}\" --write",
         "prettier": "prettier **/*.{js,json} --write",

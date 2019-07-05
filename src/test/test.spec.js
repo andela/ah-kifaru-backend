@@ -34,17 +34,19 @@ describe('TEST ALL ENDPOINT', () => {
 });
 
 describe('Password reset test', () => {
-  it('should return invalid credentials', done => {
+  it('should return success message', done => {
     chai
       .request(app)
-      .post('/api/v1/reset-password')
+      .post('/api/v1/auth/reset-password')
       .send({
         email: 'olorunwalawrence5@gmail.com'
       })
       .end((err, res) => {
-        // res.should.have.status(401);
-        // res.body.should.have.property('data');
-        // res.body.message.to.equal('Invalid credentials supplied');
+        res.should.have.status(200);
+        res.body.should.have.property('message');
+        res.body.message.should.be.equal(
+          'Password reset link has been sent to your email'
+        );
         done();
       });
   });
@@ -57,33 +59,13 @@ describe('Password reset test', () => {
         email: '@gmail.com'
       })
       .end((err, res) => {
-        // expect(res.body.status).to.equal('success');
-        // expect(res.body.data.message).to.equal(
-        //   'Password reset link has been sent to your email'
-        // );
+        res.should.have.status(401);
+        res.body.should.have.property('message');
+        res.body.message.should.be.equal('Invalid credentials supplied');
         done();
       });
   });
 
-  it('should return invalid credentials', done => {
-    const token = generateToken(600, {
-      id: 1,
-      updatedAt: '2019-06-06 14:34:18.664+01'
-    });
-    chai
-      .request(app)
-      .put(`/api/v1/reset-password/${token}`)
-      .send({
-        password: 'johndoe'
-      });
-    // .end((err, res) => {
-    //   expect(res.body.status).to.equal('error');
-    //   expect(res.body.message).to.equal('Verification link not valid');
-    done();
-  });
-});
-
-describe('Password reset test', () => {
   it('should return invalid credentials', done => {
     const token = generateToken(600, {
       id: 1,
@@ -91,16 +73,37 @@ describe('Password reset test', () => {
     });
     chai
       .request(app)
-      .put(`/api/v1/reset-password/${token}`)
+      .put(`/api/v1/auth/reset-password/${token}`)
       .send({
         password: 'johndoe'
       })
       .end((err, res) => {
-        // res.body.should.be.an('object');
-        // res.should.have.status(404);
-        //  res.body.message.should.equal('Verification link not valid');
+        res.body.should.be.an('object');
+        res.should.have.status(400);
+        res.body.should.have.property('messages');
         done();
       });
+  });
+
+  describe('Password reset test', () => {
+    it('should return invalid credentials', done => {
+      const token = generateToken(600, {
+        id: 1,
+        updatedAt: '2019-09-06 14:34:18.664+01'
+      });
+      chai
+        .request(app)
+        .put(`/api/v1/auth/reset-password/${token}`)
+        .send({
+          password: 'johndoe'
+        })
+        .end((err, res) => {
+          res.body.should.be.an('object');
+          res.should.have.status(400);
+          res.body.should.have.property('messages');
+          done();
+        });
+    });
   });
 
   it('reset password properties incomplete', done => {
@@ -116,7 +119,6 @@ describe('Password reset test', () => {
         res.body.should.be.an('object');
         res.should.have.status(400);
         res.body.should.have.property('messages');
-        //  res.body.messages.should.equal('Please provide password');
         done();
       });
   });
@@ -135,7 +137,7 @@ describe('Password reset test', () => {
       .end((err, res) => {
         res.should.have.status(400);
         res.body.should.be.an('object');
-        // res.body.message.should.equal('       Password must include at least one uppercase and lowercase character');
+        res.body.should.have.property('messages');
 
         done();
       });

@@ -1,4 +1,34 @@
+/* eslint-disable valid-jsdoc */
 const helpers = {
+  /**
+   * @description This method helps validate passwords.
+   * @param  {string} password The password you are trying to validate
+   * @retxurns {object} Contains valid (bool) and invalidMessages (array[strings])
+   */
+  validPassword: password => {
+    let valid = true;
+    const invalidMessages = [];
+    // Password cant be empty
+
+    // Check that length is greater or equal to 8
+    if (password.trim().length < 8) {
+      valid = false;
+      invalidMessages.push('Password should be more than 8 characters');
+    }
+
+    // Check that at least one character is upper or lowercase
+    if (!/(?=.*[a-z])(?=.*[A-Z])/.test(password)) {
+      valid = false;
+      invalidMessages.push(
+        'Password must include at least one uppercase and lowercase character'
+      );
+    }
+
+    return {
+      valid,
+      invalidMessages
+    };
+  },
   /**
    * @description This method checks the date the password
    * was updated and compares it to the date in the token

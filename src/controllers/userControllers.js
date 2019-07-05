@@ -1,6 +1,7 @@
 /* eslint-disable require-jsdoc */
 import { config } from 'dotenv';
 import models from '../database/models';
+import baseRepository from '../repository/base.repository';
 import generateToken from '../helpers/generateToken';
 import mailer from '../helpers/utils/mailer';
 import helpers from '../helpers/helpers';
@@ -22,9 +23,9 @@ class UserController {
    */
   static resetPassword(req, res) {
     const callbackUrl = req.body.callbackUrl || req.query.callbackUrl || url;
-    Users.findOne({
-      where: { email: req.body.email }
-    })
+    const { email } = req.body;
+    baseRepository
+      .find(Users, { email })
       .then(user => {
         if (!user) {
           return res.status(401).json({
@@ -55,7 +56,8 @@ class UserController {
             });
           });
       })
-      .catch(error => {
+      .catch(err => {
+        console.log(err);
         res.status(500).json({
           message: 'Request could not be processed. Please try again'
         });
