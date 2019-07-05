@@ -62,7 +62,6 @@ class BaseRepository {
   static async update(model, fields, options) {
     return model.update(fields, { where: options });
   }
-
   /**
    *
    *
