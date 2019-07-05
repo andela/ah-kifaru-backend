@@ -85,6 +85,19 @@ class BaseRepository {
    * @returns {object} - returns a database object
    * @memberof BaseRepository
    */
+  static async findItAll(model, options) {
+    return model.findAll({ raw: true, where: { ...options } });
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} model - database model
+   * @param {object} options - column options
+   * @returns {object} - returns a database object
+   * @memberof BaseRepository
+   */
   static async findAndCountAll(model, options) {
     return model.findAndCountAll({ ...options });
   }
@@ -116,6 +129,29 @@ class BaseRepository {
         where: associatedOptions
       }
     });
+  }
+
+  /**
+   * @static
+   * @param {*} model
+   * @param {*} options
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static findOne(model, options) {
+    return model.findByPk(options);
+  }
+
+  /**
+   * @static
+   * @param {object} model - database model
+   * @param {object} fields - a table column in the database
+   * @param {object} options - column options
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static async updateField(model, fields, options) {
+    return model.update(fields, { where: options });
   }
 }
 

@@ -48,10 +48,21 @@ const verifyTokenSchema = {
   }
 };
 
+const updateProfileSchema = {
+  body: {
+    avatar: Joi.string()
+      .regex(/(\.jpg|\.jpeg|\.png|\.gif)$/i)
+      .trim()
+      .error(new Error('Avatar should be an Image')),
+    bio: Joi.string().trim()
+  }
+};
+
 export default {
   '/signup': createAccountSchema,
   '/login': loginSchema,
-  '/verify/:token': verifyTokenSchema,
   '/follow': followOrUnfollow,
-  '/unfollow': followOrUnfollow
+  '/unfollow': followOrUnfollow,
+  '/user/:id': updateProfileSchema,
+  '/verify/:token': verifyTokenSchema
 };
