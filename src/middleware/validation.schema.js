@@ -15,6 +15,19 @@ const password = Joi.string()
   .required()
   .strict();
 
+const userId = Joi.number()
+  .min(1)
+  .required();
+
+const articleId = Joi.number()
+  .min(1)
+  .required();
+
+const ratings = Joi.number()
+  .min(1)
+  .max(5)
+  .required();
+
 const token = Joi.string().required();
 
 const createAccountSchema = {
@@ -38,8 +51,17 @@ const verifySchema = {
   }
 };
 
+const rateArticles = {
+  params: {
+    userId,
+    articleId,
+    ratings
+  }
+};
+
 export default {
   '/signup': createAccountSchema,
   '/login': loginSchema,
-  '/verify/:token': verifySchema
+  '/verify/:token': verifySchema,
+  '/articles/:articleId/:ratings': rateArticles
 };

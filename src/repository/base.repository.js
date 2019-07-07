@@ -27,13 +27,12 @@ class BaseRepository {
   /**
    * @static
    * @param {object} model - database model
-   * @param {object} fields - a table column in the database
    * @param {object} options - column options
    * @returns {object} - returns an database object
    * @memberof BaseRepository
    */
-  static async updateField(model, fields, options) {
-    return model.update(fields, { where: options });
+  static async updateField(model, options) {
+    return model.update(options);
   }
 }
 

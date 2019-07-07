@@ -30,8 +30,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   });
 
-  User.associate = (/* models */) => {
+  User.associate = models => {
     // associations can be defined here
+    // const { Ratings } = models;
+    // User.hasMany(Ratings, {
+    //   foriegnKey: 'userId',
+    //   as: 'rating'
+    // });
   };
   return User;
 };

@@ -42,3 +42,9 @@ node_modules
 
 #build
 ./build
+
+#nyc 
+.nyc_output
+
+#config.json
+./src/config/config.json

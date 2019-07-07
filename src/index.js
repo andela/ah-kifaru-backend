@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import yaml from 'yamljs';
 
 import userRoutes from './routes/user.route';
+import articlesRatingsRoute from './routes/articlesRatingsRoutes';
 
 dotenv.config();
 
@@ -17,12 +18,13 @@ app.use(cors());
 
 app.use(require('morgan')('dev'));
 
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerdoc));
 
 // registered routes
 app.use(`${API_VERSION}/auth`, userRoutes);
+articlesRatingsRoute(app);
 
 app.use('/', (req, res) => {
   res.status(200).json({
