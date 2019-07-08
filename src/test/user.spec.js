@@ -1,6 +1,9 @@
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import sinon from 'sinon';
+import nock from 'nock';
+import { config } from 'dotenv';
+import jwt from 'jsonwebtoken';
 import app from '../index';
 
 import BaseRepository from '../repository/base.repository';
@@ -10,94 +13,115 @@ import helper from '../helpers/utils';
 
 const USER_API = '/api/v1/users';
 
+config();
 chai.use(chaiHttp);
 
 const server = () => chai.request(app);
 
 describe('Test user login, signup and account verification', () => {
-  let validToken;
-
   describe('POST /auth/signup', () => {
-    it('it should create a user account', done => {
-      const newUser = {
-        email: 'timi.tejumola@andelahub.com',
-        username: 'timiosh',
-        password: 'password'
-      };
-      chai
-        .request(app)
+    beforeEach(async () => {
+      await db.User.destroy({ cascade: true, truncate: true });
+    });
+    it('should create a user account', async () => {
+      const newUser = await getUser();
+
+      const res = await server()
         .post('/api/v1/auth/signup')
-        .send(newUser)
-        .end((err, res) => {
-          expect(res.status).to.equal(201);
-          expect(res.body).to.have.property('status');
-          expect(res.body.data)
-            .to.have.property('status')
-            .to.equal('unverified');
-          done();
-        });
+        .send(newUser);
+
+      const user = await BaseRepository.findAll(db.User, {
+        id: newUser.id
+      });
+
+      expect(res.status).to.equal(201);
+      expect(user.length).to.equal(1);
+      expect(user[0].email).to.equal(newUser.email);
+      expect(user[0].username).to.equal(newUser.username);
+      expect(res.body.data)
+        .to.have.property('status')
+        .to.equal('unverified');
     });
 
-    it('it should throw an error when user with an unverified account wants to signup', done => {
-      const newUser = {
-        email: 'timi.tejumola@andelahub.com',
-        username: 'timiosh',
-        password: 'password'
-      };
-      chai
-        .request(app)
-        .post('/api/v1/auth/signup')
-        .send(newUser)
-        .end((err, res) => {
-          expect(res.status).to.equal(400);
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(
-            'This account is already registered. A verification link has been sent to your email. Check your email to continue.'
-          );
-          done();
+    it('should send an account verification mail to user on successful account creation', async () => {
+      nock('https://api.sendgrid.com')
+        .post('/api/mail.send.json')
+        .reply(202, {
+          statusMessage: 'Accepted'
         });
+
+      const res = await chai
+        .request('https://api.sendgrid.com')
+        .post('/api/mail.send.json');
+      expect(res.status).to.equal(202);
+      expect(res.body.statusMessage).to.equal('Accepted');
     });
 
-    it('it should throw an error when user with an active account tries to signup', done => {
-      const newUser = {
-        email: 'jonsnow@got.com',
-        username: 'timiosh',
-        password: 'password'
-      };
-      chai
-        .request(app)
-        .post('/api/v1/auth/signup')
-        .send(newUser)
-        .end((err, res) => {
-          expect(res.status).to.equal(400);
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(
-            'User with this email address already exist'
-          );
-          done();
+    it('should throw an error if an error occured while sending mail', async () => {
+      nock('https://api.sendgrid.com')
+        .post('/api/mail.send.json')
+        .reply(400, {
+          message: 'Failed'
         });
+
+      const res = await chai
+        .request('https://api.sendgrid.com')
+        .post('/api/mail.send.json');
+      expect(res.body.message).to.equal('Failed');
+      expect(res.status).to.equal(400);
+    });
+
+    it('should throw an error when user with an unverified account wants to signup', async () => {
+      const user = await getUser();
+      user.email = 'jonsnow@got.com';
+      user.status = 'unverified';
+
+      const createdUser = await createUser(user);
+      const res = await server()
+        .post('/api/v1/auth/signup')
+        .send(createdUser);
+
+      expect(res.status).to.equal(400);
+      expect(res.body.message).to.equal(
+        'This account is already registered. A verification link has been sent to your email. Check your email to continue.'
+      );
+    });
+
+    it('should throw an error when user with an active account tries to signup', async () => {
+      const user = await getUser();
+      user.email = 'jonsnow@got.com';
+      user.status = 'active';
+
+      const createdUser = await createUser(user);
+
+      const res = await server()
+        .post('/api/v1/auth/signup')
+        .send(createdUser);
+
+      expect(res.status).to.equal(400);
+      expect(res.body.message).to.equal(
+        'User with this email address already exist'
+      );
     });
   });
 
   describe('POST /auth/login', () => {
-    it('it should throw an error if email address is invalid', done => {
-      const user = {
-        email: 'sholabolagmail.com',
-        password: 'password'
-      };
-      chai
-        .request(app)
+    beforeEach(async () => {
+      await db.User.destroy({ cascade: true, truncate: true });
+    });
+    it('should throw an error if email address is invalid', async () => {
+      const user = await getUser();
+      user.email = 'sholabolagmail.com';
+      user.password = 'password';
+
+      const res = await server()
         .post('/api/v1/auth/login')
-        .send(user)
-        .end((err, res) => {
-          expect(res.status).to.equal(400);
-          expect(res.body).to.have.property('status');
-          expect(res.body.error).to.equal('email must be a valid email');
-          done();
-        });
+        .send(user);
+      expect(res.status).to.equal(400);
+      expect(res.body.message).to.equal('email must be a valid email');
     });
 
-    it('it should throw an error if password is not up to 8', done => {
+    it('should throw an error if password is not up to 8', done => {
       const user = {
         email: 'sholabola@gmail.com',
         password: 'pass'
@@ -108,15 +132,14 @@ describe('Test user login, signup and account verification', () => {
         .send(user)
         .end((err, res) => {
           expect(res.status).to.equal(400);
-          expect(res.body).to.have.property('status');
-          expect(res.body.error).to.equal(
+          expect(res.body.message).to.equal(
             'password length must be at least 8 characters long'
           );
           done();
         });
     });
 
-    it('it should throw a wrong credential is passed', done => {
+    it('should throw if wrong credential is passed', done => {
       const user = {
         email: 'sholabola@yahoo.com',
         password: 'password'
@@ -127,120 +150,158 @@ describe('Test user login, signup and account verification', () => {
         .send(user)
         .end((err, res) => {
           expect(res.status).to.equal(401);
-          expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('Invalid user credentials.');
           done();
         });
     });
 
-    it.skip('it should login the user into an account', done => {
-      const user = {
-        email: 'ƒ@gmail.com',
-        password: 'password'
-      };
-      chai
-        .request(app)
+    it('should login the user into an account', async () => {
+      const user = await getUser();
+      user.email = 'sholabola@yahoo.com';
+      user.status = 'active';
+      user.password = 'password';
+
+      await createUser(user);
+
+      const res = await server()
         .post('/api/v1/auth/login')
-        .send(user)
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          expect(res.body).to.have.property('status');
-          expect(res.body.data)
-            .to.have.property('status')
-            .to.equal('active');
-          done();
+        .send({
+          email: user.email,
+          password: user.password
         });
+
+      const { token } = res.body.data;
+
+      await jwt.verify(token, process.env.JWT_SECRET, (error, decode) => {
+        expect(error).to.be.an('null');
+
+        const { username, email } = decode;
+
+        expect(res.status).to.equal(200);
+        expect(res.body.data)
+          .to.have.property('username')
+          .to.equal(username);
+        expect(res.body.data)
+          .to.have.property('email')
+          .to.equal(email);
+      });
     });
 
-    it('it should throw an error when an unverified user tries to login', done => {
-      const newUser = {
-        email: 'timi.tejumola@andelahub.com',
-        password: 'password'
-      };
-      chai
-        .request(app)
+    it('should throw an error when an unverified user tries to login', async () => {
+      const user = await getUser();
+      user.email = 'sholabola@yahoo.com';
+      user.status = 'unverified';
+      user.password = 'password';
+
+      await createUser(user);
+
+      const res = await server()
         .post('/api/v1/auth/login')
-        .send(newUser)
-        .end((err, res) => {
-          if (!err) {
-            validToken = res.body.data.token;
-          }
-          expect(res.status).to.equal(200);
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(
-            'Account has not been activated. Kindly check your email address for a verification link.'
-          );
-          done();
+        .send({
+          email: user.email,
+          password: user.password
         });
+
+      expect(res.status).to.equal(200);
+      expect(res.body.message).to.equal(
+        'Account has not been activated. Kindly check your email address for a verification link.'
+      );
     });
   });
 
-  describe('POST /auth/verify/:token', () => {
-    it('it should throw an error if an invalid token is provided', done => {
+  describe('POST /auth/verify/:token', async () => {
+    beforeEach(async () => {
+      await db.User.destroy({ cascade: true, truncate: true });
+    });
+
+    it('should throw an error if an invalid token is provided', async () => {
       const invalidToken = 'jhfhje88e8';
+      const res = await server().patch(`/api/v1/auth/verify/${invalidToken}`);
+
+      expect(res.status).to.equal(400);
+      expect(res.body.message).to.equal('Token is not valid');
+    });
+
+    it('should verify a user', async () => {
+      const user = await getUser();
+      user.email = 'sholabola@yahoo.com';
+      user.status = 'unverified';
+
+      const createdUser = await createUser(user);
+      const token = helper.jwtSigner(createdUser);
+
+      const res = await server().patch(`/api/v1/auth/verify/${token}`);
+
+      expect(res.status).to.equal(200);
+      expect(res.body.message).to.equal('Your account has been activated.');
+    });
+
+    it('should return error if validation token is invalid', async () => {
+      const invalidToken = 'KJJJVJDVJD';
+
+      const findAllStub = sinon.stub(BaseRepository, 'update');
+      findAllStub.rejects();
       chai
         .request(app)
         .patch(`/api/v1/auth/verify/${invalidToken}`)
         .end((err, res) => {
           expect(res.status).to.equal(400);
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Token is not valid');
-          done();
-        });
-    });
-
-    it('it should verify a user', done => {
-      chai
-        .request(app)
-        .patch(`/api/v1/auth/verify/${validToken}`)
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Your account has been activated.');
-          done();
-        });
-    });
-
-    it('should return error if validation token is invalid', done => {
-      const findAllStub = sinon.stub(BaseRepository, 'update');
-      findAllStub.rejects();
-      chai
-        .request(app)
-        .patch(`/api/v1/auth/verify/${validToken}`)
-        .end((err, res) => {
-          expect(res.status).to.equal(400);
           findAllStub.restore();
-          done();
         });
     });
 
-    it('should return an error if database error occurs', done => {
+    it('should return an error if database error occurs', async () => {
+      const user = await getUser();
+      user.email = 'sholabola@yahoo.com';
+      user.status = 'unverified';
+
+      const createdUser = await createUser(user);
+      const token = helper.jwtSigner(createdUser);
+
       const findAllStub = sinon.stub(BaseRepository, 'findOneByField');
       findAllStub.rejects();
       chai
         .request(app)
-        .patch(`/api/v1/auth/verify/${validToken}`)
+        .patch(`/api/v1/auth/verify/${token}`)
         .end((err, res) => {
           expect(res.status).to.equal(500);
           findAllStub.restore();
-          done();
         });
     });
   });
 });
 
 describe('GET api/v1/users', () => {
-  it('should successfully get a list of all users', done => {
+  beforeEach(async () => {
+    await db.User.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should successfully get a list of all users', async () => {
+    await createUser();
+    await createUser();
+    await createUser();
+    await createUser();
+
     const userUrl = '/api/v1/users';
-    chai
-      .request(app)
-      .get(userUrl)
-      .end((err, res) => {
-        expect(res.status).to.equal(200);
-        expect(res.body.data).to.be.an('array');
-        expect(res.body.data).to.have.lengthOf(4);
-        done();
-      });
+    const res = await server().get(userUrl);
+
+    expect(res.status).to.equal(200);
+    expect(res.body.data).to.be.an('array');
+    expect(res.body.data).to.have.lengthOf(4);
+
+    const userObjectKeys = [
+      'id',
+      'username',
+      'email',
+      'status',
+      'avatar',
+      'role'
+    ];
+
+    expect(res.body.data[0]).to.have.all.keys(...userObjectKeys);
+    expect(res.body.data[1]).to.have.all.keys(...userObjectKeys);
+    expect(res.body.data[2]).to.have.all.keys(...userObjectKeys);
+    expect(res.body.data[3]).to.have.all.keys(...userObjectKeys);
   });
 });
 
@@ -343,7 +404,7 @@ describe('PATCH api/v1/users/follow', () => {
       .set('token', token)
       .send({ followeeId: 'abc' });
     expect(res.status).to.equal(400);
-    expect(res.body.error).to.equal('followeeId must be a number');
+    expect(res.body.message).to.equal('followeeId must be a number');
 
     const newNumberOfFollowing = await BaseRepository.findAll(db.Follower, {
       followerId: firstUser.id

@@ -3,12 +3,12 @@ import db from '../../database/models';
 import BaseRepository from '../../repository/base.repository';
 
 export const getUser = async () => ({
-  username: faker.internet.userName(),
-  email: faker.internet.email(),
-  avatar: faker.image.imageUrl(),
-  password: faker.internet.password(),
+  username: faker.internet.userName().toLowerCase(),
+  email: faker.internet.email().toLowerCase(),
+  avatar: faker.image.imageUrl().toLowerCase(),
+  password: faker.internet.password().toLowerCase(),
   role: 'user',
-  active: 'verified'
+  status: 'unverified'
 });
 
 export const createUser = async theUser => {

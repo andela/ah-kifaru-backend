@@ -1,7 +1,6 @@
 import Joi from 'joi';
 
 const username = Joi.string()
-  .regex(/^\D+$/)
   .lowercase()
   .required();
 

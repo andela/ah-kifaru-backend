@@ -34,8 +34,7 @@ export default () => {
           if (err) {
             // Custom Error
             const SimplifiedError = {
-              status: 400,
-              error: err.details
+              message: err.details
                 ? err.details[0].message.replace(/['"]/g, '')
                 : err.message
             };
