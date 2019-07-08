@@ -9,7 +9,6 @@ const responseGenerator = {
    */
   sendError(res, statusCode, message = '') {
     return res.status(statusCode).send({
-      status: 'error',
       message
     });
   },
@@ -24,7 +23,6 @@ const responseGenerator = {
    */
   sendSuccess(res, statusCode, data, message = '', metadata = '') {
     const filteredResponse = utility.stripNull({
-      status: 'success',
       metadata,
       message,
       data

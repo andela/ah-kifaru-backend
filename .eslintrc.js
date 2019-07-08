@@ -39,11 +39,12 @@ module.exports = {
     ]
   },
   parserOptions: {
-    ecmaVersion: 9,
-    sourceType: 'module'
-  },
-  ecmaFeatures: {
-    jsx: true,
-    experimentalObjectRestSpread: true
+    ecmaVersion: 6,
+    sourceType: 'module',
+    allowImportExportEverywhere: true,
+    ecmaFeatures: {
+      jsx: true,
+      experimentalObjectRestSpread: true
+    }
   }
 };
