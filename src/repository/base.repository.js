@@ -60,6 +60,20 @@ class BaseRepository {
    * @memberof BaseRepository
    */
 
+  static async findOrCreate(model, option) {
+    return model.findOrCreate({ where: option });
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} model - database model
+   * @param {object} options - column options
+   * @returns {object} - returns a database object
+   * @memberof BaseRepository
+   */
+
   static async delete(model, options) {
     return model.destory({
       where: options
