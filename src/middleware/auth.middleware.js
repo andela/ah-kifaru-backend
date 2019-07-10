@@ -4,7 +4,7 @@ import responseGenerator from '../helpers/responseGenerator';
 const decodeToken = (req, res, next, token) => {
   jwt.verify(token, process.env.JWT_SECRET, (error, decode) => {
     if (!error) {
-      req.token = decode;
+      req.currentUser = decode;
       return next();
     }
     return responseGenerator.sendError(res, 400, 'Token is not valid');
