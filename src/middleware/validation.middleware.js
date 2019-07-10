@@ -21,13 +21,11 @@ export default () => {
       if (!schema) {
         return next();
       }
-
       ['params', 'body', 'query', 'headers'].forEach(key => {
         if (schema[key]) {
           toValidate[key] = req[key];
         }
       });
-
       return Joi.validate(
         toValidate,
         schema,

@@ -4,7 +4,7 @@ import utility from '../helpers/utils';
 
 import db from '../database/models';
 
-const { hashPassword, jwtSigner, verifyPassword } = utility;
+const { jwtSigner, verifyPassword } = utility;
 
 /**
  * @class UserController
@@ -39,13 +39,10 @@ class UserController {
         );
       }
 
-      // create user
-      const encryptPassword = hashPassword(password);
-
       const createdUser = await BaseRepository.create(db.User, {
         username,
         email,
-        password: encryptPassword
+        password
       });
 
       const { id, role, status } = createdUser;
@@ -145,7 +142,7 @@ class UserController {
    * @memberof UserController
    */
   static async verifyUser(req, res) {
-    const { email } = req.token;
+    const { email } = req.currentUser;
 
     try {
       const user = await BaseRepository.findOneByField(db.User, { email });

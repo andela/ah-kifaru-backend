@@ -1,6 +1,7 @@
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index';
+import { callback } from '../helpers/passport/callback';
 
 chai.use(chaiHttp);
 
