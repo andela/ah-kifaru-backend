@@ -4,7 +4,8 @@
     "description": "A Social platform for the creative at heart",
     "main": "index.js",
     "scripts": {
-        "test": "nyc mocha --require @babel/register --require @babel/polyfill src/test --exit",
+        "pretest": "sequelize db:migrate:undo:all && sequelize db:migrate  && sequelize db:seed:all",
+        "test": "nyc --require @babel/register --require @babel/polyfill mocha src/test/**.spec.js --timeout 20000 --exit",
         "lint": "eslint **/*.js",
         "lint:fix": "prettier-eslint \"**/*.{js,json}\" --write",
         "prettier": "prettier **/*.{js,json} --write",
@@ -29,6 +30,7 @@
     "author": "Andela Simulations Programme",
     "license": "MIT",
     "dependencies": {
+        "bcrypt": "^3.0.6",
         "body-parser": "^1.18.3",
         "cors": "^2.8.4",
         "dotenv": "^6.0.0",
@@ -37,6 +39,8 @@
         "express": "^4.16.3",
         "express-jwt": "^5.3.1",
         "express-session": "^1.15.6",
+        "g": "^2.0.1",
+        "joi": "^14.3.1",
         "jsonwebtoken": "^8.3.0",
         "lint-staged": "^8.2.1",
         "method-override": "^2.3.10",
