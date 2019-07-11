@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       expirationTime: DataTypes.DATE,
       role: {
         type: DataTypes.ENUM,
-        values: ['user', 'admin', 'superadmin']
+        values: ['user', 'admin', 'superAdmin']
       },
       status: {
         type: DataTypes.ENUM,
