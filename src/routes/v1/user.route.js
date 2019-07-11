@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { userExist, isSelf } from '../../middleware/users.middleware';
 import UserController from '../../controllers/user.controller';
 import validationMiddleware from '../../middleware/validation.middleware';
 import authMiddleware from '../../middleware/auth.middleware';
@@ -21,9 +22,26 @@ router.patch(
 router.get(
   '/users',
   validateRequest,
-  authMiddleware,
   paginationValidations,
   UserController.listUsers
+);
+
+router.patch(
+  '/unfollow',
+  authMiddleware,
+  validateRequest,
+  isSelf,
+  userExist,
+  UserController.unfollowUser
+);
+
+router.patch(
+  '/follow',
+  authMiddleware,
+  validateRequest,
+  isSelf,
+  userExist,
+  UserController.followUser
 );
 
 export default router;

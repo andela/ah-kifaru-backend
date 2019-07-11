@@ -26,6 +26,7 @@ describe('SOCIAL LOGIN', () => {
     expect(res.body.message).to.include('hit the route');
     expect(res.status).to.eql(200);
   });
+
   it('should hit the google URL for social login', async () => {
     nock('https://accounts.google.com/')
       .filteringPath(() => '/auth/google')
@@ -50,7 +51,6 @@ describe('SOCIAL LOGIN', () => {
 
   it('should hit the github URL for social login', async () => {
     nock('https://api.github.com/')
-      // .filteringPath(() => '/auth/github')
       .get('/auth/twitter')
       .reply(200, 'hit the route');
 
@@ -60,7 +60,6 @@ describe('SOCIAL LOGIN', () => {
 
   it('should call the github call back', async () => {
     nock('https://www.github.com/')
-      // .filteringPath(() => '/auth/github/callback')
       .get('/auth/github/callback')
       .reply(200, { message: 'hit the route' });
 

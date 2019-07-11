@@ -17,6 +17,16 @@ const password = Joi.string()
 
 const token = Joi.string().required();
 
+const followeeId = Joi.number()
+  .integer()
+  .required();
+
+const followOrUnfollow = {
+  body: {
+    followeeId
+  }
+};
+
 const createAccountSchema = {
   body: {
     username,
@@ -41,5 +51,7 @@ const verifyTokenSchema = {
 export default {
   '/signup': createAccountSchema,
   '/login': loginSchema,
-  '/verify/:token': verifyTokenSchema
+  '/verify/:token': verifyTokenSchema,
+  '/follow': followOrUnfollow,
+  '/unfollow': followOrUnfollow
 };

@@ -18,7 +18,8 @@
     "nyc": {
         "exclude": [
             "**/*.spec.js",
-            "**/test/utils"
+            "**/test/utils",
+            "**/helpers/passport/"
         ]
     },
     "husky": {
