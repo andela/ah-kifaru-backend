@@ -9,7 +9,7 @@ module.exports = {
         avatar: '/img/profile.png',
         bio: 'Quick Intro',
         password: bcrypt.hashSync('password', 15),
-        role: 'superadmin',
+        role: 'superAdmin',
         status: 'active'
       },
       {

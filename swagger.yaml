@@ -123,6 +123,31 @@ paths:
                 $ref: "#/components/schemas/response"
         400:
           description: "failed operation"
+
+  paths:
+  /auth/users:
+    get: 
+      tags: 
+        - "auth"
+      summary : List All Users
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: The current page
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: The numbers of items to return
+      responses:
+        200:
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response"      
 components:
   
   schemas:

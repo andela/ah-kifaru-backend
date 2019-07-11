@@ -62,6 +62,32 @@ class BaseRepository {
   static async update(model, fields, options) {
     return model.update(fields, { where: options });
   }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} model - database model
+   * @param {object} options - column options
+   * @returns {object} - returns a database object
+   * @memberof BaseRepository
+   */
+  static async findAll(model, options) {
+    return model.findAll({ ...options });
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} model - database model
+   * @param {object} options - column options
+   * @returns {object} - returns a database object
+   * @memberof BaseRepository
+   */
+  static async findAndCountAll(model, options) {
+    return model.findAndCountAll({ ...options });
+  }
 }
 
 export default BaseRepository;

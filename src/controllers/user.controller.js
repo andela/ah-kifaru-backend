@@ -1,8 +1,8 @@
 import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
 import utility from '../helpers/utils';
-
 import db from '../database/models';
+import Pagination from '../helpers/pagination';
 
 const { jwtSigner, verifyPassword } = utility;
 
@@ -169,6 +169,37 @@ class UserController {
       return responseGenerator.sendError(res, 500, error.message);
     }
   }
-}
 
+  /**
+   * Get users and their corresponding profiles
+   * @async
+   * @param {object} req - Request object
+   * @param {object} res - Response object
+   * @return {json} Returns json object
+   * @static
+   */
+  static async listUsers(req, res) {
+    try {
+      const { page } = req.query;
+      const paginate = new Pagination(page, req.query.limit);
+      const { limit, offset } = paginate.getQueryMetadata();
+      const { count, rows: users } = await BaseRepository.findAndCountAll(
+        db.User,
+        {
+          limit,
+          offset,
+          attributes: ['id', 'username', 'email', 'avatar', 'role', 'status']
+        }
+      );
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        users,
+        paginate.getPageMetadata(count, '/api/v1/auth/users')
+      );
+    } catch (error) {
+      return responseGenerator.sendError(res, 500, error.message);
+    }
+  }
+}
 export default UserController;
