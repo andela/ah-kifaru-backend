@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 export default {
   /**
-   * @param {Object} obj may take an object of undefined values
+   * @param {Object} dirtyObj may take an object of undefined values
    * @returns {Object} returns an object void of undefined values
    */
   stripNull(dirtyObj) {
@@ -19,17 +19,17 @@ export default {
 
   /**
    * @param {string} pwd
-   * @returns hash password
+   * @returns {string} hash password
    */
   hashPassword(pwd) {
     const salt = bcrypt.genSaltSync(15);
-    let hashPass = bcrypt.hashSync(pwd, salt);
+    const hashPass = bcrypt.hashSync(pwd, salt);
     return hashPass;
   },
 
   /**
-   * @param {*} payload -  payload for jwt
-   * @returns
+   * @param {*} payload - payload for jwt
+   * @returns {string} - return jwt token
    */
   jwtSigner(payload) {
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
@@ -38,7 +38,7 @@ export default {
   /**
    * @param {*} password
    * @param {*} userPassword
-   * @returns
+   * @returns {boolean} - return a boolean
    */
   verifyPassword(password, userPassword) {
     const isValid = bcrypt.compareSync(password, userPassword);
