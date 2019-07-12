@@ -2,7 +2,7 @@ import responseGenerator from '../helpers/responseGenerator';
 
 const superAdminCheck = (req, res, next) => {
   const { role } = req.currentUser;
-  if (role === 'superAdmin') {
+  if (role === 'superadmin') {
     return next();
   }
   return responseGenerator.sendError(

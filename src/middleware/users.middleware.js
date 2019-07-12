@@ -31,4 +31,11 @@ export const isSelf = async (req, res, next) => {
   next();
 };
 
-export default { userExist, isSelf };
+export const checkRater = (userId, article) => {
+  if (userId === article.authorId) {
+    return true;
+  }
+  return false;
+};
+
+export default { userExist, isSelf, checkRater };

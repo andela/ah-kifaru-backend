@@ -1,7 +1,7 @@
 ## Badges
 [![Build Status](https://travis-ci.com/andela/ah-kifaru-backend.svg?branch=develop)](https://travis-ci.com/andela/ah-kifaru-backend)
-[![Coverage Status](https://coveralls.io/repos/github/andela/ah-kifaru-backend/badge.svg?branch=ch-integrate-coveralls-code-climate-services-166840911)](https://coveralls.io/github/andela/ah-kifaru-backend?branch=ch-integrate-coveralls-code-climate-services-166840911)
-[![](https://img.shields.io/badge/Reviewed%20by-Hound-brightgreen.svg)](https://houndci.com)`
+[![](https://img.shields.io/badge/Reviewed%20by-Hound-brightgreen.svg)](https://houndci.com)
+[![Coverage Status](https://coveralls.io/repos/github/andela/ah-kifaru-backend/badge.svg?branch=develop)](https://coveralls.io/github/andela/ah-kifaru-backend?branch=develop)
 
 =======
 

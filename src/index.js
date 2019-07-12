@@ -22,8 +22,8 @@ app.use(cors());
 
 app.use(require('morgan')('dev'));
 
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerdoc));
 
 Routes(app);
