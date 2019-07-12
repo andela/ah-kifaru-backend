@@ -1,40 +1,277 @@
 openapi: 3.0.0
 
 info:
-  version: "1.0"
+  version: '1.0'
   title: ErrorSwag
-  description: "Create a community of like minded authors to foster inspiration and innovation by leveraging the modern web."
+  description: 'Create a community of like minded authors to foster inspiration and innovation by leveraging the modern web.'
 
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:3000/api/v1
 
 tags: 
   - name : "welcome"
     description: "API for quick api welcome test"
-    
+  - name : "auth"
+    description: "API for login, signup and account verification"
+  - name : ratings
+    description: 'API for ratings of Articles'
+
 paths:
   /:
-    get: 
-      tags: 
+    get:
+      tags:
         - welcome
-      summary : Test get request
+      summary: Test get request
       responses:
         '200':
           description: Successfull
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/response"
+                $ref: '#/components/schemas/response'
+  /auth/login:
+    post:
+      tags:
+        - 'auth'
+      summary: 'Logs user into the system'
+      description: ''
+      operationId: 'loginUser'
+      produces:
+        - 'application/xml'
+        - 'application/json'
+      parameters:
+        - in: 'query'
+          name: 'email'
+          schema:
+            type: 'string'
+            required: true
+          description: The user's email for login
+        - in: 'query'
+          name: 'password'
+          schema:
+            type: 'string'
+            required: true
+          description: The password for login in clear text
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+        401:
+          description: 'failed operation'
+  /auth/signup:
+    post:
+      tags:
+        - 'auth'
+      summary: 'Create a new user into the system'
+      description: ''
+      operationId: 'signupUser'
+      produces:
+        - 'application/xml'
+        - 'application/json'
+      parameters:
+        - in: 'query'
+          name: 'email'
+          description: "The user's email for signup"
+          schema:
+            type: 'string'
+            required: true
+        - in: 'query'
+          name: 'username'
+          schema:
+            type: 'string'
+            required: true
+          description: 'The username for signup'
+        - in: 'query'
+          name: 'password'
+          description: 'The password for signup in clear text'
+          schema:
+            type: 'string'
+            required: true
+      responses:
+        200:
+          description: 'successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+        400:
+          description: 'failed operation'
+  /auth/verify/{token}:
+    patch:
+      tags:
+        - 'auth'
+      summary: "Verifies a user's account"
+      description: ''
+      operationId: 'verifyUser'
+      produces:
+        - 'application/xml'
+        - 'application/json'
+      parameters:
+        - in: 'path'
+          name: 'token'
+          description: 'The token sent to the users email.'
+          schema:
+            type: 'string'
+            required: true
+      responses:
+        200:
+          description: 'successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+        400:
+          description: "failed operation"
 
+  paths:
+  /auth/users:
+    get: 
+      tags: 
+        - "auth"
+      summary : List All Users
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: The current page
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: The numbers of items to return
+      responses:
+        200:
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response"      
   
+  paths:
+  /articles/{id}/ratings:
+    patch: 
+      tags: 
+        - ratings
+      summary : Rating of Articles
+      description: ""
+      operationId: "ratingArticles"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+        - in: header
+          name: x-access-token
+          schema:
+            type: string
+          required: true
+          description: token of user
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: articles Id for article been rated
+        - in: body
+          name: ratings
+          schema:
+            type: integer
+          required: true
+          description: ratings for the article
+      responses:
+        200:
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/goodResponse"    
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/badResponse" 
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/badResponse" 
+          description: 'failed operation'
+  /user/unfollow:
+    patch:
+      tags:
+        - 'user'
+      summary: 'Unfollow users on errorSwag'
+      description: 'Id of the user to unfollow'
+      operationId: 'followUser'
+      produces:
+        - 'application/xml'
+        - 'application/json'
+    parameters:
+      - name: 'followeeId'
+        in: 'body'
+        description: 'Id of the user to unfollow'
+        schema:
+          type: 'number'
+          required: true
+    responses:
+      200:
+        description: 'successful operation'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/response'
+    400:
+      description: 'Invalid user id'
+  /user/follow:
+    patch:
+      tags:
+        - 'user'
+      summary: 'Follow other users on errorSwag'
+      description: 'Id of the user to follow should be presented as a request body'
+      operationId: 'followUser'
+      produces:
+        - 'application/xml'
+        - 'application/json'
+    parameters:
+      - name: 'followeeId'
+        in: 'body'
+        description: 'Id of the user to follow'
+        schema:
+          type: 'number'
+          required: true
+    responses:
+      200:
+        description: 'successful operation'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/response'
+    400:
+      description: 'Invalid user id'
 components:
-  
   schemas:
-
     response:
       type: object
       properties:
         status:
-          type: number
+          type: string
+        data:
+          type: string
+    goodResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+    badResponse:
+      type: object
+      properties:
         message:
           type: string
+

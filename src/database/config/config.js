@@ -1,27 +1,49 @@
-import dotenv from 'dotenv';
+const dotenv = require('dotenv');
 
 dotenv.config();
 
-export default {
+module.exports = {
   development: {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
+    database: process.env.DB_DBNAME,
     host: process.env.DB_HOST,
-    dialect: 'postgres'
+    port: process.env.DB_PORT,
+    dialect: 'postgres',
+    ssl: true,
+    define: {
+      timestamps: false
+    },
+    dialectOption: {
+      ssl: true,
+      native: true
+    }
   },
   test: {
     username: process.env.DB_TEST_USERNAME,
-    password: process.env.DB_TEST_PASSWORD,
-    database: process.env.DB_TEST_PASSWORD,
+    password: process.env.DB_TEST_PASSWORD || '',
+    database: process.env.DB_TEST_DATABASE,
     host: process.env.DB_TEST_HOST,
-    dialect: 'postgres'
+    dialect: 'postgres',
+    ssl: true,
+    define: {
+      timestamps: false
+    },
+    dialectOption: {
+      ssl: true,
+      native: true
+    }
   },
   production: {
-    username: process.env.DB_PROD_USERNAME,
-    password: process.env.DB_PROD_USERNAME,
-    database: process.env.DB_PROD_USERNAME,
-    host: process.env.DB_PROD_USERNAME,
-    dialect: 'postgres'
+    use_env_variable: 'DATABASE_URL',
+    dialect: 'postgres',
+    logging: false,
+    port: 5432,
+    ssl: true,
+    operatorsAliases: false,
+    dialectOption: {
+      ssl: true,
+      native: true
+    }
   }
 };
