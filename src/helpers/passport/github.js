@@ -1,8 +1,7 @@
 import passport from 'passport';
 import dotenv from 'dotenv';
 import GitHubStrategy from 'passport-github2';
-import db from '../../database/models';
-import { callback } from './callback';
+import { callback, respondCallback } from './callback';
 
 dotenv.config();
 
@@ -14,6 +13,7 @@ passport.use(
       callbackURL: 'http://localhost:3000/auth/github/callback',
       scope: 'user:email'
     },
-    callback
+    callback,
+    respondCallback
   )
 );

@@ -248,6 +248,57 @@ class UserController {
   }
 
   /**
+   * @static
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   * @returns {object}- returns information about the follow status of the requested user
+   * @memberof UserController
+   */
+  static async getFollowers(req, res) {
+    const { id: followeeId } = req.currentUser;
+    // const followers = await BaseRepository.findAll(db.Follower, { followeeId });
+    const followers = await BaseRepository.findAndInclude(
+      db.Follower,
+      { followeeId },
+      db.User,
+      'followed'
+    );
+    if (followers.length > 1) {
+      return responseGenerator.sendSuccess(res, 200, followers);
+    }
+    return responseGenerator.sendError(
+      res,
+      200,
+      `You do not have any followers at the moment`
+    );
+  }
+
+  /**
+   * @static
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   * @returns {object}- returns information about the follow status of the requested user
+   * @memberof UserController
+   */
+  static async getFollowings(req, res) {
+    const { id: followerId } = req.currentUser;
+    const followings = await BaseRepository.findAndInclude(
+      db.Follower,
+      { followerId },
+      db.User,
+      'followed'
+    );
+    if (followings.length > 1) {
+      return responseGenerator.sendSuccess(res, 200, followings);
+    }
+    return responseGenerator.sendError(
+      res,
+      200,
+      `You are not following anyone at the moment`
+    );
+  }
+
+  /**
    * Get users and their corresponding profiles
    * @async
    * @param {object} req - Request object

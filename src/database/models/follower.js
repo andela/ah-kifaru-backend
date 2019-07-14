@@ -30,8 +30,17 @@ module.exports = (sequelize, DataTypes) => {
     },
     {}
   );
-  Follower.associate = (/* models */) => {
-    // associations can be defined here
+  Follower.associate = models => {
+    Follower.belongsTo(models.User, {
+      foreignKey: 'followerId',
+      as: 'follower'
+    });
+  };
+  Follower.associate = models => {
+    Follower.belongsTo(models.User, {
+      foreignKey: 'followeeId',
+      as: 'followed'
+    });
   };
   return Follower;
 };
