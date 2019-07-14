@@ -16,12 +16,9 @@ router.get(
 
 router.get(
   '/google/redirect',
-  passport.authenticate(
-    'google',
-    { session: false },
-    { failureRedirect: '/fail' }
-  ),
+  passport.authenticate('google', { session: false }),
   respondCallback
+  // { failureRedirect: '/fail' }
 );
 
 router.get('/fail', (req, res) => {
@@ -37,8 +34,8 @@ router.get(
   '/github/callback',
   passport.authenticate(
     'github',
-    { session: false },
-    { failureRedirect: '/fail' }
+    { session: false }
+    // { failureRedirect: '/fail' }
   ),
   respondCallback
 );
@@ -54,8 +51,8 @@ router.get(
   '/facebook/callback',
   passport.authenticate(
     'facebook',
-    { session: false },
-    { failureRedirect: '/fail' }
+    { session: false }
+    // { failureRedirect: '/fail' }
   ),
   respondCallback
 );
