@@ -2,8 +2,9 @@ import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import sinon from 'sinon';
 import app from '../index';
+
 import BaseRepository from '../repository/base.repository';
-import { createUser } from './utils/helpers';
+import { createUser, getUser } from './utils/helpers';
 import db from '../database/models';
 import helper from '../helpers/utils';
 
@@ -260,7 +261,6 @@ it('should return error if database error occurs', done => {
 describe('PATCH api/v1/users/follow', () => {
   beforeEach(async () => {
     await db.User.destroy({ cascade: true, truncate: true });
-    await db.Follower.destroy({ cascade: true, truncate: true });
   });
 
   it('should follow another user', async () => {
@@ -341,7 +341,7 @@ describe('PATCH api/v1/users/follow', () => {
     const res = await server()
       .patch(`${USER_API}/follow`)
       .set('token', token)
-      .send({ followeeId: '' });
+      .send({ followeeId: 'abc' });
     expect(res.status).to.equal(400);
     expect(res.body.message).to.equal('followeeId must be a number');
 
@@ -376,7 +376,6 @@ describe('PATCH api/v1/users/follow', () => {
 describe('PATCH /api/v1/unfollow', () => {
   beforeEach(async () => {
     await db.User.destroy({ cascade: true, truncate: true });
-    await db.Follower.destroy({ cascade: true, truncate: true });
   });
 
   it('should unfollow a user', async () => {
@@ -459,128 +458,159 @@ describe('PATCH /api/v1/unfollow', () => {
   });
 });
 
-describe('GET /api/v1/followers', () => {
-  beforeEach(async () => {
-    await db.User.destroy({ cascade: true, truncate: true });
-    await db.Follower.destroy({ cascade: true, truncate: true });
-  });
-
-  it('should get all followers', async () => {
-    const firstUser = await createUser();
-    const secondUser = await createUser();
-
-    const firstToken = helper.jwtSigner(firstUser);
-
-    const numberOfFollowers = await BaseRepository.findAll(db.Follower, {
-      followeeId: secondUser.id
+describe('Test for update user profile', () => {
+  describe('PATCH api/v1/users/:id', () => {
+    beforeEach(async () => {
+      await db.User.destroy({ cascade: true, truncate: true });
     });
 
-    expect(numberOfFollowers.length).to.equal(0);
+    it('should update user profile', async () => {
+      const firstUser = await createUser();
+      const numberOfUsers = await BaseRepository.findAll(db.User, {
+        id: firstUser.id
+      });
+      const token = helper.jwtSigner(firstUser);
+      expect(numberOfUsers.length).to.equal(1);
 
-    await server()
-      .patch(`${USER_API}/follow`)
-      .set('token', firstToken)
-      .send({ followeeId: secondUser.id });
+      const res = await server()
+        .put(`${USER_API}/${firstUser.id}`)
+        .set('token', token)
+        .send({ bio: 'I am Nkechi', avatar: 'anythingdotimage.jpg' });
 
-    const newNumberOfFollowers = await BaseRepository.findAll(db.Follower, {
-      followeeId: secondUser.id
+      expect(res.body.message).to.equal('Record successfully updated');
+      expect(res.status).to.equal(200);
+
+      const userProfile = await BaseRepository.findItAll(db.User, {
+        id: firstUser.id
+      });
+
+      expect(userProfile[0].bio).to.equal('I am Nkechi');
+      expect(userProfile[0].avatar).to.equal('anythingdotimage.jpg');
     });
-    expect(newNumberOfFollowers.length).to.equal(1);
-    expect(newNumberOfFollowers[0].followeeId).to.equal(secondUser.id);
-    expect(newNumberOfFollowers[0].followerId).to.equal(firstUser.id);
-
-    const secondToken = helper.jwtSigner(secondUser);
-
-    const res = await server()
-      .get(`${USER_API}/followers`)
-      .set('token', secondToken);
-
-    expect(res.status).to.equal(200);
-
-    const currentNumberOfFollowers = await BaseRepository.findAll(db.Follower, {
-      followeeId: secondUser.id
-    });
-    expect(currentNumberOfFollowers.length).to.equal(1);
-  });
-
-  it('should return a specific message if there are no followers', async () => {
-    const firstUser = await createUser();
-
-    const token = helper.jwtSigner(firstUser);
-
-    const numberOfFollowers = await BaseRepository.findAll(db.Follower, {
-      followeeId: firstUser.id
-    });
-
-    expect(numberOfFollowers.length).to.equal(0);
-
-    const res = await server()
-      .get(`${USER_API}/followers`)
-      .set('token', token);
-
-    expect(res.status).to.equal(200);
-
-    const newNumberOfFollowers = await BaseRepository.findAll(db.Follower, {
-      followeeId: firstUser.id
-    });
-
-    expect(newNumberOfFollowers.length).to.equal(0);
   });
 });
 
-describe('GET /api/v1/following', () => {
+describe('Test for view user profile', () => {
+  describe('GET api/v1/users/:id', () => {
+    beforeEach(async () => {
+      await db.User.destroy({ cascade: true, truncate: true });
+    });
+
+    it('should fetch specific user profile', async () => {
+      const newUser = await createUser();
+      const user = await BaseRepository.findAll(db.User, {
+        id: newUser.id
+      });
+      expect(user.length).to.equal(1);
+      const numRows = await BaseRepository.updateField(
+        db.User,
+        { status: 'active' },
+        {
+          id: newUser.id
+        }
+      );
+      expect(numRows[0]).to.equal(1);
+      const token = helper.jwtSigner(newUser);
+      const res = await server()
+        .get(`${USER_API}/${newUser.id}`)
+        .set('token', token);
+      expect(res.status).to.equal(200);
+      expect(res.body.data.id).to.equal(newUser.id);
+    });
+
+    it('should not fetch specific user profile if USER ID is invalid', async () => {
+      const newUser = await createUser();
+      const user = await BaseRepository.findAll(db.User, {
+        id: newUser.id
+      });
+      expect(user.length).to.equal(1);
+      const token = helper.jwtSigner(newUser);
+      const res = await server()
+        .get(`${USER_API}/999999`)
+        .set('token', token);
+      expect(res.status).to.equal(400);
+      expect(res.body.message).to.equal('Invalid User ID');
+    });
+  });
+});
+
+describe('PATCH /api/v1/auth/user/:id/role', () => {
   beforeEach(async () => {
     await db.User.destroy({ cascade: true, truncate: true });
-    await db.Follower.destroy({ cascade: true, truncate: true });
   });
 
-  it('should get all followed users', async () => {
-    const firstUser = await createUser();
-    const secondUser = await createUser();
+  it(`should change a user's role to admin`, async () => {
+    const theUser = await createUser();
+    const getSuperAdmin = await getUser();
+    getSuperAdmin.role = 'superadmin';
+    const superAdmin = await createUser(getSuperAdmin);
 
-    const firstToken = helper.jwtSigner(firstUser);
+    const numberOfUsers = await BaseRepository.findItAll(db.User);
+    expect(numberOfUsers.length).to.equal(2);
+    expect(numberOfUsers[0].role).to.equal('user');
+    expect(numberOfUsers[1].role).to.equal('superadmin');
 
-    const followedUsers = await BaseRepository.findAll(db.Follower, {
-      followerId: firstUser.id
-    });
-
-    expect(followedUsers.length).to.equal(0);
-
-    await server()
-      .get(`${USER_API}/following`)
-      .set('token', firstToken)
-      .send({ followeeId: secondUser.id });
-
-    const newFollowedUsers = await BaseRepository.findAll(db.Follower, {
-      followerId: firstUser.id
-    });
-    expect(newFollowedUsers.length).to.equal(0);
-  });
-
-  it("should return a specific message if user isn't following anyone", async () => {
-    const firstUser = await createUser();
-
-    const token = helper.jwtSigner(firstUser);
-
-    const numberOfFollowers = await BaseRepository.findAll(db.Follower, {
-      followerId: firstUser.id
-    });
-
-    expect(numberOfFollowers.length).to.equal(0);
+    const token = helper.jwtSigner(superAdmin);
 
     const res = await server()
-      .get(`${USER_API}/following`)
-      .set('token', token);
-
+      .patch(`${USER_API}/${theUser.id}/role`)
+      .set('token', token)
+      .send({ role: 'admin' });
     expect(res.status).to.equal(200);
-    expect(res.body.message).to.equal(
-      `You are not following anyone at the moment`
-    );
 
-    const newNumberOfFollowers = await BaseRepository.findAll(db.Follower, {
-      followerId: firstUser.id
+    const userRoleStatus = await BaseRepository.findItAll(db.User, {
+      id: theUser.id
+    });
+    expect(userRoleStatus[0].role).to.equal('admin');
+  });
+
+  it('should not change role if it is not a superadmin', async () => {
+    const fistUser = await createUser();
+    const secondUser = await createUser();
+
+    const numberOfUsers = await BaseRepository.findItAll(db.User);
+    expect(numberOfUsers.length).to.equal(2);
+    expect(numberOfUsers[0].role).to.equal('user');
+    expect(numberOfUsers[1].role).to.equal('user');
+
+    const token = helper.jwtSigner(fistUser);
+
+    const res = await server()
+      .patch(`${USER_API}/${secondUser.id}/role`)
+      .set('token', token)
+      .send({ role: 'admin' });
+    expect(res.status).to.equal(403);
+
+    const userRoleStatus = await BaseRepository.findItAll(db.User, {
+      id: secondUser.id
+    });
+    expect(userRoleStatus[0].role).to.not.equal('admin');
+    expect(userRoleStatus[0].role).to.equal('user');
+  });
+
+  it('should not change role if it is not a superadmin', async () => {
+    const getSuperAdmin = await getUser();
+    getSuperAdmin.role = 'superadmin';
+    const superAdmin = await createUser(getSuperAdmin);
+
+    const numberOfUsers = await BaseRepository.findItAll(db.User);
+    expect(numberOfUsers.length).to.equal(1);
+    expect(numberOfUsers[0].role).to.equal('superadmin');
+
+    const token = helper.jwtSigner(superAdmin);
+
+    const res = await server()
+      .patch(`${USER_API}/12345/role`)
+      .set('token', token)
+      .send({ role: 'admin' });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.equal('Invalid User ID');
+
+    const userRoleStatus = await BaseRepository.findItAll(db.User, {
+      id: superAdmin.id
     });
 
-    expect(newNumberOfFollowers.length).to.equal(0);
+    expect(userRoleStatus[0].role).to.equal('superadmin');
+    expect(userRoleStatus.length).to.equal(1);
   });
 });

@@ -171,6 +171,90 @@ class UserController {
   }
 
   /**
+   *
+   *
+   * @static
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   * @returns {object} - return user's updated data
+   * @memberof UserController
+   */
+  static async updateProfile(req, res) {
+    try {
+      const { avatar, bio } = req.body;
+      const { id: userId } = req.currentUser;
+
+      await BaseRepository.updateField(
+        db.User,
+        { avatar, bio },
+        { id: userId }
+      );
+
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        null,
+        'Record successfully updated'
+      );
+    } catch (error) {
+      return responseGenerator.sendError(res, 500, error.message);
+    }
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   * @returns {object} - returns number of rows updated
+   * @memberof UserController
+   */
+  static async updateRole(req, res) {
+    try {
+      const { role } = req.body;
+      const { id } = req.params;
+      const findId = await BaseRepository.findOneByField(db.User, { id });
+      if (findId) {
+        const userObject = await BaseRepository.updateField(
+          db.User,
+          { role },
+          { id }
+        );
+        return responseGenerator.sendSuccess(res, 200, { userObject });
+      }
+      return responseGenerator.sendError(res, 400, 'Invalid User ID');
+    } catch (error) {
+      return responseGenerator.sendError(res, 500, error.message);
+    }
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   * @returns {object} - return user's  object data
+   * @memberof UserController
+   */
+  static async viewProfile(req, res) {
+    try {
+      const { id } = req.params;
+      const userObject = await BaseRepository.findOneByField(db.User, {
+        id,
+        status: 'active'
+      });
+      if (userObject) {
+        return responseGenerator.sendSuccess(res, 200, userObject);
+      }
+      return responseGenerator.sendError(res, 400, 'Invalid User ID');
+    } catch (error) {
+      return responseGenerator.sendError(res, 500, error.message);
+    }
+  }
+
+  /**
    * @static
    * @param {object} req - express request object
    * @param {object} res - express response object

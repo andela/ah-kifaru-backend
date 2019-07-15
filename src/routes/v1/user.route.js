@@ -4,6 +4,7 @@ import UserController from '../../controllers/user.controller';
 import validationMiddleware from '../../middleware/validation.middleware';
 import authMiddleware from '../../middleware/auth.middleware';
 import paginationValidations from '../../middleware/pagination.validation';
+import superAdminCheck from '../../middleware/permission.middleware';
 
 const router = Router();
 const validateRequest = validationMiddleware();
@@ -11,6 +12,13 @@ const validateRequest = validationMiddleware();
 router.post('/signup', validateRequest, UserController.createAccount);
 
 router.post('/login', validateRequest, UserController.loginUser);
+
+router.put(
+  '/:id',
+  validateRequest,
+  authMiddleware,
+  UserController.updateProfile
+);
 
 router.patch(
   '/verify/:token',
@@ -44,18 +52,13 @@ router.patch(
   UserController.followUser
 );
 
-router.get(
-  '/followers',
+router.patch(
+  '/:id/role',
+  validateRequest,
   authMiddleware,
-  paginationValidations,
-  UserController.getFollowers
+  superAdminCheck,
+  UserController.updateRole
 );
-
-router.get(
-  '/following',
-  authMiddleware,
-  paginationValidations,
-  UserController.getFollowings
-);
+router.get('/:id', validateRequest, authMiddleware, UserController.viewProfile);
 
 export default router;
