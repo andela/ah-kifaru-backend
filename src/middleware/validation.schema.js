@@ -21,6 +21,16 @@ const followeeId = Joi.number()
   .integer()
   .required();
 
+const articleId = Joi.number()
+  .integer()
+  .required();
+
+const bookmarkArticle = {
+  body: {
+    articleId
+  }
+};
+
 const followOrUnfollow = {
   body: {
     followeeId
@@ -64,5 +74,7 @@ export default {
   '/follow': followOrUnfollow,
   '/unfollow': followOrUnfollow,
   '/user/:id': updateProfileSchema,
-  '/verify/:token': verifyTokenSchema
+  '/verify/:token': verifyTokenSchema,
+  '/bookmark': bookmarkArticle,
+  '/unbookmark': bookmarkArticle
 };
