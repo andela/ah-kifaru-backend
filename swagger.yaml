@@ -221,6 +221,58 @@ paths:
                 $ref: '#/components/schemas/response'
         400:
           description: 'failed operation'
+  /user/bookmark:
+    patch:
+      tags:
+        - 'bookmark'
+      summary: 'Bookmark articles on errorswag'
+      description: 'Id of the article to be bookmarked should be presented as a request body'
+      operationId: 'bookmark Article'
+      produces:
+        - 'application/xml'
+        - 'application/json'
+    parameters:
+      - name: 'articleId'
+        in: 'body'
+        description: 'Id of the article to be bookmarked'
+        schema:
+          type: 'number'
+          required: true
+    responses:
+      200:
+        description: 'successful operation'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/response'
+    400:
+      description: 'Invalid article id'
+  /user/unbookmark:
+    patch:
+      tags:
+        - 'bookmark'
+      summary: 'Unbookmark articles on errorSwag'
+      description: 'Id of the article to be unbookmarked should be presented as a request body'
+      operationId: 'articeId'
+      produces:
+        - 'application/xml'
+        - 'application/json'
+    parameters:
+      - name: 'articleId'
+        in: 'body'
+        description: 'Id of the article to unbookmark'
+        schema:
+          type: 'number'
+          required: true
+    responses:
+      200:
+        description: 'successful operation'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/response'
+    400:
+      description: 'Invalid user id'
 components:
   schemas:
     response:

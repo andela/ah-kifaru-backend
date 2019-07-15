@@ -183,11 +183,7 @@ class UserController {
       const { avatar, bio } = req.body;
       const { id: userId } = req.currentUser;
 
-      await BaseRepository.updateField(
-        db.User,
-        { avatar, bio },
-        { id: userId }
-      );
+      await BaseRepository.update(db.User, { avatar, bio }, { id: userId });
 
       return responseGenerator.sendSuccess(
         res,
@@ -215,7 +211,7 @@ class UserController {
       const { id } = req.params;
       const findId = await BaseRepository.findOneByField(db.User, { id });
       if (findId) {
-        const userObject = await BaseRepository.updateField(
+        const userObject = await BaseRepository.update(
           db.User,
           { role },
           { id }
