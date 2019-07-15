@@ -1,5 +1,4 @@
 import faker from 'faker';
-
 import db from '../../database/models';
 import BaseRepository from '../../repository/base.repository';
 
@@ -29,7 +28,7 @@ export const generateArticle = async ({ authorId = 1 } = {}) => ({
   authorId,
   slug: faker.lorem.slug(),
   description: faker.lorem.word(),
-  active: true
+  status: 'active'
 });
 
 export const createArticle = async article => {
