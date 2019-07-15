@@ -13,6 +13,10 @@ tags:
     description: 'API for quick api welcome test'
   - name: 'auth'
     description: 'API for login, signup and account verification'
+  - name: 'users'
+    description: 'API for users'
+  - name: 'articles'
+    description: 'API for articles' 
 
 paths:
   /:
@@ -123,12 +127,10 @@ paths:
                 $ref: '#/components/schemas/response'
         400:
           description: "failed operation"
-
-  paths:
-  /auth/users:
+  /users:
     get: 
       tags: 
-        - "auth"
+        - "users"
       summary : List All Users
       parameters:
         - in: query
@@ -147,12 +149,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/response"      
+                $ref: "#/components/schemas/response"
+        400:              
           description: 'failed operation'
   /user/unfollow:
     patch:
       tags:
-        - 'user'
+        - 'users'
       summary: 'Unfollow users on errorSwag'
       description: 'Id of the user to unfollow'
       operationId: 'followUser'
@@ -178,7 +181,7 @@ paths:
   /user/follow:
     patch:
       tags:
-        - 'user'
+        - 'users'
       summary: 'Follow other users on errorSwag'
       description: 'Id of the user to follow should be presented as a request body'
       operationId: 'followUser'
@@ -273,6 +276,33 @@ paths:
               $ref: '#/components/schemas/response'
     400:
       description: 'Invalid user id'
+
+  /articles:
+    get: 
+      tags: 
+        - 'articles'
+      summary : List All Articles
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: The current page
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: The numbers of items to return
+      responses:
+        200:
+          description: 'Successfull'
+          content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/response"      
+        400:          
+          description: 'failed operation'  
+        
 components:
   schemas:
     response:

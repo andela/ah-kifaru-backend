@@ -1,5 +1,6 @@
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
+import sinon from 'sinon';
 import app from '../index';
 import BaseRepository from '../repository/base.repository';
 import { createUser, createArticle, generateArticle } from './utils/helpers';
@@ -17,7 +18,6 @@ describe('PATCH api/v1/articles/bookmark', () => {
     await db.Bookmark.destroy({ cascade: true, truncate: true });
     await db.User.destroy({ cascade: true, truncate: true });
   });
-
   it('should bookmark an article', async () => {
     const firstUser = await createUser();
     const secondUser = await createUser();
@@ -141,5 +141,75 @@ describe('PATCH api/v1/articles/bookmark', () => {
       }
     );
     expect(newNumberOfBookmarks.count).to.equal(0);
+  });
+});
+
+describe('GET api/v1/articles', () => {
+  beforeEach(async () => {
+    await db.Article.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should get a list of all articles', async () => {
+    const firstUser = await createUser();
+    const secondUser = await createUser();
+    const theArticle = await createArticle(
+      await generateArticle({ authorId: secondUser.id })
+    );
+
+    const numberOfArticles = await BaseRepository.findAndCountAll(db.Article);
+    const token = helper.jwtSigner(firstUser);
+    expect(numberOfArticles.count).to.equal(1);
+
+    const res = await server()
+      .get(`${ARTICLES_API}`)
+      .set('token', token);
+    expect(res.status).to.equal(200);
+    expect(res.body.data).to.be.an('array');
+    expect(res.body.data).to.have.lengthOf(1);
+    expect(res.body.data[0].id).to.equal(theArticle.id);
+    expect(res.body.data[0].authorId).to.equal(secondUser.id);
+    expect(res.body.data[0].title).to.equal(theArticle.title);
+    expect(res.body.data[0].body).to.equal(theArticle.body);
+    expect(res.body.data[0].image).to.equal(theArticle.image);
+  });
+
+  it('should list articles with pagaination', async () => {
+    const firstUser = await createUser();
+    await createArticle(await generateArticle({ authorId: firstUser.id }));
+    await createArticle(await generateArticle({ authorId: firstUser.id }));
+    await createArticle(await generateArticle({ authorId: firstUser.id }));
+    await createArticle(await generateArticle({ authorId: firstUser.id }));
+    await createArticle(await generateArticle({ authorId: firstUser.id }));
+
+    const numberOfArticles = await BaseRepository.findAndCountAll(db.Article);
+    const token = helper.jwtSigner(firstUser);
+    expect(numberOfArticles.count).to.equal(5);
+    const page = 2;
+    const limit = 2;
+    const res = await server()
+      .get(`${ARTICLES_API}?page=${page}&limit=${limit}`)
+      .set('token', token);
+    expect(res.status).to.equal(200);
+    expect(res.body.data).to.be.an('array');
+    expect(res.body.metadata.prev).to.equal(`${ARTICLES_API}?page=1&limit=2`);
+    expect(res.body.metadata.currentPage).to.equal(2);
+    expect(res.body.metadata.next).to.equal(`${ARTICLES_API}?page=3&limit=2`);
+    expect(res.body.metadata.totalPages).to.equal(3);
+    expect(res.body.metadata.totalItems).to.equal(5);
+  });
+
+  it('should return error if database error occurs', done => {
+    const findAllStub = sinon.stub(BaseRepository, 'findAndCountAll');
+    findAllStub.rejects();
+    const userUrl = '/api/v1/articles';
+    chai
+      .request(app)
+      .get(userUrl)
+      .end((err, res) => {
+        expect(res.status).to.equal(500);
+        findAllStub.restore();
+        done();
+      });
   });
 });

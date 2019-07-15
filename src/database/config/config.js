@@ -16,7 +16,8 @@ module.exports = {
     dialectOption: {
       ssl: true,
       native: true
-    }
+    },
+    logging: false
   },
   test: {
     username: process.env.DB_TEST_USERNAME,
@@ -31,7 +32,8 @@ module.exports = {
     dialectOption: {
       ssl: true,
       native: true
-    }
+    },
+    logging: false
   },
   production: {
     use_env_variable: 'DATABASE_URL',
