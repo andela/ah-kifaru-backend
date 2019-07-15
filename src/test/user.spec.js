@@ -92,7 +92,7 @@ describe('Test user login, signup and account verification', () => {
         .end((err, res) => {
           expect(res.status).to.equal(400);
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('email must be a valid email');
+          expect(res.body.error).to.equal('email must be a valid email');
           done();
         });
     });
@@ -109,7 +109,7 @@ describe('Test user login, signup and account verification', () => {
         .end((err, res) => {
           expect(res.status).to.equal(400);
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(
+          expect(res.body.error).to.equal(
             'password length must be at least 8 characters long'
           );
           done();
@@ -343,7 +343,7 @@ describe('PATCH api/v1/users/follow', () => {
       .set('token', token)
       .send({ followeeId: 'abc' });
     expect(res.status).to.equal(400);
-    expect(res.body.message).to.equal('followeeId must be a number');
+    expect(res.body.error).to.equal('followeeId must be a number');
 
     const newNumberOfFollowing = await BaseRepository.findAll(db.Follower, {
       followerId: firstUser.id
