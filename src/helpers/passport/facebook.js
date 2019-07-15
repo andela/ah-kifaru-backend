@@ -1,7 +1,7 @@
 import passport from 'passport';
 import FacebookStrategy from 'passport-facebook';
 import dotenv from 'dotenv';
-import { callback } from './callback';
+import { callback, respondCallback } from './callback';
 
 dotenv.config();
 
@@ -14,6 +14,7 @@ passport.use(
       profileFields: ['id', 'displayName', 'photos', 'emails', 'name'],
       enableProof: false
     },
-    callback
+    callback,
+    respondCallback
   )
 );

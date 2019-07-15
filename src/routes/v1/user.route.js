@@ -44,4 +44,18 @@ router.patch(
   UserController.followUser
 );
 
+router.get(
+  '/followers',
+  authMiddleware,
+  paginationValidations,
+  UserController.getFollowers
+);
+
+router.get(
+  '/following',
+  authMiddleware,
+  paginationValidations,
+  UserController.getFollowings
+);
+
 export default router;

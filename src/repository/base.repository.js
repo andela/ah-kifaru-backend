@@ -88,6 +88,35 @@ class BaseRepository {
   static async findAndCountAll(model, options) {
     return model.findAndCountAll({ ...options });
   }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} model - database model
+   * @param {object} options - column options
+   * @param {object} associatedModel - associated database model
+   * @param {string} alias - title of the alias
+   * @param {object} associatedOptions - query for the associated model
+   * @returns {object} - returns a database object
+   * @memberof BaseRepository
+   */
+  static async findAndInclude(
+    model,
+    options,
+    associatedModel,
+    alias,
+    associatedOptions
+  ) {
+    return model.findAll({
+      where: options,
+      include: {
+        model: associatedModel,
+        as: alias,
+        where: associatedOptions
+      }
+    });
+  }
 }
 
 export default BaseRepository;

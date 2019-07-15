@@ -22,7 +22,8 @@ export const callback = async (accessToken, refreshToken, payload, done) => {
     const theUser = await user.get({ plain: true });
     const { id, username, email, role, status } = theUser;
     const data = { id, username, email, role, status };
-    const token = helpers.jwtSigner({ data });
+    const token = helpers.jwtSigner({ ...data });
+
     const info = {
       id,
       username,
@@ -32,7 +33,8 @@ export const callback = async (accessToken, refreshToken, payload, done) => {
       token,
       created
     };
-    done(null, info);
+
+    return done(null, info);
   } catch (err) {
     throw new Error(err);
   }
