@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       expirationTime: DataTypes.DATE,
       role: {
         type: DataTypes.ENUM,
-        values: ['user', 'admin', 'superAdmin']
+        values: ['user', 'admin', 'superadmin']
       },
       status: {
         type: DataTypes.ENUM,
@@ -47,15 +47,22 @@ module.exports = (sequelize, DataTypes) => {
   User.associate = models => {
     User.belongsToMany(models.User, {
       through: 'Followers',
-      as: 'users',
+      as: 'follower',
       foreignKey: 'followerId'
     });
   };
   User.associate = models => {
     User.belongsToMany(models.User, {
       through: 'Followers',
-      as: 'users',
+      as: 'followee',
       foreignKey: 'followeeId'
+    });
+  };
+  User.associate = models => {
+    User.belongsToMany(models.Article, {
+      through: 'Bookmarks',
+      foreignKey: 'userId',
+      as: 'articleId'
     });
   };
   return User;

@@ -20,3 +20,27 @@ export const createUser = async theUser => {
   const plain = await created.get({ plain: true });
   return plain;
 };
+
+export const generateArticle = async ({ authorId = 1 } = {}) => ({
+  title: faker.lorem.word(),
+  body: faker.lorem.words(),
+  image: faker.image.imageUrl(),
+  publishedDate: new Date(),
+  authorId,
+  slug: faker.lorem.slug(),
+  description: faker.lorem.word(),
+  active: true
+});
+
+export const createArticle = async article => {
+  const created = await BaseRepository.create(db.Article, article);
+  const plain = await created.get({ plain: true });
+  return plain;
+};
+
+export const followUser = async (firstId, secondId) => {
+  await BaseRepository.create({
+    followerId: secondId,
+    followeeId: firstId
+  });
+};
