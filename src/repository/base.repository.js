@@ -234,6 +234,19 @@ class BaseRepository {
       }
     );
   }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} model
+   * @param {array} data
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static bulkCreate(model, data) {
+    return model.bulkCreate(data);
+  }
 }
 
 export default BaseRepository;

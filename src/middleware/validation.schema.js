@@ -20,9 +20,7 @@ const followeeId = Joi.number()
   .integer()
   .required();
 
-const articleId = Joi.number()
-  .integer()
-  .required();
+const articleId = Joi.number().required();
 
 const bookmarkArticle = {
   body: {
@@ -81,6 +79,7 @@ const ratingSchema = {
       .error(new Error('ratings must be a number between 1 and 5'))
   }
 };
+
 const articleBodySchema = {
   body: {
     title: Joi.string()
@@ -164,6 +163,22 @@ const publishedArticle = {
   }
 };
 
+const notificationSchema = {
+  params: {
+    notificationId: Joi.number()
+      .min(1)
+      .required()
+  }
+};
+
+const emailNotification = {
+  body: {
+    emailNotify: Joi.boolean()
+      .required()
+      .error(new Error('emailNotify should be set to either true or false'))
+  }
+};
+
 export default [
   {
     route: '/signup',
@@ -234,5 +249,15 @@ export default [
     route: '/publish',
     method: 'put',
     schema: publishedArticle
+  },
+  {
+    route: '/:notificationId',
+    method: 'patch',
+    schema: notificationSchema
+  },
+  {
+    route: '/opt',
+    method: 'patch',
+    schema: emailNotification
   }
 ];

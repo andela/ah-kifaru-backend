@@ -24,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM,
         values: ['unverified', 'active', 'inactive']
       },
+      emailNotify: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      },
       createdAt: {
         allowNull: false,
         defaultValue: new Date(),
@@ -76,6 +80,13 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Article, {
       foreignKey: 'authorId',
       as: 'Article'
+    });
+  };
+
+  User.associate = models => {
+    User.hasMany(models.Notification, {
+      as: 'notifications',
+      foreignKey: 'receiverId'
     });
   };
   return User;
