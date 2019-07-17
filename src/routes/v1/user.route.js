@@ -28,7 +28,7 @@ router.patch(
 );
 
 router.get(
-  '/users',
+  '/',
   validateRequest,
   paginationValidations,
   UserController.listUsers

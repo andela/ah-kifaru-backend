@@ -19,6 +19,14 @@ module.exports = {
       published: {
         type: Sequelize.BOOLEAN
       },
+      publishedDate: {
+        type: Sequelize.DATE,
+        field: 'published_date'
+      },
+      status: {
+        type: Sequelize.ENUM('draft', 'active', 'deactivated'),
+        defaultValue: 'draft'
+      },
       authorId: {
         type: Sequelize.INTEGER
       },
@@ -27,9 +35,6 @@ module.exports = {
       },
       description: {
         type: Sequelize.STRING
-      },
-      active: {
-        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,
@@ -43,7 +48,7 @@ module.exports = {
       }
     });
   },
-  down: (queryInterface, Sequelize) => {
+  down: (queryInterface /* , Sequelize */) => {
     return queryInterface.dropTable('Articles');
   }
 };

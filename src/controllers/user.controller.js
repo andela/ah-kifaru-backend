@@ -402,7 +402,7 @@ class UserController {
         res,
         200,
         users,
-        paginate.getPageMetadata(count, '/api/v1/auth/users')
+        paginate.getPageMetadata(count, '/api/v1/users')
       );
     } catch (error) {
       return responseGenerator.sendError(res, 500, error.message);

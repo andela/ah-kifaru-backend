@@ -37,12 +37,12 @@ class Pagination {
     const totalPages = Math.ceil(totalItems / limit);
     const prev =
       page > 1
-        ? `${baseUrl}?${extraQuery}&page=${page - 1}&limit=${limit}`
+        ? `${baseUrl}?${extraQuery}page=${page - 1}&limit=${limit}`
         : null;
     const currentPage = page;
     const next =
       page < totalPages
-        ? `${baseUrl}?${extraQuery}&page=${page + 1}&limit=${limit}`
+        ? `${baseUrl}?${extraQuery}page=${page + 1}&limit=${limit}`
         : null;
 
     return {
