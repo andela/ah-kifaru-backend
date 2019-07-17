@@ -6,10 +6,18 @@ module.exports = (sequelize, DataTypes) => {
       body: DataTypes.TEXT,
       image: DataTypes.STRING,
       published: DataTypes.BOOLEAN,
+      publisheddate: {
+        type: DataTypes.DATE,
+        field: 'published_date',
+        defaultValue: new Date()
+      },
+      status: {
+        type: DataTypes.ENUM('draft', 'active', 'deactivated'),
+        defaultValue: 'draft'
+      },
       authorId: DataTypes.INTEGER,
       slug: DataTypes.STRING,
-      description: DataTypes.STRING,
-      active: DataTypes.BOOLEAN
+      description: DataTypes.STRING
     },
     {}
   );
