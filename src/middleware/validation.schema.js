@@ -72,6 +72,29 @@ const verifyTokenSchema = {
   }
 };
 
+const commentSchema = {
+  body: {
+    content: Joi.string()
+      .min(3)
+      .trim()
+      .required()
+      .error(
+        new Error(
+          'Please provide body for your comment with minimum of 3 characters'
+        )
+      )
+  },
+  params: {
+    articleId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(
+        new Error('Invalid CommentID, commentID must be a positive integer')
+      )
+  }
+};
+
 const updateProfileSchema = {
   body: {
     avatar: Joi.string()
@@ -122,6 +145,18 @@ const articleParamsSchema = {
       .required()
       .error(
         new Error('Invalid Article ID. Article ID must be a positive integer')
+      )
+  }
+};
+
+const commentParamSchesma = {
+  params: {
+    commentId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(
+        new Error('Invalid comment ID. comment ID must be a positive integer')
       )
   }
 };
@@ -370,5 +405,24 @@ export default [
     method: 'delete',
     schema: articleParamsSchema
   },
-  { route: '/:articleId/report', method: 'post', schema: reportArticle }
+  { route: '/:articleId/report', 
+  method: 'post', 
+  schema: reportArticle 
+},
+  {
+    route: '/:articleId',
+    method: 'post',
+    schema: commentSchema
+  },
+
+  {
+    route: '/:articleId',
+    method: 'put',
+    schema: commentSchema
+  },
+  {
+    route: '/:commentId',
+    method: 'delete',
+    schema: commentParamSchesma
+  }
 ];

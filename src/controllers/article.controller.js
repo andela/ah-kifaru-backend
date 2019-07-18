@@ -356,6 +356,35 @@ class ArticleController {
       await articleTag(tag, publishedArticle.id);
       return responseGenerator.sendSuccess(res, 201, publishedArticle);
     } catch (error) {
+      return responseGenerator.sendError(response, 500, error.message);
+    }
+  }
+
+  /*
+   * report and article
+   * @async
+   * @param {object} req - Request object
+   * @param {object} res - Response object
+   * @return {json} Returns json object
+   * @static
+   */
+  static async reportArticle(req, res) {
+    const { violation, description } = req.body;
+    const options = {
+      reporterId: req.currentUser.id,
+      articleId: req.params.articleId,
+      violation,
+      description
+    };
+    try {
+      await BaseRepository.create(Report, options);
+      return responseGenerator.sendSuccess(
+        res,
+        201,
+        options,
+        `This case has been recorded and will be reviewed`
+      );
+    } catch (error) {
       return responseGenerator.sendError(res, 500, error.message);
     }
   }

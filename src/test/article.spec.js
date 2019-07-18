@@ -15,7 +15,9 @@ import {
   rateArticle,
   createArticle2,
   reportArticle,
-  generateReport
+  generateReport,
+  createComment,
+  generateComment
 } from './utils/helpers';
 import db from '../database/models';
 import helper from '../helpers/utils';
@@ -1197,5 +1199,254 @@ describe('GET /api/v1/articles/popular', () => {
     expect(res.body.message).to.equal('Server Error');
 
     findAllStub.restore();
+describe('POST api/v1/:articleId/comments', () => {
+  beforeEach(async () => {
+    await db.Article.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Comments.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should create a comment for an article', async () => {
+    const comenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const token = helper.jwtSigner({ id: comenter.id });
+    const res = await server()
+      .post(`/api/v1/comments/${createdArticle.id}/`)
+      .set('token', token)
+      .send({ content: createdArticle.body });
+    expect(res.status).to.equal(201);
+    expect(res.body.message).to.be.equal('Commented successfully');
+  });
+
+  it('It should fail if article does not exist', async () => {
+    const comenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const token = helper.jwtSigner({ id: comenter.id });
+    const res = await server()
+      .post(`/api/v1/comments/34567`)
+      .set('token', token)
+      .send({ content: createdArticle.body });
+    expect(res.status).to.equal(404);
+    expect(res.body.message).to.be.equal('The requested article was not found');
+  });
+
+  it('should not create a comment if the content body is not provided', async () => {
+    const comenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const token = helper.jwtSigner({ id: comenter.id });
+    const res = await server()
+      .post(`/api/v1/comments/${createdArticle.id}`)
+      .set('token', token)
+      .send({ content: '' });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.be.equal(
+      'Please provide body for your comment with minimum of 3 characters'
+    );
+  });
+  it('should not create a comment if unauthenticated', async () => {
+    const comenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const fakeToken = '1234rtgfdgh';
+    const res = await server()
+      .post(`/api/v1/comments/${createdArticle.id}`)
+      .set('token', fakeToken)
+      .send({ content: createdArticle.body });
+    expect(res.status).to.equal(401);
+    expect(res.body.message).to.be.equal('Token is not valid');
   });
 });
+  });
+});
+
+describe('POST api/v1/:articleId/comments', () => {
+  beforeEach(async () => {
+    await db.Article.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Comments.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should create a comment for an article', async () => {
+    const comenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+
+    const createdComment = await createComment(
+      createdArticle.id,
+      await generateComment({ userId: comenter.id })
+    );
+    const { content: body } = createdComment[0].dataValues;
+
+    const token = helper.jwtSigner({ id: comenter.id });
+    const res = await server()
+      .post(`/api/v1/comments/${createdArticle.id}/`)
+      .set('token', token)
+      .send({ content: body });
+    expect(res.status).to.equal(201);
+    expect(res.body.message).to.be.equal('Commented successfully');
+    expect(res.body.data.content).to.be.equal(
+      createdComment[0].dataValues.content
+    );
+  });
+
+  it('It should fail if article does not exist', async () => {
+    const comenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const token = helper.jwtSigner({ id: comenter.id });
+    const res = await server()
+      .post(`/api/v1/comments/34567`)
+      .set('token', token)
+      .send({ content: createdArticle.body });
+    expect(res.status).to.equal(404);
+    expect(res.body.message).to.be.equal('The requested article was not found');
+  });
+
+  it('should not create a comment if the content body is not provided', async () => {
+    const comenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const token = helper.jwtSigner({ id: comenter.id });
+    const res = await server()
+      .post(`/api/v1/comments/${createdArticle.id}`)
+      .set('token', token)
+      .send({ content: '' });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.be.equal(
+      'Please provide body for your comment with minimum of 3 characters'
+    );
+  });
+  it('should not create a comment if unauthenticated', async () => {
+    const comenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const fakeToken = '1234rtgfdgh';
+    const res = await server()
+      .post(`/api/v1/comments/${createdArticle.id}`)
+      .set('token', fakeToken)
+      .send({ content: createdArticle.body });
+    expect(res.status).to.equal(401);
+    expect(res.body.message).to.be.equal('Token is not valid');
+  });
+});
+describe('GET api/v1/:articleId/comments', () => {
+  beforeEach(async () => {
+    await db.Article.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+  });
+  it('should list all comments for an article', async () => {
+    const comenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const token = helper.jwtSigner({ id: comenter.id });
+    const res = await server()
+      .get(`/api/v1/comments/${createdArticle.id}`)
+      .set('token', token);
+    expect(res.status).to.equal(200);
+    expect(res.body.message).to.be.equal('Operation Successful');
+    expect((res.body.data.rows[0] = 1));
+  });
+
+  it('should not list  when comment token is invalid', async () => {
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const fakeToken = '12345678iokjhgfdsdfghjk';
+    const res = await server()
+      .get(`/api/v1/comments/${createdArticle.id}`)
+      .set('token', fakeToken);
+    expect(res.status).to.equal(401);
+    expect(res.body.message).to.be.equal('Token is not valid');
+  });
+});
+
+describe('PUT api/v1/comments/:commentId', async () => {
+  beforeEach(async () => {
+    await db.Article.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Comments.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should not update a comment if no change was effected', async () => {
+    const commenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const createdComment = await createComment(
+      createdArticle.id,
+      await generateComment({ userId: commenter.id })
+    );
+    const { id: commentId, content } = createdComment[0].dataValues;
+    const token = helper.jwtSigner({ id: commenter.id });
+    const res = await server()
+      .put(`/api/v1/comments/${commentId}`)
+      .set('token', token)
+      .send({ content });
+    expect(res.status).to.equal(200);
+    expect(res.body.message).to.equal(
+      'Comment is the same, no change was effected'
+    );
+    expect(res.body.data).to.be.equal(createdComment[0].dataValues.content);
+  });
+
+  it('should not update if invalid token is  provided', async () => {
+    const commenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const createdComment = await createComment(
+      createdArticle.id,
+      await generateComment({ userId: commenter.id })
+    );
+    const { id: commentId, content } = createdComment[0].dataValues;
+    const fakeToken = 'wertyuiow3456789';
+    const res = await server()
+      .put(`/api/v1/comments/${commentId}`)
+      .set('token', fakeToken)
+      .send({ content });
+    expect(res.status).to.equal(401);
+    expect(res.body.message).to.be.equal('Token is not valid');
+  });
+  it('User should not be able to comment if not authenticated', async () => {
+    const commenter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const createdComment = await createComment(
+      createdArticle.id,
+      await generateComment({ userId: commenter.id })
+    );
+    const { id: commentId, content } = createdComment[0].dataValues;
+    const res = await server()
+      .put(`/api/v1/comments/${commentId}`)
+      .send({ content });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.be.equal('Invalid access token');
+  });
+});
+

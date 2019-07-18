@@ -53,6 +53,9 @@ export const generateReport = async ({
   reporterId,
   articleId,
   description,
+});
+export const generateReport = async ({ violation }) => ({
+  description: faker.lorem.sentences(),
   violation
 });
 
@@ -70,6 +73,21 @@ export const createArticle2 = async article => {
     db.Article,
     { id: article.id },
     article
+  );
+};
+export const generateComment = async ({ userId }) => ({
+  userId,
+  content: faker.lorem.word()
+});
+
+export const createComment = async (
+  articleId,
+  content = faker.lorem.sentences()
+) => {
+  const created = await BaseRepository.findOrCreate(
+    db.Comments,
+    { articleId },
+    content
   );
   return created;
 };

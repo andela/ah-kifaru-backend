@@ -908,3 +908,126 @@ components:
       properties:
         message:
           type: string
+          type: string
+
+  /articles/{articleId}/comments:
+    post:
+      tags:
+      - Articles
+      summary: POST API endpoint for creating comment on an article
+      produces:
+      - application/json
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - name: slug
+        in: path
+        description: slug of the article to be commented on
+        required: true
+        type: string
+      - name: content
+        in: formData
+        description: content of the comment
+        required: true
+        type: string
+      responses:
+        '201':
+          description: successful operation
+        '401':
+          description: Not authorized
+        '403':
+          description: invalid token supplied
+        '404':
+          description: No user found
+        '500':
+          description: Auth token expired
+      security:
+      - JWT: []
+    get:
+      tags:
+      - Articles
+      summary: GET API endpoint for getting all comment on an article
+      produces:
+      - application/json
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - name: slug
+        in: path
+        description: slug of the article to view all comments
+        required: true
+        type: string
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: article not found
+      security:
+      - JWT: []
+        "/articles/comments/{id}":
+    patch:
+      tags:
+      - Articles
+      summary: PUT API endpoint for updating a single comment
+      produces:
+      - application/json
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - name: id
+        in: path
+        description: id of comment
+        required: true
+        type: integer
+      - name: commentBody
+        in: formData
+        description: body of the comment
+        required: true
+        type: string
+      responses:
+        '201':
+          description: successful operation
+        '401':
+          description: Not authorized
+        '403':
+          description: Auth token not supplied
+        '404':
+          description: No user found
+        '500':
+          description: Auth token expired
+      security:
+      - JWT: []
+
+        "/articles/comments/{id}":
+    delete:
+      tags:
+      - Articles
+      summary: PATCH API endpoint for deleting an end point
+      produces:
+      - application/json
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - name: id
+        in: path
+        description: id of comment
+        required: true
+        type: integer
+      - name: commentBody
+        in: formData
+        description: body of the comment
+        required: true
+        type: string
+      responses:
+        '201':
+          description: successful operation
+        '401':
+          description: Not authorized
+        '403':
+          description: Auth token not supplied
+        '404':
+          description: No user found
+        '500':
+          description: Auth token expired
+      security:
+      - JWT: []
