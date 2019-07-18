@@ -4,7 +4,8 @@
     "description": "A Social platform for the creative at heart",
     "main": "index.js",
     "scripts": {
-        "pretest": "NODE_ENV=test sequelize db:migrate:undo:all && NODE_ENV=test sequelize db:migrate  && NODE_ENV=test sequelize db:seed:all",
+        "pretest": "NODE_ENV=test npm run set:test",
+        "set:test": "sequelize db:migrate:undo:all && sequelize db:migrate",
         "test": "NODE_ENV=test nyc --require @babel/register --require @babel/polyfill mocha src/test/**.spec.js --timeout 20000 --exit",
         "lint": "eslint **/*.js",
         "lint:fix": "prettier-eslint \"**/*.{js,json}\" --write",

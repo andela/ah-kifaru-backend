@@ -8,7 +8,6 @@ export default () => {
     allowUnknown: true,
     stripUnknown: true
   };
-
   // return the validation middleware
   return (req, res, next) => {
     const route = req.route.path;
