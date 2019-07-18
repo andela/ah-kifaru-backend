@@ -9,7 +9,6 @@ module.exports = {
     database: process.env.DB_DATABASE,
     host: process.env.DB_HOST,
     dialect: 'postgres',
-    logging: false,
     ssl: true,
     define: {
       timestamps: false
@@ -17,8 +16,7 @@ module.exports = {
     dialectOption: {
       ssl: true,
       native: true
-    },
-    logging: false
+    }
   },
   test: {
     username: process.env.DB_USERNAME_TEST,
@@ -34,8 +32,7 @@ module.exports = {
     dialectOption: {
       ssl: true,
       native: true
-    },
-    logging: false
+    }
   },
   production: {
     use_env_variable: 'DATABASE_URL',

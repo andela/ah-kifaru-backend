@@ -8,7 +8,8 @@ export const getUser = async () => ({
   avatar: faker.image.imageUrl().toLowerCase(),
   password: faker.internet.password().toLowerCase(),
   role: 'user',
-  status: 'unverified'
+  status: 'unverified',
+  emailNotify: false
 });
 
 export const createUser = async theUser => {
