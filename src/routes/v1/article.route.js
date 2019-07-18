@@ -68,6 +68,13 @@ router.put(
   validateRequest,
   ArticleController.updateOneArticle
 );
+router.post(
+  '/:articleId/report',
+  authMiddleware,
+  validateRequest,
+  articleMiddleware,
+  ArticleController.reportArticle
+);
 
 router.get(
   '/:articleId',

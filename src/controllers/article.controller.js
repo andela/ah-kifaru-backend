@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 import createArticle from '../helpers/articles';
 import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
@@ -5,6 +6,7 @@ import db from '../database/models';
 import Pagination from '../helpers/pagination';
 import { articleTag } from '../helpers/tagArticle';
 
+const { Report } = db;
 /**
  * @class UserController
  */
@@ -386,6 +388,36 @@ class ArticleController {
       return responseGenerator.sendSuccess(res, 200, fetchArticles);
     } catch (err) {
       return responseGenerator.sendError(res, 500, err.message);
+    }
+  }
+
+  /*
+   *
+   * @static
+   * @param {*} req - Request object
+   *@param {object} res - Response object
+   * @returns {object} - - article object
+   * @memberof ArticleController
+   */
+  static async reportArticle(req, res) {
+    const { violation, description } = req.body;
+    const { article } = req;
+    const options = {
+      reporterId: req.currentUser.id,
+      articleId: article.id,
+      violation,
+      description
+    };
+    try {
+      await BaseRepository.create(Report, options);
+      return responseGenerator.sendSuccess(
+        res,
+        201,
+        options,
+        `We received your report and our support staff will attend to it. Thank you`
+      );
+    } catch (error) {
+      return responseGenerator.sendError(res, 500, error.message);
     }
   }
 }

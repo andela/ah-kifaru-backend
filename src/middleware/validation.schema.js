@@ -14,6 +14,13 @@ const password = Joi.string()
   .required()
   .strict();
 
+const descriptionRequired = Joi.string()
+  .min(10)
+  .required()
+  .strict();
+
+const descriptionNotRequired = Joi.optional().allow('');
+
 const token = Joi.string().required();
 
 const followeeId = Joi.number()
@@ -139,9 +146,40 @@ const updateArticleSchema = {
           'Please provide a title for your article with minimum of 3 characters'
         )
       ),
+
     description: Joi.required(),
     body: Joi.required(),
     image: Joi.required()
+  }
+};
+
+const reportArticle = {
+  params: {
+    articleId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(
+        new Error('Invalid Article ID. Article ID must be a positive integer')
+      )
+  },
+  body: {
+    violation: Joi.string()
+      .required()
+      .valid(
+        'Discrimination',
+        'Sexual Content',
+        'Offensive Language',
+        'Plagiarism',
+        'Others'
+      )
+      .strict()
+      .lowercase(),
+    description: Joi.alternatives().when('violation', {
+      is: 'Others',
+      then: descriptionRequired,
+      otherwise: descriptionNotRequired
+    })
   }
 };
 
@@ -316,5 +354,21 @@ export default [
     route: '/:id/delete',
     method: 'delete',
     schema: deleteTag
-  }
+  },
+  {
+    route: '/:articleId',
+    method: 'get',
+    schema: articleParamsSchema
+  },
+  {
+    route: '/:articleId',
+    method: 'put',
+    schema: updateArticleSchema
+  },
+  {
+    route: '/:articleId',
+    method: 'delete',
+    schema: articleParamsSchema
+  },
+  { route: '/:articleId/report', method: 'post', schema: reportArticle }
 ];
