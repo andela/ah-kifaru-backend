@@ -25,6 +25,10 @@ export const articleSample2 = {
   ).toLowerCase()
 };
 
+export const likeComment = {
+  type: 'comment'
+};
+
 export const articleWithNoTitle = {
   ...articleSample,
   title: undefined

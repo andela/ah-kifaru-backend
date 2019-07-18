@@ -891,6 +891,30 @@ paths:
         description: article has been reported by authenticated user before
         schema:
           "$ref": "#/definitions/reportRes2"
+/api/v1/articles/:articleId/comments/like:
+  post:
+    tags:
+    - Like
+    summary: Route for authenticated users to like or remove reaction of comments
+      on an article
+    description: Returns a confirmation is like or remove reaction is successful
+    parameters:
+    - in: params
+      name: commentId
+      description: the id of the comment to be liked
+      required: true
+    responses:
+      '200':
+        description: Returns a 200 when like is toggled based on yours like/reset
+          the action
+      '201':
+        description: Returns a 201 status code on the first like
+      '400':
+        description: Returns a 400 if params is not valid
+      '401':
+        description: User access required
+      '500':
+        description: Returns a 500 if comment no longer exists
 components:
   schemas:
     response:

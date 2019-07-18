@@ -27,7 +27,9 @@ const followeeId = Joi.number()
   .integer()
   .required();
 
-const articleId = Joi.number().required();
+const articleId = Joi.number().required()
+  .integer()
+  .required();
 
 const bookmarkArticle = {
   body: {
@@ -256,6 +258,31 @@ const emailNotification = {
       .error(new Error('emailNotify should be set to either true or false'))
   }
 };
+const commentLikeSchema = {
+  body: {
+    type: Joi.string()
+      .min(3)
+      .required()
+      .error(new Error('Type is required . .'))
+  },
+
+  params: {
+    articleId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(
+        new Error('Invalid Article ID. Article ID must be a positive integer')
+      ),
+    commentId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(
+        new Error('Invalid Comment ID. Comment ID must be a positive integer')
+      )
+  }
+};
 
 export default [
   {
@@ -373,5 +400,10 @@ export default [
     method: 'delete',
     schema: articleParamsSchema
   },
-  { route: '/:articleId/report', method: 'post', schema: reportArticle }
+  { route: '/:articleId/report', method: 'post', schema: reportArticle },
+  
+   { route: '/:articleId/comments/:commentId/like',
+    method: 'post',
+    schema: commentLikeSchema
+  }
 ];
