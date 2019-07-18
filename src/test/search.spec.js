@@ -11,6 +11,7 @@ import {
   createArticleTag
 } from './utils/helpers';
 import db from '../database/models';
+import helper from '../helpers/utils';
 
 const SEARCH_API = '/api/v1/search';
 
@@ -25,7 +26,6 @@ describe('GET api/v1/search', () => {
     await db.Tags.destroy({ cascade: true, truncate: true });
     await db.ArticleTags.destroy({ cascade: true, truncate: true });
   });
-
   it('should search for articles by author', async () => {
     const user1 = await generateUser({ username: 'kechhy' });
     const user2 = await generateUser({ username: 'onyimatics' });
