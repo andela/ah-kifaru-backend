@@ -4,9 +4,10 @@ import utility from '../helpers/utils';
 import db from '../database/models';
 import Pagination from '../helpers/pagination';
 import mailer from '../helpers/mailer';
+import NotificationHelper from '../helpers/notifications';
 
 const { jwtSigner, verifyPassword } = utility;
-
+const { onFollowNotification, testPusher } = NotificationHelper;
 /**
  * @class UserController
  */
@@ -78,7 +79,7 @@ class UserController {
         'Account created successfully. An email verification link has been sent to your email address.'
       );
     } catch (error) {
-      return responseGenerator.sendError(res, 500, error);
+      return responseGenerator.sendError(res, 500, error.message);
     }
   }
 
@@ -289,6 +290,8 @@ class UserController {
       const [user, created] = followedUser;
 
       if (created) {
+        await onFollowNotification({ followerId, followeeId });
+
         return responseGenerator.sendSuccess(
           res,
           200,

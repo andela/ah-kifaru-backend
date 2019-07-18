@@ -21,13 +21,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     {}
   );
+
   Article.associate = models => {
     Article.belongsTo(models.User, {
-      through: 'Articles',
-      foreignKey: 'authorId'
+      foreignKey: 'authorId',
+      as: 'author'
     });
-  };
-  Article.associate = models => {
+
     Article.belongsToMany(models.User, {
       through: 'Bookmarks',
       foreignKey: 'articleId',
