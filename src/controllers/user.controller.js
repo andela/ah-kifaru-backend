@@ -3,6 +3,7 @@ import responseGenerator from '../helpers/responseGenerator';
 import utility from '../helpers/utils';
 import db from '../database/models';
 import Pagination from '../helpers/pagination';
+import mailer from '../helpers/mailer';
 
 const { jwtSigner, verifyPassword } = utility;
 
@@ -24,7 +25,6 @@ class UserController {
 
       if (user) {
         if (user.status === 'unverified') {
-          // TODO : SEND EMAIL TO USER
           return responseGenerator.sendError(
             res,
             400,
@@ -54,7 +54,16 @@ class UserController {
         role
       });
 
-      // TODO : SEND EMAIL TO USER
+      const { protocol } = req;
+      mailer({
+        name: username,
+        receiver: email,
+        subject: 'Welcome to ErrorSwag',
+        templateName: 'confirm_account',
+        confirm_account_url: `${protocol}://${req.get(
+          'host'
+        )}/api/v1/auth/verify/${token}`
+      });
 
       return responseGenerator.sendSuccess(
         res,
@@ -69,7 +78,7 @@ class UserController {
         'Account created successfully. An email verification link has been sent to your email address.'
       );
     } catch (error) {
-      return responseGenerator.sendError(res, 500, error.message);
+      return responseGenerator.sendError(res, 500, error);
     }
   }
 
@@ -96,7 +105,18 @@ class UserController {
           });
 
           if (user.status === 'unverified') {
-            // TODO : SEND EMAIL TO USER
+            const { protocol } = req;
+
+            mailer({
+              name: username,
+              receiver: email,
+              subject: 'Welcome to ErrorSwag',
+              templateName: 'confirm_account',
+              confirm_account_url: `${protocol}://${req.get(
+                'host'
+              )}/api/v1/auth/verify/${token}`
+            });
+
             return responseGenerator.sendSuccess(
               res,
               200,
@@ -165,7 +185,7 @@ class UserController {
 
       return responseGenerator.sendError(res, 400, 'Invalid validation token.');
     } catch (error) {
-      return responseGenerator.sendError(res, 500, error.message);
+      return responseGenerator.sendError(res, 500, error);
     }
   }
 
