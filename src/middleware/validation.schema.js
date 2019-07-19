@@ -67,13 +67,47 @@ const updateProfileSchema = {
   }
 };
 
+const ratingSchema = {
+  params: {
+    articleId: Joi.number()
+      .min(1)
+      .required()
+  },
+  body: {
+    ratings: Joi.number()
+      .min(1)
+      .max(5)
+      .required()
+      .error(new Error('ratings must be a number between 1 and 5'))
+  }
+};
+
+const notificationSchema = {
+  params: {
+    notificationId: Joi.number()
+      .min(1)
+      .required()
+  }
+};
+
+const emailNotification = {
+  body: {
+    emailNotify: Joi.boolean()
+      .required()
+      .error(new Error('emailNotify should be set to either true or false'))
+  }
+};
+
 export default {
   '/signup': createAccountSchema,
   '/login': loginSchema,
+  '/verify/:token': verifyTokenSchema,
   '/follow': followOrUnfollow,
   '/unfollow': followOrUnfollow,
   '/user/:id': updateProfileSchema,
-  '/verify/:token': verifyTokenSchema,
   '/bookmark': bookmarkArticle,
-  '/unbookmark': bookmarkArticle
+  '/unbookmark': bookmarkArticle,
+  '/:articleId/ratings': ratingSchema,
+  '/:notificationId': notificationSchema,
+  '/opt': emailNotification
 };

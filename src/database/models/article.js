@@ -1,4 +1,8 @@
-module.exports = (sequelize, DataTypes) => {
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+export default (sequelize, DataTypes) => {
   const Article = sequelize.define(
     'Article',
     {
@@ -32,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
       through: 'Bookmarks',
       foreignKey: 'articleId',
       as: 'bookmarks'
+    });
+    Article.hasMany(models.Rating, {
+      as: 'articleRatings',
+      foreignKey: 'articleId'
     });
   };
   return Article;

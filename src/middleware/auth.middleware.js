@@ -26,11 +26,7 @@ const authMiddleware = (req, res, next) => {
     return decodeToken(req, res, next, token);
   }
 
-  return responseGenerator.sendError(
-    res,
-    400,
-    'Please assign a access token as header'
-  );
+  return responseGenerator.sendError(res, 400, 'Invalid access token');
 };
 
 export default authMiddleware;

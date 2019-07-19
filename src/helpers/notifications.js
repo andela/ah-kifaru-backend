@@ -60,7 +60,6 @@ const onFollowNotification = async ({ followerId, followeeId }) => {
     message,
     link
   });
-
   await pushNotification([receiverId], message);
 };
 
@@ -131,5 +130,6 @@ const onPublishArticleNotification = async ({ userId, articleId }) => {
 export default {
   onFollowNotification,
   onCommentNotification,
-  onPublishArticleNotification
+  onPublishArticleNotification,
+  createInAppNotification
 };

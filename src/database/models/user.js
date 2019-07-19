@@ -61,6 +61,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'followee',
       foreignKey: 'followeeId'
     });
+
+    User.hasMany(models.Rating, {
+      foreignKey: 'userId',
+      as: 'rating'
+    });
   };
 
   User.associate = models => {
@@ -68,8 +73,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'authorId',
       as: 'article'
     });
-
-    User.hasMany(models.Article, {
+    User.belongsToMany(models.Article, {
       through: 'Bookmarks',
       foreignKey: 'userId',
       as: 'articleId'

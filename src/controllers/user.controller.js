@@ -7,7 +7,7 @@ import mailer from '../helpers/mailer';
 import NotificationHelper from '../helpers/notifications';
 
 const { jwtSigner, verifyPassword } = utility;
-const { onFollowNotification, testPusher } = NotificationHelper;
+const { onFollowNotification } = NotificationHelper;
 /**
  * @class UserController
  */

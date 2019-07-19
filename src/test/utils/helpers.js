@@ -21,9 +21,9 @@ export const createUser = async theUser => {
   return plain;
 };
 
-export const generateArticle = async ({ authorId = 1 } = {}) => ({
+export const generateArticle = async ({ authorId }) => ({
   title: faker.lorem.word(),
-  body: faker.lorem.words(),
+  body: faker.lorem.sentences(),
   image: faker.image.imageUrl(),
   publishedDate: new Date(),
   authorId,
@@ -43,4 +43,32 @@ export const followUser = async (firstId, secondId) => {
     followerId: secondId,
     followeeId: firstId
   });
+};
+
+export const ratings = {
+  ratings: faker.random.number({
+    min: 1,
+    max: 5
+  })
+};
+
+export const addNotification = async (receiverId, read) => {
+  const notification = {
+    message: faker.lorem.sentences(),
+    read,
+    receiverId,
+    link: faker.image.imageUrl()
+  };
+
+  const createNotification = await BaseRepository.create(
+    db.Notification,
+    notification
+  );
+  return createNotification;
+};
+
+export const newNotification = {
+  receiverId: 1,
+  message: faker.lorem.sentences(),
+  link: faker.image.imageUrl()
 };

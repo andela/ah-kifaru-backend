@@ -17,6 +17,8 @@ tags:
     description: 'API for users'
   - name: 'articles'
     description: 'API for articles' 
+  - name : ratings
+    description: 'API for ratings of Articles'
 
 paths:
   /:
@@ -145,7 +147,7 @@ paths:
           description: The numbers of items to return
       responses:
         200:
-          description: Successfull
+          description: 'successful operation'
           content:
             application/json:
               schema:
@@ -302,13 +304,76 @@ paths:
                   $ref: "#/components/schemas/response"      
         400:          
           description: 'failed operation'  
-        
+
+  /articles/{articleId}/ratings:
+    patch: 
+      tags: 
+        - ratings
+      summary : Rating of Articles
+      description: ""
+      operationId: "ratingArticles"
+      produces:
+        - 'application/xml'
+        - 'application/json'
+      parameters:
+        - in: header
+          name: x-access-token
+          schema:
+            type: string
+          required: true
+          description: token of user
+        - in: path
+          name: articleId
+          schema:
+            type: integer
+          required: true
+          description: articles Id for article been rated
+        - in: body
+          name: ratings
+          schema:
+            type: integer
+          required: true
+          description: ratings for the article
+      responses:
+        200:
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/goodResponse"    
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/badResponse" 
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/badResponse" 
+          description: 'failed operation'
+
 components:
   schemas:
     response:
       type: object
       properties:
         status:
-          type: number
+          type: string
+        data:
+          type: string
+    goodResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+    badResponse:
+      type: object
+      properties:
         message:
           type: string
+

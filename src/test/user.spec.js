@@ -603,14 +603,13 @@ describe('PATCH /api/v1/auth/user/:id/role', () => {
   it(`should change a user's role to admin`, async () => {
     const theUser = await createUser();
     const getSuperAdmin = await getUser();
-    getSuperAdmin.role = 'superAdmin';
+    getSuperAdmin.role = 'superadmin';
     const superAdmin = await createUser(getSuperAdmin);
 
     const numberOfUsers = await BaseRepository.findItAll(db.User);
     expect(numberOfUsers.length).to.equal(2);
     expect(numberOfUsers[0].role).to.equal('user');
-    expect(numberOfUsers[1].role).to.equal('superAdmin');
-
+    expect(numberOfUsers[1].role).to.equal('superadmin');
     const token = helper.jwtSigner(superAdmin);
 
     const res = await server()
@@ -651,12 +650,12 @@ describe('PATCH /api/v1/auth/user/:id/role', () => {
 
   it('should not change role if it is not a superadmin', async () => {
     const getSuperAdmin = await getUser();
-    getSuperAdmin.role = 'superAdmin';
+    getSuperAdmin.role = 'superadmin';
     const superAdmin = await createUser(getSuperAdmin);
 
     const numberOfUsers = await BaseRepository.findItAll(db.User);
     expect(numberOfUsers.length).to.equal(1);
-    expect(numberOfUsers[0].role).to.equal('superAdmin');
+    expect(numberOfUsers[0].role).to.equal('superadmin');
 
     const token = helper.jwtSigner(superAdmin);
 
@@ -671,7 +670,7 @@ describe('PATCH /api/v1/auth/user/:id/role', () => {
       id: superAdmin.id
     });
 
-    expect(userRoleStatus[0].role).to.equal('superAdmin');
+    expect(userRoleStatus[0].role).to.equal('superadmin');
     expect(userRoleStatus.length).to.equal(1);
   });
 });
