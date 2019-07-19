@@ -39,13 +39,10 @@ node_modules
 
 .env
 .package-lock.json
+ .nyc_output 
 #build
 ./build
 
 .nyc_output
 .vscode
-
-20190703214830-create-article.js
-20190703214607-create-article.
-20190703214918-create-article.js
 

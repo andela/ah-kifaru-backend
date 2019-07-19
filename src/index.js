@@ -1,10 +1,10 @@
 import express from 'express';
+import passport from 'passport';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import yaml from 'yamljs';
-import passport from 'passport';
 
 import Routes from './routes/v1';
 import './helpers/passport/google';

@@ -3,8 +3,10 @@ import responseGenerator from '../helpers/responseGenerator';
 import utility from '../helpers/utils';
 import db from '../database/models';
 import Pagination from '../helpers/pagination';
-import mailer from '../helpers/mailer';
 import NotificationHelper from '../helpers/notifications';
+import mailer from '../helpers/mailer';
+
+const { User } = db;
 
 const { jwtSigner, verifyPassword } = utility;
 const { onFollowNotification } = NotificationHelper;
@@ -228,6 +230,56 @@ class UserController {
   /**
    *
    *
+   * @description This is the method that generates the password reset email
+   * @param  {object} req The request object
+   * @param  {object} res The response object
+   * @returns {object} json response
+   */
+  static async resetPassword(req, res) {
+    try {
+      const user = await BaseRepository.findOne(User, {
+        where: { email: req.body.email }
+      });
+      if (!user) {
+        return responseGenerator.sendError(
+          res,
+          400,
+          'Email does not match any account in our record'
+        );
+      }
+      const token = jwtSigner({
+        email: user.dataValues.email,
+        time: { expiresIn: 600 }
+      });
+
+      const { protocol } = req;
+      mailer({
+        name: user.dataValues.email,
+        receiver: user.dataValues.email,
+        subject: 'Password reset',
+        templateName: 'reset_password',
+        confirm_account_url: `${protocol}://${req.get(
+          'host'
+        )}/api/v1/auth/reset-password/${token}`
+      });
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        null,
+        'A password reset link would be sent to the email provided if it is associated with a registered email'
+      );
+    } catch (error) {
+      return responseGenerator.sendError(
+        res,
+        500,
+        `Request could not be processed. Please try again`
+      );
+    }
+  }
+
+  /**
+   *
+   *
    * @static
    * @param {object} req - express request object
    * @param {object} res - express response object
@@ -275,6 +327,49 @@ class UserController {
       return responseGenerator.sendError(res, 400, 'Invalid User ID');
     } catch (error) {
       return responseGenerator.sendError(res, 500, error.message);
+    }
+  }
+
+  /**
+   *
+   *
+   * @description This is method that resets the User password
+   * @param  {object} req The request object
+   * @param  {object} res The response object
+   * @returns {object} json response
+   */
+  static async reset(req, res) {
+    const { email } = req.currentUser;
+    try {
+      const reset = await BaseRepository.find(User, { email });
+      if (!reset) {
+        return responseGenerator.sendError(
+          res,
+          401,
+          `verification link not valid`
+        );
+      }
+      await BaseRepository.update(
+        User,
+        {
+          password: req.body.password
+        },
+        {
+          email
+        }
+      );
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        null,
+        'Password reset successful'
+      );
+    } catch (err) {
+      return responseGenerator.sendError(
+        res,
+        500,
+        `Request could not be processed. Please try again`
+      );
     }
   }
 
