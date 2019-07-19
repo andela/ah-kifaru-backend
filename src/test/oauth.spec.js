@@ -51,7 +51,7 @@ describe('SOCIAL LOGIN', () => {
 
   it('should hit the github URL for social login', async () => {
     nock('https://api.github.com/')
-      .get('/auth/twitter')
+      .get('/auth/github')
       .reply(200, 'hit the route');
 
     const res = await chai.request(app).get('/auth/github');

@@ -25,6 +25,7 @@ export default (sequelize, DataTypes) => {
     },
     {}
   );
+
   Article.associate = models => {
     Article.belongsTo(models.User, {
       through: 'Articles',
