@@ -135,11 +135,37 @@ class BaseRepository {
    * @static
    * @param {*} model
    * @param {*} options
+   * @param {*} attributes
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static findOneAndIncludeField(model, options, attributes) {
+    return model.findOne({
+      where: options,
+      include: attributes
+    });
+  }
+
+  /**
+   * @static
+   * @param {*} model
+   * @param {*} options
    * @returns {object} - returns an database object
    * @memberof BaseRepository
    */
   static findOne(model, options) {
     return model.findByPk(options);
+  }
+
+  /**
+   * @static
+   * @param {object} model
+   * @param {array} data
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static bulkCreate(model, data) {
+    return model.bulkCreate(data);
   }
 }
 

@@ -1,12 +1,20 @@
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import sinon from 'sinon';
+import { config } from 'dotenv';
 import app from '../index';
 import sign from '../helpers/utils';
 import db from '../database/models';
 import BaseRepository from '../repository/base.repository';
 import { createUser, addNotification, newNotification } from './utils/helpers';
-import { createInAppNotification } from '../helpers/notifications';
+import NotificationHelper, {
+  createInAppNotification
+} from '../helpers/notifications';
+
+config();
+chai.use(chaiHttp);
+
+const { onFollowNotification } = NotificationHelper;
 
 chai.use(chaiHttp);
 chai.should();
@@ -199,5 +207,33 @@ describe('PATCH /api/v1/notifications/opt', () => {
     expect(response.status).to.equal(500);
     expect(response.body.message).to.equal('Server Error');
     findAllStub.restore();
+  });
+});
+
+describe('Test notification related endpoints', async () => {
+  beforeEach(async () => {
+    await User.destroy({ truncate: true, cascade: true });
+    await Follower.destroy({ truncate: true, cascade: true });
+    await Notification.destroy({ truncate: true, cascade: true });
+  });
+  it('should send in app notification when a user is followed', async () => {
+    const follower = await createUser();
+    const followee = await createUser();
+
+    const message = `<b>${follower.username}</b> just followed you.`;
+    const link = `/profile/${follower.username}`;
+
+    await onFollowNotification({
+      followerId: follower.id,
+      followeeId: followee.id
+    });
+
+    const newNotifications = await BaseRepository.findAll(db.Notification, {
+      receiverId: followee.id
+    });
+
+    expect(newNotifications.length).to.equal(1);
+    expect(newNotifications[0].message).to.equal(message);
+    expect(newNotifications[0].link).to.equal(link);
   });
 });

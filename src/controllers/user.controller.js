@@ -79,7 +79,7 @@ class UserController {
         'Account created successfully. An email verification link has been sent to your email address.'
       );
     } catch (error) {
-      return responseGenerator.sendError(res, 500, error);
+      return responseGenerator.sendError(res, 500, error.message);
     }
   }
 

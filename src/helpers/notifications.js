@@ -13,9 +13,13 @@ const pusher = new Pusher({
   useTLS: true
 });
 
-const pushNotification = async receiverIds => {
+const pushNotification = async (receiverIds, message) => {
   receiverIds.forEach(id => {
-    pusher.trigger('notifications', `event_${id}`, `Show notification badge`);
+    if (process.env.NODE_ENV !== 'production') {
+      pusher.trigger('my-channel', 'my-event', { message });
+    } else {
+      pusher.trigger('notifications', `event_${id}`, message);
+    }
   });
 };
 
@@ -48,8 +52,8 @@ const onFollowNotification = async ({ followerId, followeeId }) => {
 
   const { id: receiverId, emailNotify } = receiver;
 
-  const message = `${sender.username} just followed you.`;
-  const link = `/profile/${sender.id}`; // /username will be prefered here for easy navigation
+  const message = `<b>${sender.username}</b> just followed you.`;
+  const link = `/profile/${sender.username}`;
 
   if (emailNotify) {
     // TODO: send email notification at this point
@@ -60,16 +64,15 @@ const onFollowNotification = async ({ followerId, followeeId }) => {
     message,
     link
   });
-
-  await pushNotification([receiverId]);
+  await pushNotification([receiverId], message);
 };
 
-const onCommentNotification = async () => {
-  // TODO: send in app notification when there is a comment an an article
+const onCommentNotification = async ({ commenterId, articleId }) => {
+  // TODO: implement notification on comment of an article
 };
 
-const onPublishArticleNotification = async () => {
-  // TODO: send in app notification when there is a comment an an article
+const onPublishArticleNotification = async ({ userId, articleId }) => {
+  // TODO: implement notification on publish of an article
 };
 
 export default {

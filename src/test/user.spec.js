@@ -324,7 +324,7 @@ describe('PATCH api/v1/users/follow', () => {
     await db.User.destroy({ cascade: true, truncate: true });
   });
 
-  it.only('should follow another user', async () => {
+  it('should follow another user', async () => {
     const firstUser = await createUser();
     const secondUser = await createUser();
     await createUser();
