@@ -10,6 +10,7 @@ module.exports = {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: 'postgres',
+    logging: false,
     ssl: true,
     define: {
       timestamps: false
@@ -33,7 +34,8 @@ module.exports = {
     dialectOption: {
       ssl: true,
       native: true
-    }
+    },
+    logging: false
   },
   production: {
     use_env_variable: 'DATABASE_URL',
