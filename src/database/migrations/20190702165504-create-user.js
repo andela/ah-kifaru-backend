@@ -41,6 +41,10 @@ module.exports = {
         values: ['unverified', 'active', 'inactive'],
         defaultValue: 'unverified'
       },
+      emailNotify: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       createdAt: {
         allowNull: false,
         defaultValue: new Date(),

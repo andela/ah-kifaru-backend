@@ -82,6 +82,22 @@ const ratingSchema = {
   }
 };
 
+const notificationSchema = {
+  params: {
+    notificationId: Joi.number()
+      .min(1)
+      .required()
+  }
+};
+
+const emailNotification = {
+  body: {
+    emailNotify: Joi.boolean()
+      .required()
+      .error(new Error('emailNotify should be set to either true or false'))
+  }
+};
+
 export default {
   '/signup': createAccountSchema,
   '/login': loginSchema,
@@ -91,5 +107,7 @@ export default {
   '/user/:id': updateProfileSchema,
   '/bookmark': bookmarkArticle,
   '/unbookmark': bookmarkArticle,
-  '/:articleId/ratings': ratingSchema
+  '/:articleId/ratings': ratingSchema,
+  '/:notificationId': notificationSchema,
+  '/opt': emailNotification
 };

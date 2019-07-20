@@ -8,7 +8,8 @@ export const getUser = async () => ({
   avatar: faker.image.imageUrl().toLowerCase(),
   password: faker.internet.password().toLowerCase(),
   role: 'user',
-  status: 'unverified'
+  status: 'unverified',
+  emailNotify: false
 });
 
 export const createUser = async theUser => {
@@ -49,4 +50,25 @@ export const ratings = {
     min: 1,
     max: 5
   })
+};
+
+export const addNotification = async (receiverId, read) => {
+  const notification = {
+    message: faker.lorem.sentences(),
+    read,
+    receiverId,
+    link: faker.image.imageUrl()
+  };
+
+  const createNotification = await BaseRepository.create(
+    db.Notification,
+    notification
+  );
+  return createNotification;
+};
+
+export const newNotification = {
+  receiverId: 1,
+  message: faker.lorem.sentences(),
+  link: faker.image.imageUrl()
 };
