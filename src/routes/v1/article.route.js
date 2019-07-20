@@ -39,4 +39,24 @@ router.patch(
   RatingsController.rateArticles
 );
 
+router.post(
+  '/',
+  authMiddleware,
+  validateRequest,
+  ArticleController.createArticle
+);
+
+router.get(
+  '/:articleId',
+  validateRequest,
+  ArticleController.fetchSpecificArticle
+);
+
+router.delete(
+  '/:articleId',
+  authMiddleware,
+  validateRequest,
+  ArticleController.deleteArticle
+);
+
 export default router;
