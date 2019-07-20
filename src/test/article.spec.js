@@ -746,8 +746,8 @@ describe('PUT /api/v1/articles/publish?articleId', () => {
   it('Returns 200 if article saved as draft has been published', async () => {
     const firstUser = await createUser();
     const token = await helper.jwtSigner(firstUser);
-    const article = await generateArticle({ authorId: firstUser.id });
-    const createdArticle = await createArticle(article);
+    const newArticle = await generateArticle({ authorId: firstUser.id });
+    const createdArticle = await createArticle(newArticle);
 
     const response = await server()
       .put(`${ARTICLES_API}/publish?articleId=${createdArticle.id}`)
@@ -756,27 +756,26 @@ describe('PUT /api/v1/articles/publish?articleId', () => {
     expect(response.status).to.equal(200);
     expect(response.body.data.title).to.equal(article.title);
     expect(response.body.data.body).to.equal(article.body);
-    expect(response.body.data.image).to.equal(article.image);
-    expect(response.body.data.authorId).to.equal(article.authorId);
+    expect(response.body.data.authorId).to.equal(createdArticle.authorId);
     expect(response.body.data.description).to.equal(article.description);
   });
   it('Publishing an article multiple times fails silently', async () => {
     const firstUser = await createUser();
     const token = await helper.jwtSigner(firstUser);
-    const article = await generateArticle({ authorId: firstUser.id });
-    article.publishedDate = '2019-07-22T08:51:47.224Z';
-    const createdArticle = await createArticle(article);
+    const newArticle = await generateArticle({ authorId: firstUser.id });
+    newArticle.publishedDate = '2019-07-22T08:51:47.224Z';
+    const createdArticle = await createArticle(newArticle);
 
     const response = await server()
       .put(`${ARTICLES_API}/publish?articleId=${createdArticle.id}`)
       .set('x-access-token', token)
       .send(article);
     expect(response.status).to.equal(200);
-    expect(response.body.data.publishedDate).to.equal(article.publishedDate);
+    expect(response.body.data.publishedDate).to.equal(newArticle.publishedDate);
     expect(response.body.data.title).to.equal(article.title);
     expect(response.body.data.body).to.equal(article.body);
     expect(response.body.data.image).to.equal(article.image);
-    expect(response.body.data.authorId).to.equal(article.authorId);
+    expect(response.body.data.authorId).to.equal(createdArticle.authorId);
     expect(response.body.data.description).to.equal(article.description);
   });
   it('Returns 201 if the article was published immediately', async () => {
