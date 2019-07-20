@@ -8,7 +8,8 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       title: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       body: {
         type: Sequelize.TEXT
@@ -16,34 +17,32 @@ module.exports = {
       image: {
         type: Sequelize.STRING
       },
-      published: {
-        type: Sequelize.BOOLEAN
-      },
       publishedDate: {
-        type: Sequelize.DATE,
-        field: 'published_date'
+        type: Sequelize.DATE
       },
       status: {
-        type: Sequelize.ENUM('draft', 'active', 'deactivated'),
-        defaultValue: 'draft'
+        type: Sequelize.ENUM('active', 'deactivated'),
+        defaultValue: 'active'
       },
       authorId: {
         type: Sequelize.INTEGER
       },
       slug: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       description: {
         type: Sequelize.STRING
       },
       createdAt: {
-        allowNull: false,
+        type: Sequelize.DATE,
         defaultValue: new Date(),
-        type: Sequelize.DATE
+        allowNull: false
       },
       updatedAt: {
-        allowNull: false,
-        defaultValue: new Date(),
+        type: Sequelize.DATE
+      },
+      deletedAt: {
         type: Sequelize.DATE
       }
     });

@@ -6,6 +6,11 @@ import BaseRepository from '../repository/base.repository';
 import { createUser, createArticle, generateArticle } from './utils/helpers';
 import db from '../database/models';
 import helper from '../helpers/utils';
+import {
+  articleSample,
+  articleSample2,
+  articleWithNoTitle
+} from './mockdata/mock_article_data';
 
 const ARTICLES_API = '/api/v1/articles';
 
@@ -302,5 +307,364 @@ describe('GET api/v1/articles', () => {
         findAllStub.restore();
         done();
       });
+  });
+});
+
+describe('POST api/v1/articles/', () => {
+  beforeEach(async () => {
+    await db.Bookmark.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Article.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should throw a 401 status code when creating an article with invalid token', async () => {
+    const invalidToken = 'sdsf89u023434n23knslfdasa.xzdfsdf';
+    const token = invalidToken;
+
+    const response = await server()
+      .post(`${ARTICLES_API}`)
+      .set('x-access-token', token)
+      .send(articleSample);
+    expect(response.status).to.equal(401);
+    expect(response.body.message).to.equal('Token is not valid');
+  });
+
+  it('should throw a 400 when token is not provided', async () => {
+    const response = await server()
+      .post(`${ARTICLES_API}`)
+      .send(articleSample);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Invalid access token');
+  });
+
+  it('should successfully create an article with valid user input', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const response = await server()
+      .post(`${ARTICLES_API}`)
+      .set('x-access-token', token)
+      .send(articleSample);
+    expect(response.status).to.equal(201);
+    expect(response.body.data.authorId).to.equal(newUser.id);
+    expect(response.body.data.title).to.equal(articleSample.title);
+    expect(response.body.data.body).to.equal(articleSample.body);
+    expect(response.body.data.image).to.equal(articleSample.image);
+    expect(response.body.data).to.have.property('slug');
+    expect(response.body.data.slug).to.be.a('string');
+    expect(response.body.data.status).to.equal('active');
+    expect(response.body.data.publishedDate).to.equal(null);
+  });
+
+  it('should test that two articles with same title are not created with the same slug', async () => {
+    const article1 = await BaseRepository.create(db.Article, articleSample);
+    const article2 = await BaseRepository.create(db.Article, articleSample2);
+
+    expect(article1.slug).to.not.equal(article2.slug);
+  });
+
+  it('should throw a 400 status code when creating an article with no title', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const response = await server()
+      .post(`${ARTICLES_API}`)
+      .set('x-access-token', token)
+      .send(articleWithNoTitle);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal(
+      'Please provide a title for your article with minimum of 3 characters'
+    );
+  });
+
+  it('should return error if database error occurs', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+    const findAllStub = await sinon.stub(BaseRepository, 'create');
+    findAllStub.rejects(
+      new Error(
+        'Your request cannot be processed right now, Please try again later'
+      )
+    );
+    const res = await chai
+      .request(app)
+      .post(`${ARTICLES_API}`)
+      .set('x-access-token', token)
+      .send(articleSample);
+    expect(res.status).to.equal(500);
+    expect(res.body.message).to.equal(
+      'Your request cannot be processed right now, Please try again later'
+    );
+    findAllStub.restore();
+  });
+});
+
+describe('GET /api/v1/articles/:articleId', () => {
+  beforeEach(async () => {
+    await db.Bookmark.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Article.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should successfully get a specific article', async () => {
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+    const article = await BaseRepository.findOne(db.Article, validArticle.id);
+
+    const response = await server().get(`/api/v1/articles/${validArticle.id}`);
+    expect(response.status).to.equal(200);
+    expect(response.body.data.title).to.equal(article.title);
+    expect(response.body.data.description).to.equal(article.description);
+    expect(response.body.data.body).to.equal(article.body);
+    expect(response.body.data.image).to.equal(article.image);
+    expect(response.body.data.slug).to.equal(article.slug);
+    expect(response.body.data.slug).to.be.a('string');
+    expect(response.body.data.authorId).to.equal(article.authorId);
+    expect(response.body.data.publishedDate).to.equal(null);
+  });
+
+  it('should throw a 404 status code when a specific article is not found', async () => {
+    const nonExistentArticleId = 5;
+    const response = await server().get(
+      `${ARTICLES_API}/${nonExistentArticleId}`
+    );
+    expect(response.status).to.equal(404);
+    expect(response.body.message).to.equal(
+      'The requested article was not found'
+    );
+  });
+
+  it('should return a 400 if article ID is invalid or not a non-zero positive an integer', async () => {
+    const invalidArticleId = '--gr444eat';
+    const response = await server().get(`${ARTICLES_API}/${invalidArticleId}`);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal(
+      'Invalid Article ID. Article ID must be a positive integer'
+    );
+  });
+});
+
+describe('DELETE /api/v1/articles/:articleId', () => {
+  beforeEach(async () => {
+    await db.Bookmark.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Article.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should throw a 401 status code when creating an article with invalid token', async () => {
+    const invalidToken = 'sdsf89u023434n23knslfdasa.xzdfsdf';
+    const token = invalidToken;
+
+    const response = await server()
+      .delete(`${ARTICLES_API}/:articleId`)
+      .set('x-access-token', token)
+      .send(articleSample);
+    expect(response.status).to.equal(401);
+    expect(response.body.message).to.equal('Token is not valid');
+  });
+
+  it('should throw a 400 status code when token is not provided', async () => {
+    const response = await server()
+      .delete(`${ARTICLES_API}/:articleId`)
+      .send(articleSample);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Invalid access token');
+  });
+
+  it('should successfully delete an article', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const article = await generateArticle({ authorId: newUser.id });
+    const createdArticle = await createArticle(article);
+    const initialArticles = await BaseRepository.findAndCountAll(db.Article);
+
+    const response = await chai
+      .request(app)
+      .delete(`${ARTICLES_API}/${createdArticle.id}`)
+      .set('x-access-token', token);
+    expect(initialArticles.count).to.equal(1);
+    expect(response.status).to.equal(200);
+    expect(createdArticle.authorId).to.equal(newUser.id);
+    expect(response.body.message).to.equal('Article successfully deleted');
+    const finalArticles = await BaseRepository.findAndCountAll(db.Article);
+    expect(finalArticles.count).to.equal(0);
+  });
+
+  it('should throw a 404 status code when a specific article is not found', async () => {
+    const nonExistentArticleId = 5;
+    const response = await server().get(
+      `${ARTICLES_API}/${nonExistentArticleId}`
+    );
+    expect(response.status).to.equal(404);
+    expect(response.body.message).to.equal(
+      'The requested article was not found'
+    );
+  });
+
+  it('should return a 400 status code if article IDis invalid or not a non-zero positive an integer', async () => {
+    const invalidArticleId = '--gr444eat';
+
+    const response = await server().get(`${ARTICLES_API}/${invalidArticleId}`);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal(
+      'Invalid Article ID. Article ID must be a positive integer'
+    );
+  });
+
+  it('should return error if database error occurs', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+    const findAllStub = await sinon.stub(BaseRepository, 'findOneByField');
+    findAllStub.rejects(
+      new Error(
+        'Your request cannot be processed right now, Please try again later'
+      )
+    );
+
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+
+    const response = await chai
+      .request(app)
+      .delete(`${ARTICLES_API}/${validArticle.id}`)
+      .set('x-access-token', token)
+      .send(articleSample);
+    expect(response.status).to.equal(500);
+    expect(response.body.message).to.equal(
+      'Your request cannot be processed right now, Please try again later'
+    );
+    findAllStub.restore();
+  });
+});
+
+describe('PUT /api/v1/articles/:articleId', () => {
+  beforeEach(async () => {
+    await db.Bookmark.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Article.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should throw a 401 status code when creating an article with invalid token', async () => {
+    const invalidToken = 'sdsf89u023434n23knslfdasa.xzdfsdf';
+
+    const response = await server()
+      .put(`${ARTICLES_API}/:articleId`)
+      .set('x-access-token', invalidToken)
+      .send(articleSample);
+    expect(response.status).to.equal(401);
+    expect(response.body.message).to.equal('Token is not valid');
+  });
+
+  it('should throw a 400 status code when token is not provided', async () => {
+    const response = await server()
+      .put(`${ARTICLES_API}/:articleId`)
+      .send(articleSample);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Invalid access token');
+  });
+
+  it('should successfully update a specific article', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+    const newUpdateDate = new Date();
+    const article = await generateArticle({ authorId: newUser.id });
+    const createdArticle = await createArticle(article);
+
+    const response = await chai
+      .request(app)
+      .put(`${ARTICLES_API}/${createdArticle.id}`)
+      .set('x-access-token', token)
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image,
+        updatedAt: newUpdateDate
+      });
+    expect(response.status).to.equal(200);
+    expect(response.body.message).to.equal('Article successfully updated');
+    expect(response.body.data.id).to.equal(createdArticle.id);
+    expect(response.body.data.title).to.equal(articleSample.title);
+    expect(response.body.data.description).to.equal(articleSample.description);
+    expect(response.body.data.body).to.equal(articleSample.body);
+    expect(response.body.data).to.have.property('image');
+    expect(response.body.data).to.have.property('slug');
+    expect(response.body.data.slug).to.equal(createdArticle.slug);
+    expect(response.body.data.publishedDate).to.deep.equal(
+      article.publishedDate
+    );
+    expect(response.body.data.authorId).to.equal(createdArticle.authorId);
+    expect(response.body.data.updatedAt).to.not.equal(createdArticle.updatedAt);
+  });
+
+  it('should throw a 404 error when a specific article is not found', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+    const nonExistentArticleId = 5;
+
+    const response = await chai
+      .request(app)
+      .put(`${ARTICLES_API}/${nonExistentArticleId}`)
+      .set('x-access-token', token)
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image
+      });
+    expect(response.status).to.equal(404);
+    expect(response.body.message).to.equal(
+      'The requested article was not found'
+    );
+  });
+
+  it('should return a 400 if article ID is invalid or not a non-zero positive an integer', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const stringId = 'great';
+    const response = await server()
+      .put(`${ARTICLES_API}/${stringId}`)
+      .set('x-access-token', token)
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image
+      });
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal(
+      'Invalid Article ID. Article ID must be a positive integer'
+    );
+  });
+
+  it('should return error if database error occurs', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+    const newUpdateDate = new Date();
+    const article = await generateArticle({ authorId: newUser.id });
+    const createdArticle = await createArticle(article);
+    const findAllStub = sinon.stub(BaseRepository, 'update');
+    findAllStub.rejects(
+      new Error(
+        'Your request cannot be processed right now, Please try again later'
+      )
+    );
+
+    const response = await chai
+      .request(app)
+      .put(`${ARTICLES_API}/${createdArticle.id}`)
+      .set('x-access-token', token)
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image,
+        updatedAt: newUpdateDate
+      });
+    expect(response.status).to.equal(500);
+    expect(response.body.message).to.equal(
+      'Your request cannot be processed right now, Please try again later'
+    );
+    findAllStub.restore();
   });
 });

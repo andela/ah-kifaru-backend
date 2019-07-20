@@ -81,6 +81,60 @@ const ratingSchema = {
       .error(new Error('ratings must be a number between 1 and 5'))
   }
 };
+const articleBodySchema = {
+  body: {
+    title: Joi.string()
+      .trim()
+      .min(3)
+      .required()
+      .error(
+        new Error(
+          'Please provide a title for your article with minimum of 3 characters'
+        )
+      ),
+    description: Joi.required(),
+    body: Joi.required(),
+    image: Joi.required()
+  }
+};
+
+const articleParamsSchema = {
+  params: {
+    articleId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(
+        new Error('Invalid Article ID. Article ID must be a positive integer')
+      )
+  }
+};
+
+const updateArticleSchema = {
+  params: {
+    articleId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(
+        new Error('Invalid Article ID. Article ID must be a positive integer')
+      )
+  },
+  body: {
+    title: Joi.string()
+      .trim()
+      .min(3)
+      .required()
+      .error(
+        new Error(
+          'Please provide a title for your article with minimum of 3 characters'
+        )
+      ),
+    description: Joi.required(),
+    body: Joi.required(),
+    image: Joi.required()
+  }
+};
 
 export default [
   {
@@ -127,5 +181,25 @@ export default [
     route: '/:articleId/ratings',
     method: 'patch',
     schema: ratingSchema
+  },
+  {
+    route: '/',
+    method: 'post',
+    schema: articleBodySchema
+  },
+  {
+    route: '/:articleId',
+    method: 'get',
+    schema: articleParamsSchema
+  },
+  {
+    route: '/:articleId',
+    method: 'put',
+    schema: updateArticleSchema
+  },
+  {
+    route: '/:articleId',
+    method: 'delete',
+    schema: articleParamsSchema
   }
 ];

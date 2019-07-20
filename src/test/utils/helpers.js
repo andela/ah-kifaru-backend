@@ -1,4 +1,6 @@
 import faker from 'faker';
+import slug from 'slug';
+import crypto from 'crypto';
 import db from '../../database/models';
 import BaseRepository from '../../repository/base.repository';
 
@@ -24,9 +26,11 @@ export const generateArticle = async ({ authorId }) => ({
   title: faker.lorem.word(),
   body: faker.lorem.sentences(),
   image: faker.image.imageUrl(),
-  publishedDate: new Date(),
+  publishedDate: '2019-07-23T11:48:21.224Z',
   authorId,
-  slug: faker.lorem.slug(),
+  slug: slug(
+    `${faker.lorem.word()}-${crypto.randomBytes(12).toString('base64')}`
+  ).toLowerCase(),
   description: faker.lorem.word(),
   status: 'active'
 });

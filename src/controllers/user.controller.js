@@ -173,7 +173,7 @@ class UserController {
           { email }
         );
 
-        if (updatedUser > 0) {
+        if (updatedUser[0] > 0) {
           return responseGenerator.sendSuccess(
             res,
             200,

@@ -47,7 +47,7 @@ class BaseRepository {
    */
   static async remove(model, options) {
     return model.destroy({
-      where: options
+      where: { ...options }
     });
   }
 
@@ -60,7 +60,10 @@ class BaseRepository {
    * @memberof BaseRepository
    */
   static async update(model, fields, options) {
-    return model.update(fields, { where: options });
+    return model.update(fields, {
+      where: options,
+      returning: true
+    });
   }
 
   /**
