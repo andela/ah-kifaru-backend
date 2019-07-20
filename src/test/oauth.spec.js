@@ -3,6 +3,7 @@ import nock from 'nock';
 import app from '../index';
 
 const { expect } = chai;
+const API_VERSION = '/api/v1';
 
 describe('SOCIAL LOGIN', () => {
   it('should hit the facebook URL for social login', async () => {
@@ -11,7 +12,7 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/facebook')
       .reply(200, { message: 'hit the route' });
 
-    const res = await chai.request(app).get('/auth/facebook');
+    const res = await chai.request(app).get(`${API_VERSION}/auth/facebook`);
     expect(res.body.message).to.include('hit the route');
     expect(res.status).to.eql(200);
   });
@@ -22,18 +23,20 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/facebook/callback')
       .reply(200, { message: 'hit the route' });
 
-    const res = await chai.request(app).get('/auth/facebook/callback');
+    const res = await chai
+      .request(app)
+      .get(`${API_VERSION}/auth/facebook/callback`);
     expect(res.body.message).to.include('hit the route');
     expect(res.status).to.eql(200);
   });
 
   it('should hit the google URL for social login', async () => {
     nock('https://accounts.google.com/')
-      .filteringPath(() => '/auth/google')
+      .filteringPath(() => `/auth/google`)
       .get('/auth/google')
       .reply(200, { message: 'hit the route' });
 
-    const res = await chai.request(app).get('/auth/google');
+    const res = await chai.request(app).get(`${API_VERSION}/auth/google`);
     expect(res.body.message).to.include('hit the route');
     expect(res.status).to.eql(200);
   });
@@ -44,7 +47,9 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/google/callback')
       .reply(200, { message: 'hit the route' });
 
-    const res = await chai.request(app).get('/auth/google/redirect');
+    const res = await chai
+      .request(app)
+      .get(`${API_VERSION}/auth/google/redirect`);
     expect(res.body.message).to.include('hit the route');
     expect(res.status).to.eql(200);
   });
@@ -54,7 +59,7 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/twitter')
       .reply(200, 'hit the route');
 
-    const res = await chai.request(app).get('/auth/github');
+    const res = await chai.request(app).get(`${API_VERSION}/auth/github`);
     expect(res.body).to.an('object');
   });
 
@@ -63,7 +68,9 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/github/callback')
       .reply(200, { message: 'hit the route' });
 
-    const res = await chai.request(app).get('/auth/github/callback');
+    const res = await chai
+      .request(app)
+      .get(`${API_VERSION}/auth/github/callback`);
     expect(res.body).to.an('object');
   });
 });

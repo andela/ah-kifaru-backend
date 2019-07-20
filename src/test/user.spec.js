@@ -640,7 +640,6 @@ describe('PATCH /api/v1/auth/user/:id/role', () => {
       .set('token', token)
       .send({ role: 'admin' });
     expect(res.status).to.equal(403);
-
     const userRoleStatus = await BaseRepository.findItAll(db.User, {
       id: secondUser.id
     });
@@ -665,7 +664,6 @@ describe('PATCH /api/v1/auth/user/:id/role', () => {
       .send({ role: 'admin' });
     expect(res.status).to.equal(400);
     expect(res.body.message).to.equal('Invalid User ID');
-
     const userRoleStatus = await BaseRepository.findItAll(db.User, {
       id: superAdmin.id
     });

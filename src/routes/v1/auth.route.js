@@ -1,11 +1,26 @@
-import express from 'express';
+import { Router } from 'express';
 import passport from 'passport';
 import '../../helpers/passport/google';
 import '../../helpers/passport/facebook';
 import { respondCallback } from '../../helpers/passport/callback';
+import UserController from '../../controllers/user.controller';
+import validationMiddleware from '../../middleware/validation.middleware';
 import responseGenerator from '../../helpers/responseGenerator';
+import authMiddleware from '../../middleware/auth.middleware';
 
-const router = express.Router();
+const router = Router();
+const validateRequest = validationMiddleware();
+
+router.post('/signup', validateRequest, UserController.createAccount);
+
+router.post('/login', validateRequest, UserController.loginUser);
+
+router.patch(
+  '/verify/:token',
+  validateRequest,
+  authMiddleware,
+  UserController.verifyUser
+);
 
 router.get(
   '/google',

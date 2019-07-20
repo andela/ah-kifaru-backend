@@ -82,14 +82,121 @@ const ratingSchema = {
   }
 };
 
-export default {
-  '/signup': createAccountSchema,
-  '/login': loginSchema,
-  '/verify/:token': verifyTokenSchema,
-  '/follow': followOrUnfollow,
-  '/unfollow': followOrUnfollow,
-  '/user/:id': updateProfileSchema,
-  '/bookmark': bookmarkArticle,
-  '/unbookmark': bookmarkArticle,
-  '/:articleId/ratings': ratingSchema
+const createArticleSchema = {
+  body: {
+    title: Joi.string()
+      .trim()
+      .min(3)
+      .required()
+      .error(
+        new Error(
+          'Please provide a title for your article with minimum of 3 characters'
+        )
+      ),
+    description: Joi.required(),
+    body: Joi.required(),
+    image: Joi.required()
+  }
 };
+
+const articleParamsSchema = {
+  params: {
+    articleId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(new Error('Please input a valid number as article ID'))
+  }
+};
+
+const updateArticleSchema = {
+  params: {
+    articleId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(new Error('Please input a valid number as article ID'))
+  },
+  body: {
+    title: Joi.string()
+      .trim()
+      .min(3)
+      .required()
+      .error(
+        new Error(
+          'Please provide a title for your article with minimum of 3 characters'
+        )
+      ),
+    description: Joi.required(),
+    body: Joi.required(),
+    image: Joi.required()
+  }
+};
+
+export default [
+  {
+    route: '/signup',
+    method: 'post',
+    schema: createAccountSchema
+  },
+  {
+    route: '/login',
+    method: 'post',
+    schema: loginSchema
+  },
+  {
+    route: '/verify/:token',
+    method: 'patch',
+    schema: verifyTokenSchema
+  },
+  {
+    route: '/follow',
+    method: 'patch',
+    schema: followOrUnfollow
+  },
+  {
+    route: '/unfollow',
+    method: 'patch',
+    schema: followOrUnfollow
+  },
+  {
+    route: '/user/:id',
+    method: 'patch',
+    schema: updateProfileSchema
+  },
+  {
+    route: '/bookmark',
+    method: 'patch',
+    schema: bookmarkArticle
+  },
+  {
+    route: '/unbookmark',
+    method: 'patch',
+    schema: bookmarkArticle
+  },
+  {
+    route: '/:articleId/ratings',
+    method: 'patch',
+    schema: ratingSchema
+  },
+  {
+    route: '/articles',
+    method: 'post',
+    schema: createArticleSchema
+  },
+  {
+    route: '/articles/:articleId',
+    method: 'put',
+    schema: updateArticleSchema
+  },
+  {
+    route: '/articles/:articleId',
+    method: 'delete',
+    schema: articleParamsSchema
+  },
+  {
+    route: '/articles/:articleId',
+    method: 'get',
+    schema: articleParamsSchema
+  }
+];

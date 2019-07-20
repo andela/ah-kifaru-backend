@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import '../../helpers/passport/google';
+import '../../helpers/passport/facebook';
 import { userExist, isSelf } from '../../middleware/users.middleware';
 import UserController from '../../controllers/user.controller';
 import validationMiddleware from '../../middleware/validation.middleware';
@@ -9,10 +11,6 @@ import superAdminCheck from '../../middleware/permission.middleware';
 const router = Router();
 const validateRequest = validationMiddleware();
 
-router.post('/signup', validateRequest, UserController.createAccount);
-
-router.post('/login', validateRequest, UserController.loginUser);
-
 router.put(
   '/:id',
   validateRequest,
@@ -20,19 +18,7 @@ router.put(
   UserController.updateProfile
 );
 
-router.patch(
-  '/verify/:token',
-  validateRequest,
-  authMiddleware,
-  UserController.verifyUser
-);
-
-router.get(
-  '/',
-  validateRequest,
-  paginationValidations,
-  UserController.listUsers
-);
+router.get('/', paginationValidations, UserController.listUsers);
 
 router.patch(
   '/unfollow',

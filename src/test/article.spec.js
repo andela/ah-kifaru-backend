@@ -6,6 +6,13 @@ import BaseRepository from '../repository/base.repository';
 import { createUser, createArticle, generateArticle } from './utils/helpers';
 import db from '../database/models';
 import helper from '../helpers/utils';
+import {
+  articleSample,
+  articleWithNoTitle,
+  articleWithNoDescription,
+  articleWithNoBody,
+  articleWithNoImage
+} from './mockdata/mock_article_data';
 
 const ARTICLES_API = '/api/v1/articles';
 
@@ -211,5 +218,421 @@ describe('GET api/v1/articles', () => {
         findAllStub.restore();
         done();
       });
+  });
+});
+
+describe('POST api/v1/articles/', () => {
+  it('should throw a 400 status code when creating an article with invalid token', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const token = 'helper.jwtSigner(newUser);';
+
+    const response = await server()
+      .post(`${ARTICLES_API}`)
+      .set('x-access-token', token)
+      .send(articleWithNoTitle);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Token is not valid');
+  });
+
+  it('should throw a 400 server error when token is not provided', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const response = await server()
+      .post(`${ARTICLES_API}`)
+      .send(articleWithNoTitle);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Invalid access token');
+  });
+
+  it('should successfully create an article with valid user input', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const response = await server()
+      .post(`${ARTICLES_API}`)
+      .set('x-access-token', token)
+      .send(articleSample);
+    expect(response.status).to.equal(201);
+    expect(response.body.data.authorId).to.equal(newUser.id);
+    expect(response.body.data.title).to.equal(articleSample.title);
+    expect(response.body.data.body).to.equal(articleSample.body);
+    expect(response.body.data.image).to.equal(articleSample.image);
+    expect(response.body.data).to.have.property('slug');
+    expect(response.body.data.slug).to.not.equal(articleSample.slug);
+    expect(response.body.data.slug).to.be.a('string');
+    expect(response.body.data.status).to.equal('active');
+    expect(response.body.data.publishedDate).to.equal(null);
+  });
+
+  it('should throw a 400 status code when creating an article with no title', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const response = await server()
+      .post(`${ARTICLES_API}`)
+      .set('x-access-token', token)
+      .send(articleWithNoTitle);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal(
+      'Please provide a title for your article with minimum of 3 characters'
+    );
+  });
+
+  it('should throw a 400 server error when creating an article without a description', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+    const response = await server()
+      .post(ARTICLES_API)
+      .set('x-access-token', token)
+      .send(articleWithNoDescription);
+    expect(response.status).to.equal(400);
+    expect(response.message).to.equal(response.message);
+  });
+
+  it('should throw a 400 server error when creating an article without a body', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+    const response = await server()
+      .post(ARTICLES_API)
+      .set('x-access-token', token)
+      .send(articleWithNoBody);
+    expect(response.status).to.equal(400);
+    expect(response.message).to.equal(response.message);
+  });
+
+  it.only('should throw a 400 server error when creating an article without an image', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+    const response = await server()
+      .post(ARTICLES_API)
+      .set('x-access-token', token)
+      .send(articleWithNoImage);
+    console.log(response.body);
+    expect(response.status).to.equal(400);
+    expect(response.message).to.equal(response.message);
+  });
+});
+
+describe('GET /api/v1/articles/:articleId', () => {
+  it('should successfully get a specific article', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+    const article = await BaseRepository.findOne(db.Article, validArticle.id);
+
+    const response = await server().get(`/api/v1/articles/${validArticle.id}`);
+    expect(response.status).to.equal(200);
+    expect(response.body.data.title).to.equal(article.title);
+    expect(response.body.data.description).to.equal(article.description);
+    expect(response.body.data.body).to.equal(article.body);
+    expect(response.body.data.image).to.equal(article.image);
+    expect(response.body.data.slug).to.equal(article.slug);
+    expect(response.body.data.slug).to.be.a('string');
+    expect(response.body.data.authorId).to.equal(article.authorId);
+    expect(response.body.data.publishedDate).to.equal(null);
+  });
+
+  it('should throw a 404 error when a specific article is not found', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    const response = await server().get(`${ARTICLES_API}/000010000100`);
+    expect(response.status).to.equal(404);
+    expect(response.body.message).to.equal(
+      'The requested article was not found'
+    );
+  });
+
+  it('should throw a 404 server error when searching for an article with a string as articleId', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    const stringId = 'great';
+    const response = await server().get(`${ARTICLES_API}/${stringId}`);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal(
+      'Please input a valid number as article ID'
+    );
+  });
+});
+
+describe('DELETE /api/v1/articles/:articleId', () => {
+  it('should throw a 400 server error when token is not invalid', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+
+    const response = await server()
+      .delete(`${ARTICLES_API}/${validArticle.id}`)
+      .set('x-access-token', 'greatisthyfaithfulness')
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image
+      });
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Token is not valid');
+  });
+
+  it('should throw a 400 server error when token is not provided', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+
+    const response = await server()
+      .delete(`${ARTICLES_API}/${validArticle.id}`)
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image
+      });
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Invalid access token');
+  });
+
+  it('should successfully delete an article', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+
+    const response = await chai
+      .request(app)
+      .delete(`${ARTICLES_API}/${validArticle.id}`)
+      .set('x-access-token', token);
+    expect(response.status).to.equal(200);
+    expect(response.body.message).to.equal('Article successfully deleted');
+  });
+
+  it('should throw a 404 error when a specific article is not found', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+
+    const response = await chai
+      .request(app)
+      .get(`${ARTICLES_API}/000010000100`)
+      .set('x-access-token', token)
+      .send(!validArticle);
+    expect(response.status).to.equal(404);
+    expect(response.body.message).to.equal(
+      'The requested article was not found'
+    );
+  });
+
+  it('should throw a 404 server error when searching for an article with a string as articleId', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+    const stringId = 'great';
+    const response = await server().get(`${ARTICLES_API}/${stringId}`);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal(
+      'Please input a valid number as article ID'
+    );
+  });
+});
+
+describe('PUT /api/v1/articles/:articleId/update', () => {
+  it('should throw a 400 server error when token is not invalid', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+
+    const response = await server()
+      .put(`${ARTICLES_API}/${validArticle.id}`)
+      .set('x-access-token', 'greatisthyfaithfulness')
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image
+      });
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Token is not valid');
+  });
+
+  it('should throw a 400 server error when token is not provided', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+
+    const response = await server()
+      .put(`${ARTICLES_API}/${validArticle.id}`)
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image
+      });
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Invalid access token');
+  });
+
+  it('should successfully update a specific article', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+    const response = await chai
+      .request(app)
+      .put(`${ARTICLES_API}/${validArticle.id}`)
+      .set('x-access-token', token)
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image
+      });
+    expect(response.status).to.equal(200);
+    expect(response.body.message).to.equal('Article successfully updated');
+    expect(response.body.data).to.have.property('id');
+    expect(response.body.data.id).to.be.a('number');
+    expect(response.body.data).to.have.property('title');
+    expect(response.body.data.title).to.equal(articleSample.title);
+    expect(response.body.data).to.have.property('description');
+    expect(response.body.data.description).to.equal(articleSample.description);
+    expect(response.body.data).to.have.property('body');
+    expect(response.body.data.body).to.equal(articleSample.body);
+    expect(response.body.data).to.have.property('image');
+    expect(response.body.data.image).to.equal(articleSample.image);
+    expect(response.body.data).to.have.property('slug');
+    expect(response.body.data.slug).to.equal(articleSample.slug);
+    expect(response.body.data).to.have.property('authorId');
+    expect(response.body.data).to.have.property('publishedDate');
+    expect(response.body.data).to.have.property('createdAt');
+    expect(response.body.data).to.have.property('updatedAt');
+  });
+
+  it('should throw a 404 error when a specific article is not found', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const response = await chai
+      .request(app)
+      .put(`${ARTICLES_API}/000010000100`)
+      .set('x-access-token', token)
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image
+      });
+    expect(response.status).to.equal(404);
+    expect(response.body.message).to.equal(
+      'The requested article was not found'
+    );
+  });
+
+  it('should throw a 404 server error when searching for an article with a string as articleId', async () => {
+    beforeEach(async () => {
+      await db.Bookmark.destroy({ cascade: true, truncate: true });
+      await db.User.destroy({ cascade: true, truncate: true });
+      await db.Article.destroy({ cascade: true, truncate: true });
+    });
+
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+
+    const stringId = 'great';
+    const response = await server()
+      .put(`${ARTICLES_API}/${stringId}`)
+      .set('x-access-token', token)
+      .send({
+        title: articleSample.title,
+        description: articleSample.description,
+        body: articleSample.body,
+        image: articleSample.image
+      });
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal(
+      'Please input a valid number as article ID'
+    );
   });
 });
