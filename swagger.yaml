@@ -304,7 +304,44 @@ paths:
                   $ref: "#/components/schemas/response"      
         400:          
           description: 'failed operation'  
-
+    post:
+      tags:
+        - 'Articles'
+      summary: Create an article on errorswag
+      description: Create an article
+      operationId: CreateArticle
+      parameters:
+        - in: query
+          name: body
+          description: Information to be sent to create an article
+          required: true
+          schema:
+            type: object
+            required:
+              - title
+              - description
+              - body
+              - image
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              body:
+                type: string
+              image:
+                type: string
+      responses:
+        '201':
+          description: Article successfully created
+        '400':
+          description: Bad request
+        '401':
+          description: Not authorized to create an article
+        '500':
+          description: Server error
+      security:
+        - api_key: []
   /articles/{articleId}/ratings:
     patch: 
       tags: 

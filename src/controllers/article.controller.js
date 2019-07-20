@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+import slug from 'slug';
 import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
 import db from '../database/models';
@@ -31,7 +33,7 @@ class ArticleController {
             'title',
             'body',
             'image',
-            'published',
+            'publishedDate',
             'status'
           ]
         }
@@ -124,6 +126,32 @@ class ArticleController {
       `article with id = ${articleId} has been successfully removed from your bookmarks`
     );
   }
-}
 
+  /**
+   *
+   *
+   * @static
+   * @param {*} request -- Request object
+   * @param {*} response -- Response object
+   * @returns {json} -- Returns a json object
+   * @memberof ArticleController
+   */
+  static async createArticle(request, response) {
+    const { id: authorId } = request.currentUser;
+    const { title, description, body, image } = request.body;
+    const article = await BaseRepository.create(db.Article, {
+      ...request.body,
+      slug: slug(
+        `${title}-${crypto.randomBytes(12).toString('base64')}`
+      ).toLowerCase(),
+      authorId
+    });
+    return responseGenerator.sendSuccess(
+      response,
+      201,
+      article,
+      'Artilcle successfully created'
+    );
+  }
+}
 export default ArticleController;

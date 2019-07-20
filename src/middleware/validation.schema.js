@@ -82,6 +82,26 @@ const ratingSchema = {
   }
 };
 
+const createArticleSchema = {
+  body: {
+    title: Joi.string()
+      .trim()
+      .min(3)
+      .required()
+      .error(
+        new Error(
+          'Please provide a title for your article with minimum of 3 characters'
+        )
+      ),
+
+    description: Joi.required(),
+
+    body: Joi.required(),
+
+    image: Joi.required()
+  }
+};
+
 export default {
   '/signup': createAccountSchema,
   '/login': loginSchema,
@@ -91,5 +111,6 @@ export default {
   '/user/:id': updateProfileSchema,
   '/bookmark': bookmarkArticle,
   '/unbookmark': bookmarkArticle,
-  '/:articleId/ratings': ratingSchema
+  '/:articleId/ratings': ratingSchema,
+  '/': createArticleSchema
 };
