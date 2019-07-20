@@ -6,7 +6,7 @@
     "scripts": {
         "pretest": "NODE_ENV=test npm run set:test",
         "set:test": "sequelize db:migrate:undo:all && sequelize db:migrate",
-        "test": "NODE_ENV=test nyc --require @babel/register --require @babel/polyfill mocha src/test/**.spec.js --timeout 20000 --exit",
+        "test": "NODE_ENV=test nyc --require @babel/register mocha src/test/**.spec.js --timeout 20000 --exit",
         "lint": "eslint **/*.js",
         "lint:fix": "prettier-eslint \"**/*.{js,json}\" --write",
         "prettier": "prettier **/*.{js,json} --write",
@@ -65,6 +65,7 @@
         "sequelize": "^5.8.12",
         "sequelize-cli": "^5.5.0",
         "sinon-chai": "^3.3.0",
+        "slug": "^1.1.0",
         "swagger-ui-express": "^4.0.6",
         "yamljs": "^0.3.0"
     },

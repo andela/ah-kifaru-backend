@@ -27,12 +27,7 @@ router.patch(
   UserController.verifyUser
 );
 
-router.get(
-  '/',
-  validateRequest,
-  paginationValidations,
-  UserController.listUsers
-);
+router.get('/', paginationValidations, UserController.listUsers);
 
 router.patch(
   '/unfollow',
