@@ -136,6 +136,34 @@ const updateArticleSchema = {
   }
 };
 
+const publishedArticle = {
+  query: {
+    articleId: Joi.number().error(
+      new Error(
+        'Invalid article id. Article id must be a non-zero positive integer'
+      )
+    )
+  },
+  body: {
+    title: Joi.string()
+      .min(3)
+      .required()
+      .error(new Error('Title is required')),
+    body: Joi.string()
+      .min(3)
+      .required()
+      .error(new Error('A body is required. . .')),
+    image: Joi.string()
+      .uri()
+      .required()
+      .error(new Error('Invalid image url')),
+    description: Joi.string()
+      .min(3)
+      .required()
+      .error(new Error('Enter a brief description for the article'))
+  }
+};
+
 export default [
   {
     route: '/signup',
@@ -201,5 +229,10 @@ export default [
     route: '/:articleId',
     method: 'delete',
     schema: articleParamsSchema
+  },
+  {
+    route: '/publish',
+    method: 'put',
+    schema: publishedArticle
   }
 ];

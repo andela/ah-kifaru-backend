@@ -26,7 +26,7 @@ export const generateArticle = async ({ authorId }) => ({
   title: faker.lorem.word(),
   body: faker.lorem.sentences(),
   image: faker.image.imageUrl(),
-  publishedDate: '2019-07-23T11:48:21.224Z',
+  publishedDate: null,
   authorId,
   slug: slug(
     `${faker.lorem.word()}-${crypto.randomBytes(12).toString('base64')}`
@@ -53,4 +53,39 @@ export const ratings = {
     min: 1,
     max: 5
   })
+};
+
+export const article = {
+  title: faker.lorem.sentence(),
+  body: faker.lorem.paragraphs(),
+  image: faker.image.imageUrl(),
+  description: faker.lorem.sentence()
+};
+
+export const articleWithShortTitle = {
+  title: 'ak',
+  body: faker.lorem.paragraphs(),
+  image: 'https://stackoverflow.com',
+  description: faker.lorem.sentence()
+};
+
+export const articleWithShortBody = {
+  title: faker.lorem.sentence(),
+  body: 'ak',
+  image: faker.image.imageUrl(),
+  description: faker.lorem.sentence()
+};
+
+export const articleWithShortImage = {
+  title: faker.lorem.sentence(),
+  body: faker.lorem.paragraphs(),
+  image: 'ak',
+  description: faker.lorem.sentence()
+};
+
+export const articleWithShortDescription = {
+  title: faker.lorem.sentence(),
+  body: faker.lorem.paragraphs(),
+  image: faker.image.imageUrl(),
+  description: 'ak'
 };

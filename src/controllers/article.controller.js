@@ -1,5 +1,4 @@
-import crypto from 'crypto';
-import slug from 'slug';
+import createArticle from '../helpers/articles';
 import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
 import db from '../database/models';
@@ -162,22 +161,17 @@ class ArticleController {
    * @returns {json} -- Returns a json object
    * @memberof ArticleController
    */
-  static async draftArticle(request, response) {
+  static async createDraft(request, response) {
     const { id: authorId } = request.currentUser;
     const { title, description, body, image } = request.body;
-    const createDate = new Date();
     try {
-      const article = await BaseRepository.create(db.Article, {
+      const article = await createArticle(response, {
         title,
         description,
         body,
-        image,
-        slug: slug(
-          `${title}-${crypto.randomBytes(12).toString('base64')}`
-        ).toLowerCase(),
         authorId,
-        createdAt: createDate,
-        updatedAt: null
+        publishedDate: null,
+        image
       });
       return responseGenerator.sendSuccess(
         response,
@@ -287,6 +281,67 @@ class ArticleController {
       );
     } catch (error) {
       return responseGenerator.sendError(response, 500, error.message);
+    }
+  }
+
+  /**
+   *
+   * Publishes an existing / new article
+   * @static
+   * @param {*} req - - express request parameter
+   * @param {*} res - - express response parameter
+   * @returns {object} - article object
+   * @memberof ArticleController
+   */
+
+  static async publishArticle(req, res) {
+    const { articleId } = req.query;
+    const { id: authorId } = req.currentUser;
+    const { title, description, body, image } = req.body;
+
+    let article, publishedArticle;
+    try {
+      if (articleId) {
+        article = await BaseRepository.findOneByField(db.Article, {
+          id: articleId,
+          authorId
+        });
+      }
+
+      if (article) {
+        const date = article.publishedDate ? article.publishedDate : Date.now();
+        publishedArticle = await BaseRepository.update(
+          db.Article,
+          {
+            title: title || article.title,
+            description: description || article.description,
+            body: body || article.body,
+            image: image || article.image,
+            publishedDate: date,
+            updatedAt: date
+          },
+          {
+            id: articleId
+          }
+        );
+        return responseGenerator.sendSuccess(
+          res,
+          200,
+          publishedArticle[1][0].dataValues
+        );
+      }
+
+      publishedArticle = await createArticle(res, {
+        title,
+        description,
+        body,
+        authorId,
+        image
+      });
+
+      return responseGenerator.sendSuccess(res, 201, publishedArticle);
+    } catch (error) {
+      return responseGenerator.sendError(res, 500, error.message);
     }
   }
 }
