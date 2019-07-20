@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+import slug from 'slug';
 import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
 import db from '../database/models';
@@ -31,7 +33,7 @@ class ArticleController {
             'title',
             'body',
             'image',
-            'published',
+            'publishedDate',
             'status'
           ]
         }
@@ -122,6 +124,109 @@ class ArticleController {
       200,
       null,
       `article with id = ${articleId} has been successfully removed from your bookmarks`
+    );
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} request -- Request object
+   * @param {*} response -- Response object
+   * @returns {json} -- Returns a json object
+   * @memberof ArticleController
+   */
+  static async createArticle(request, response) {
+    const { id: authorId } = request.currentUser;
+    const { title } = request.body;
+    const article = await BaseRepository.create(db.Article, {
+      ...request.body,
+      slug: slug(
+        `${title}-${crypto.randomBytes(12).toString('base64')}`
+      ).toLowerCase(),
+      authorId
+    });
+    return responseGenerator.sendSuccess(
+      response,
+      201,
+      article,
+      'Artilcle successfully created'
+    );
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} request - - express request parameter
+   * @param {*} response - - express response parameter
+   * @returns {object} - - article object
+   * @memberof ArticleController
+   */
+  static async fetchSpecificArticle(request, response) {
+    const { articleId } = request.params;
+    const article = await BaseRepository.findOne(db.Article, articleId);
+    return article
+      ? responseGenerator.sendSuccess(response, 200, article)
+      : responseGenerator.sendError(
+          response,
+          404,
+          'The requested article was not found'
+        );
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} request - - express request parameter
+   * @param {*} response - - express response parameter
+   * @returns  {object} - - article object
+   * @memberof ArticleController
+   */
+  static async deleteArticle(request, response) {
+    const { articleId } = request.params;
+    await BaseRepository.remove(db.Article, { id: articleId });
+    return responseGenerator.sendSuccess(
+      response,
+      200,
+      null,
+      'Article successfully deleted'
+    );
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} request - - express request parameter
+   * @param {*} response - - express response parameter
+   * @returns {object} - - article object
+   * @memberof ArticleController
+   */
+  static async updateOneArticle(request, response) {
+    const { articleId } = request.params;
+    let { article } = request;
+    const { title, description, body, image } = request.body;
+    const updateDate = new Date();
+
+    article = await BaseRepository.update(
+      db.Article,
+      {
+        title,
+        description,
+        body,
+        image,
+        updatedAt: updateDate
+      },
+      { id: article.id }
+    );
+    article = await BaseRepository.findOne(db.Article, articleId);
+    return responseGenerator.sendSuccess(
+      response,
+      200,
+      article,
+      'Article successfully updated'
     );
   }
 }
