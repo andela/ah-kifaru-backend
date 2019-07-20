@@ -8,7 +8,8 @@ import {
   generateArticle,
   createArticle,
   addNotification,
-  newNotification
+  newNotification,
+  followUser
 } from './utils/helpers';
 import app from '../index';
 import db from '../database/models';
@@ -18,7 +19,8 @@ import NotificationHelper from '../helpers/notifications';
 const {
   onFollowNotification,
   onCommentNotification,
-  createInAppNotification
+  createInAppNotification,
+  onPublishArticleNotification
 } = NotificationHelper;
 const { User, Follower, Notification } = db;
 
@@ -61,7 +63,7 @@ describe('Test notification related endpoints', () => {
       expect(notification[0].link).to.equal(link);
     });
 
-    it('should send in app notification to the author of article when there is a new comment', async () => {
+    it('should send in-app notification to the author of article when there is a new comment', async () => {
       const author = await createUser();
       const commenter = await createUser();
 
@@ -83,6 +85,38 @@ describe('Test notification related endpoints', () => {
       expect(notification.length).to.equal(1);
       expect(notification[0].message).to.equal(message);
       expect(notification[0].link).to.equal(link);
+    });
+
+    it('should send in-app notification to all followers when a new article is published', async () => {
+      const author = await createUser();
+      const firstFollower = await createUser();
+      const secondFollower = await createUser();
+
+      await followUser(author.id, firstFollower.id);
+      await followUser(author.id, secondFollower.id);
+
+      const generatedArticle = await generateArticle({ authorId: author.id });
+      const article = await createArticle(generatedArticle);
+
+      const message = `<b>${author.username}</b> just published <b>${article.title}</b>`;
+      const link = `/article/${article.slug}`;
+
+      await onPublishArticleNotification({
+        userId: author.id,
+        articleId: article.id
+      });
+
+      const notification = await BaseRepository.findAll(db.Notification, {});
+
+      expect(notification.length).to.equal(2);
+
+      expect(notification[0].receiverId).to.equal(firstFollower.id);
+      expect(notification[0].message).to.equal(message);
+      expect(notification[0].link).to.equal(link);
+
+      expect(notification[1].receiverId).to.equal(secondFollower.id);
+      expect(notification[1].message).to.equal(message);
+      expect(notification[1].link).to.equal(link);
     });
   });
 

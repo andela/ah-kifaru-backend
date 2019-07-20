@@ -39,7 +39,7 @@ export const createArticle = async article => {
 };
 
 export const followUser = async (firstId, secondId) => {
-  await BaseRepository.create({
+  await BaseRepository.create(db.Follower, {
     followerId: secondId,
     followeeId: firstId
   });

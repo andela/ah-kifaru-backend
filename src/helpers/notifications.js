@@ -31,12 +31,7 @@ const createInAppNotification = async ({ receiverId, message, link }) => {
   });
 };
 
-/**
- * @static
- * @param {id} followerId - primary key of a follower alias (notification sender)
- * @param {id} followeeId - primary key of a followee alias (notification receiver)
- * @returns {object}- returns information about the follow status of the requested user
- */
+// ON FOLLOW NOTICATION
 const onFollowNotification = async ({ followerId, followeeId }) => {
   const sender = await BaseRepository.findOneByField(db.User, {
     id: followerId
@@ -63,6 +58,7 @@ const onFollowNotification = async ({ followerId, followeeId }) => {
   await pushNotification([receiverId], message);
 };
 
+// ON COMMENT NOTICATION
 const onCommentNotification = async ({ commenterId, articleId }) => {
   const sender = await BaseRepository.findOneByField(db.User, {
     id: commenterId
@@ -91,39 +87,38 @@ const onCommentNotification = async ({ commenterId, articleId }) => {
   await pushNotification([article[0]['author.id']], message);
 };
 
+// ON PUBLISH NOTICATION
 const onPublishArticleNotification = async ({ userId, articleId }) => {
   const followers = await BaseRepository.findAndInclude(
     db.Follower,
-    { userId },
+    { followeeId: userId },
     db.User,
-    'followed'
+    'follower'
   );
 
   const article = await BaseRepository.findAndInclude(
     db.Article,
-    { articleId },
+    { id: articleId },
     db.User,
     'author'
   );
 
   // TODO: send email notification at this point
-  // const followers = followers.filter(follower => follower.emailNotify);
 
-  const followerIds = followers.map(follower => follower.id);
+  const followerIds = followers.map(follower => follower.followerId);
 
-  const { username } = article.author;
+  const link = `/article/${article[0].slug}`;
+  const message = `<b>${article[0]['author.username']}</b> just published <b>${
+    article[0].title
+  }</b>`;
 
-  const message = `<b>${username}</b> just published <b>${article.title}</b>`;
-  const link = `/article/${article.slug}`;
-
-  const data = followerIds.map(user => ({
-    receiverId: user.id,
+  const data = followerIds.map(id => ({
+    receiverId: id,
     message,
     link
   }));
 
   await BaseRepository.bulkCreate(db.Notification, data);
-
   await pushNotification(followerIds, message);
 };
 
