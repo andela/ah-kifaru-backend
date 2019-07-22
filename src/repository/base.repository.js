@@ -132,6 +132,27 @@ class BaseRepository {
   }
 
   /**
+   *
+   *
+   * @static
+   * @param {object} model - database model
+   * @param {object} options - column options
+   * @param {array} includes - a database table
+   * @param {object} attributes - fileds needed
+   * @returns {object} - returns a databse object
+   * @memberof BaseRepository
+   */
+  static async findOneAndInclude(model, options, includes, attributes) {
+    return model.findAll({
+      where: {
+        ...options
+      },
+      include: [includes],
+      attributes
+    });
+  }
+
+  /**
    * @static
    * @param {*} model
    * @param {*} options

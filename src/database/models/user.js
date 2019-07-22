@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import articleExist from '../../middleware/article.middleware';
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
@@ -63,12 +64,21 @@ module.exports = (sequelize, DataTypes) => {
       as: 'rating'
     });
   };
+
   User.associate = models => {
     User.belongsToMany(models.Article, {
       through: 'Bookmarks',
       foreignKey: 'userId',
-      as: 'articleId'
+      as: 'Articles'
     });
   };
+
+  User.associate = models => {
+    User.hasMany(models.Article, {
+      foreignKey: 'authorId',
+      as: 'Articles'
+    });
+  };
+
   return User;
 };
