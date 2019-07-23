@@ -22,6 +22,7 @@ describe('PATCH, /api/v1/articles/:id/ratings', () => {
     await Rating.destroy({ truncate: true, cascade: true });
     await Article.destroy({ truncate: true, cascade: true });
   });
+
   it('Returns a 400 status code and an error message if the token was not set', done => {
     chai
       .request(app)
@@ -32,6 +33,7 @@ describe('PATCH, /api/v1/articles/:id/ratings', () => {
         done();
       });
   });
+
   it('Returns an error message if the article Id is not valid', async () => {
     const newUser = await createUser();
     const token = sign.jwtSigner(newUser);
@@ -43,6 +45,7 @@ describe('PATCH, /api/v1/articles/:id/ratings', () => {
       .set('x-access-token', token);
     expect(response.body.message).to.equal('articleId must be a number');
   });
+
   it('Returns an error message if the ratings passed is not a number', async () => {
     const newUser = await createUser();
     const token = sign.jwtSigner(newUser);
@@ -57,6 +60,7 @@ describe('PATCH, /api/v1/articles/:id/ratings', () => {
       'ratings must be a number between 1 and 5'
     );
   });
+
   it('Returns a 403 if an author tries ratings his/her article', async () => {
     const newUser = await createUser();
     const token = sign.jwtSigner(newUser);
@@ -74,6 +78,7 @@ describe('PATCH, /api/v1/articles/:id/ratings', () => {
     const finalRating = await BaseRepository.findAndCountAll(Rating, {});
     expect(initialRating.count).to.equal(finalRating.count);
   });
+
   it('Should return status 200 if the request was successful', async () => {
     const newUser = await createUser();
     const token = sign.jwtSigner(newUser);
@@ -92,6 +97,7 @@ describe('PATCH, /api/v1/articles/:id/ratings', () => {
     const numberOfRatings = await BaseRepository.findAll(Rating, {});
     expect(numberOfRatings.length).to.equal(1);
   });
+
   it('Should return message if the article to be rated was not found', async () => {
     const newUser = await createUser();
     const token = sign.jwtSigner(newUser);

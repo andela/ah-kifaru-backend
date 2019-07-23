@@ -114,20 +114,61 @@ class BaseRepository {
    * @returns {object} - returns a database object
    * @memberof BaseRepository
    */
-  static async findAndInclude(
+  static async findAndInclude({
+    model,
+    options,
+    limit,
+    offset,
+    associatedModel,
+    alias,
+    attributes
+  }) {
+    return model.findAll({
+      raw: true,
+      where: options,
+      limit,
+      offset,
+      include: {
+        model: associatedModel,
+        as: alias,
+        attributes
+      }
+    });
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} model - database model
+   * @param {object} options - column options
+   * @param {object} associatedModel - associated database model
+   * @param {string} alias - title of the alias
+   * @param {array} attributes - array of required attributes from associated model
+   * @param {integer} limit - maximum reponse objects
+   * @param {integer} offset - page number
+   * @returns {object} returns a database object
+   * @memberof BaseRepository
+   */
+  static async findCountAndInclude({
     model,
     options,
     associatedModel,
     alias,
-    associatedOptions
-  ) {
-    return model.findAll({
-      where: options,
+    attributes,
+    limit,
+    offset
+  }) {
+    return model.findAndCountAll({
+      raw: true,
+      where: { ...options },
       include: {
         model: associatedModel,
         as: alias,
-        where: associatedOptions
-      }
+        attributes
+      },
+      limit,
+      offset
     });
   }
 

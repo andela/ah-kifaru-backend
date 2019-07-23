@@ -12,7 +12,7 @@ const router = Router();
 router.get('/', paginationValidations, ArticleController.fetchAllArticles);
 
 router.get(
-  '/bookmark',
+  '/bookmarks',
   paginationValidations,
   authMiddleware,
   ArticleController.getBookMarks

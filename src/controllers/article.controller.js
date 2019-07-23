@@ -58,22 +58,40 @@ class ArticleController {
    */
   static async getBookMarks(req, res) {
     const { id: userId } = req.currentUser;
+    try {
+      const { page } = req.query;
+      const paginate = new Pagination(page, req.query.limit);
+      const { limit, offset } = paginate.getQueryMetadata();
 
-    const allBookMarks = await BaseRepository.findAndInclude(
-      db.Bookmark,
-      { userId },
-      db.Article,
-      'article'
-    );
+      const {
+        count,
+        rows: allBookMarks
+      } = await BaseRepository.findCountAndInclude({
+        model: db.Bookmark,
+        options: { userId },
+        limit,
+        offset,
+        alias: 'article',
+        associatedModel: db.Article,
+        attributes: ['id', 'title', 'authorId', 'description']
+      });
+      const message = count
+        ? 'Bookmarks found'
+        : 'You currently do not have any article in your bookmark';
 
-    if (allBookMarks.length < 1) {
-      return responseGenerator.sendError(
-        res,
-        400,
-        `You currently do not have any article in your bookmark`
-      );
+      if (count > 0) {
+        return responseGenerator.sendSuccess(
+          res,
+          200,
+          allBookMarks,
+          message,
+          paginate.getPageMetadata(count, '/api/v1/articles')
+        );
+      }
+      return responseGenerator.sendSuccess(res, 200, allBookMarks, message);
+    } catch (err) {
+      return responseGenerator.sendError(res, 500, err.message);
     }
-    return responseGenerator.sendSuccess(res, 200, null, allBookMarks);
   }
 
   /**
@@ -85,21 +103,25 @@ class ArticleController {
    * @static
    */
   static async addBookMark(req, res) {
-    const { id: userId } = req.currentUser;
-    const { articleId } = req.body;
+    try {
+      const { id: userId } = req.currentUser;
+      const { articleId } = req.body;
 
-    await BaseRepository.findOrCreate(
-      db.Bookmark,
-      { articleId, userId },
-      { articleId, userId }
-    );
+      await BaseRepository.findOrCreate(
+        db.Bookmark,
+        { articleId, userId },
+        { articleId, userId }
+      );
 
-    return responseGenerator.sendSuccess(
-      res,
-      200,
-      null,
-      'Article Bookmarked successfully'
-    );
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        null,
+        'Article Bookmarked successfully'
+      );
+    } catch (err) {
+      return responseGenerator.sendError(res, 500, err.message);
+    }
   }
 
   /**
@@ -111,18 +133,22 @@ class ArticleController {
    * @static
    */
   static async removeBookMark(req, res) {
-    const { articleId } = req.body;
-    const { id: userId } = req.currentUser;
-    await BaseRepository.remove(db.Bookmark, {
-      articleId,
-      userId
-    });
-    return responseGenerator.sendSuccess(
-      res,
-      200,
-      null,
-      `article with id = ${articleId} has been successfully removed from your bookmarks`
-    );
+    try {
+      const { articleId } = req.body;
+      const { id: userId } = req.currentUser;
+      await BaseRepository.remove(db.Bookmark, {
+        articleId,
+        userId
+      });
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        null,
+        `article with id = ${articleId} has been successfully removed from your bookmarks`
+      );
+    } catch (err) {
+      return responseGenerator.sendError(res, 500, err.message);
+    }
   }
 }
 

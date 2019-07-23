@@ -20,6 +20,20 @@ router.put(
   UserController.updateProfile
 );
 
+router.get(
+  '/followers',
+  authMiddleware,
+  paginationValidations,
+  UserController.getFollowers
+);
+
+router.get(
+  '/following',
+  authMiddleware,
+  paginationValidations,
+  UserController.getFollowings
+);
+
 router.patch(
   '/verify/:token',
   validateRequest,

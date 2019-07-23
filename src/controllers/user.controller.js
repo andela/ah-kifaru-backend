@@ -278,7 +278,6 @@ class UserController {
    */
   static async followUser(req, res) {
     try {
-      //  Please inform team to change the id of the decrypted user to id when been parsed with req object
       const { followeeId } = req.body;
       const { id: followerId } = req.currentUser;
       const details = { followeeId, followerId };
@@ -355,19 +354,36 @@ class UserController {
    */
   static async getFollowers(req, res) {
     const { id: followeeId } = req.currentUser;
-    // const followers = await BaseRepository.findAll(db.Follower, { followeeId });
-    const followers = await BaseRepository.findAndInclude(
-      db.Follower,
-      { followeeId },
-      db.User,
-      'followed'
-    );
-    if (followers.length > 1) {
-      return responseGenerator.sendSuccess(res, 200, followers);
+
+    const { page } = req.query;
+    const paginate = new Pagination(page, req.query.limit);
+    const { limit, offset } = paginate.getQueryMetadata();
+
+    const {
+      count,
+      rows: followings
+    } = await BaseRepository.findCountAndInclude({
+      model: db.Follower,
+      options: { followeeId },
+      limit,
+      offset,
+      alias: 'followee',
+      associatedModel: db.User,
+      attributes: ['id', 'username', 'email']
+    });
+    if (count > 0) {
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        followings,
+        null,
+        paginate.getPageMetadata(count, '/api/v1/users')
+      );
     }
-    return responseGenerator.sendError(
+    return responseGenerator.sendSuccess(
       res,
       200,
+      followings,
       `You do not have any followers at the moment`
     );
   }
@@ -381,18 +397,36 @@ class UserController {
    */
   static async getFollowings(req, res) {
     const { id: followerId } = req.currentUser;
-    const followings = await BaseRepository.findAndInclude(
-      db.Follower,
-      { followerId },
-      db.User,
-      'followed'
-    );
-    if (followings.length > 1) {
-      return responseGenerator.sendSuccess(res, 200, followings);
+
+    const { page } = req.query;
+    const paginate = new Pagination(page, req.query.limit);
+    const { limit, offset } = paginate.getQueryMetadata();
+
+    const {
+      count,
+      rows: followings
+    } = await BaseRepository.findCountAndInclude({
+      model: db.Follower,
+      options: { followerId },
+      limit,
+      offset,
+      alias: 'followee',
+      associatedModel: db.User,
+      attributes: ['id', 'username', 'email']
+    });
+    if (count > 0) {
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        followings,
+        null,
+        paginate.getPageMetadata(count, '/api/v1/users')
+      );
     }
-    return responseGenerator.sendError(
+    return responseGenerator.sendSuccess(
       res,
       200,
+      null,
       `You are not following anyone at the moment`
     );
   }

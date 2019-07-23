@@ -674,3 +674,188 @@ describe('PATCH /api/v1/auth/user/:id/role', () => {
     expect(userRoleStatus.length).to.equal(1);
   });
 });
+
+describe('GET /api/v1/users/followers', () => {
+  beforeEach(async () => {
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Follower.destroy({ cascade: true, truncate: true });
+  });
+
+  it('returns appropriate message when authorized user tries to get followers', async () => {
+    const firstUser = await createUser();
+
+    const limit = 1;
+    const page = 1;
+
+    const res = await server()
+      .get(`${USER_API}/followers?page=${page}&limit=${limit}`)
+      .send({ followeeId: firstUser.id });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.equal('Invalid access token');
+  });
+
+  it('returns appropriate message when there are no followers', async () => {
+    const firstUser = await createUser();
+
+    const token = helper.jwtSigner(firstUser);
+
+    const numberOfFollowing = await BaseRepository.findAndCountAll(
+      db.Follower,
+      {
+        followerId: firstUser.id
+      }
+    );
+
+    expect(numberOfFollowing.count).to.equal(0);
+    const limit = 1;
+    const page = 1;
+
+    const res = await server()
+      .get(`${USER_API}/followers?page=${page}&limit=${limit}`)
+      .set('token', token)
+      .send({ followeeId: firstUser.id });
+    expect(res.status).to.equal(200);
+    expect(res.body.message).to.equal(
+      `You do not have any followers at the moment`
+    );
+  });
+
+  it('should get all followers', async () => {
+    const firstUser = await createUser();
+    const secondUser = await createUser();
+    const thirdUser = await createUser();
+    const fourthUser = await createUser();
+    const fifthUser = await createUser();
+    const sixthUser = await createUser();
+    const seventhUser = await createUser();
+
+    await BaseRepository.create(db.Follower, {
+      followeeId: firstUser.id,
+      followerId: secondUser.id
+    });
+    await BaseRepository.create(db.Follower, {
+      followeeId: firstUser.id,
+      followerId: thirdUser.id
+    });
+    await BaseRepository.create(db.Follower, {
+      followeeId: firstUser.id,
+      followerId: fourthUser.id
+    });
+    await BaseRepository.create(db.Follower, {
+      followeeId: firstUser.id,
+      followerId: fifthUser.id
+    });
+    await BaseRepository.create(db.Follower, {
+      followeeId: firstUser.id,
+      followerId: sixthUser.id
+    });
+    await BaseRepository.create(db.Follower, {
+      followeeId: firstUser.id,
+      followerId: seventhUser.id
+    });
+
+    const token = helper.jwtSigner(firstUser);
+
+    const numberOfFollowing = await BaseRepository.findAndCountAll(
+      db.Follower,
+      {
+        followerId: firstUser.id
+      }
+    );
+
+    expect(numberOfFollowing.count).to.equal(6);
+
+    const page = 2;
+    const limit = 3;
+
+    const res = await server()
+      .get(`${USER_API}/followers?page=${page}&limit=${limit}`)
+      .set('token', token)
+      .send({ followeeId: firstUser.id });
+    expect(res.status).to.equal(200);
+    expect(res.body.data.length).to.equal(limit);
+    expect(res.body.metadata.prev).to.equal(
+      `/api/v1/users?page=${page - 1}&limit=${limit}`
+    );
+    expect(res.body.metadata.currentPage).to.equal(page);
+    expect(res.body.metadata.totalItems).to.equal(numberOfFollowing.count);
+  });
+});
+
+describe('GET /api/v1/users/followings', () => {
+  beforeEach(async () => {
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Follower.destroy({ cascade: true, truncate: true });
+  });
+
+  it('returns appropriate message when user is not following anyone', async () => {
+    const firstUser = await createUser();
+
+    const token = helper.jwtSigner(firstUser);
+
+    const numberOfFollowing = await BaseRepository.findAndCountAll(
+      db.Follower,
+      {
+        followeeId: firstUser.id
+      }
+    );
+
+    expect(numberOfFollowing.count).to.equal(0);
+    const limit = 1;
+    const page = 1;
+
+    const res = await server()
+      .get(`${USER_API}/following?page=${page}&limit=${limit}`)
+      .set('token', token);
+    expect(res.status).to.equal(200);
+    expect(res.body.message).to.equal(
+      `You are not following anyone at the moment`
+    );
+  });
+
+  it('should get all followings', async () => {
+    const firstUser = await createUser();
+    const secondUser = await createUser();
+    const thirdUser = await createUser();
+    const fourthUser = await createUser();
+    const fifthUser = await createUser();
+
+    await BaseRepository.create(db.Follower, {
+      followeeId: secondUser.id,
+      followerId: firstUser.id
+    });
+    await BaseRepository.create(db.Follower, {
+      followeeId: thirdUser.id,
+      followerId: firstUser.id
+    });
+    await BaseRepository.create(db.Follower, {
+      followeeId: fourthUser.id,
+      followerId: firstUser.id
+    });
+    await BaseRepository.create(db.Follower, {
+      followeeId: fifthUser.id,
+      followerId: firstUser.id
+    });
+
+    const token = helper.jwtSigner(firstUser);
+
+    const numberOfFollowing = await BaseRepository.findAndCountAll(
+      db.Follower,
+      {
+        followerId: firstUser.id
+      }
+    );
+
+    expect(numberOfFollowing.count).to.equal(4);
+    const limit = 2;
+    const page = 1;
+
+    const res = await server()
+      .get(`${USER_API}/following?page=${page}&limit=${limit}`)
+      .set('token', token);
+    expect(res.status).to.equal(200);
+    expect(res.body.metadata.prev).to.equal(null);
+    expect(res.body.metadata.currentPage).to.equal(page);
+    expect(res.body.metadata.totalItems).to.equal(numberOfFollowing.count);
+  });
+});

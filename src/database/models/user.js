@@ -70,5 +70,6 @@ module.exports = (sequelize, DataTypes) => {
       as: 'articleId'
     });
   };
+
   return User;
 };
