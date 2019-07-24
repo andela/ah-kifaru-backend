@@ -4,6 +4,7 @@ import validationMiddleware from '../../middleware/validation.middleware';
 import RatingsController from '../../controllers/rating.controller';
 import { articleExist } from '../../middleware/article.middleware';
 import paginationValidations from '../../middleware/pagination.validation';
+import { checkRaterMiddleware } from '../../middleware/users.middleware';
 
 const validateRequest = validationMiddleware();
 
@@ -13,6 +14,7 @@ router.patch(
   authMiddleware,
   validateRequest,
   articleExist,
+  checkRaterMiddleware,
   RatingsController.rateArticles
 );
 

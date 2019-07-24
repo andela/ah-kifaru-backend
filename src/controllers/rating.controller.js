@@ -1,7 +1,7 @@
 import db from '../database/models';
 import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
-import { checkRater } from '../middleware/users.middleware';
+import { updateAverage } from '../helpers/ratingsHelpers';
 import Pagination from '../helpers/pagination';
 
 const { Rating } = db;
@@ -23,40 +23,38 @@ class RatingsController {
     const { id: userId } = req.currentUser;
     const { ratings } = req.body;
 
-    const { article } = req;
-
-    const author = checkRater(userId, article);
-
-    if (author) {
-      return responseGenerator.sendError(
-        res,
-        403,
-        'You cannot rate your article'
-      );
-    }
+    // const { article } = req;
     try {
-      const rater = await BaseRepository.findOneByField(Rating, {
-        articleId,
-        userId
-      });
+      let theRating;
+      theRating = await BaseRepository.findOrCreate(
+        Rating,
+        { articleId, userId },
+        {
+          articleId,
+          userId,
+          ratings
+        }
+      );
+      const [user, created] = theRating;
+      theRating = await user.get({ plain: true });
 
-      let newRating;
-      if (rater) {
-        newRating = await BaseRepository.update(
+      created && updateAverage(articleId);
+
+      if (!created) {
+        theRating = await BaseRepository.update(
           Rating,
           { ratings },
           { userId, articleId }
         );
-      } else {
-        newRating = await BaseRepository.create(Rating, {
-          articleId,
-          ratings,
-          userId
-        });
+        updateAverage(articleId);
       }
-      newRating.ratings = parseInt(newRating.ratings, 10);
-      delete newRating.dataValues.userId;
-      return responseGenerator.sendSuccess(res, 200, newRating);
+
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        null,
+        'Article Rated Successfully'
+      );
     } catch (error) {
       return responseGenerator.sendError(res, 500, error.message);
     }

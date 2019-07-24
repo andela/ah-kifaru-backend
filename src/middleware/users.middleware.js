@@ -31,11 +31,24 @@ export const isSelf = async (req, res, next) => {
   next();
 };
 
-export const checkRater = (userId, article) => {
+// export const checkRater = (userId, article) => {
+//   if (userId === article.authorId) {
+//     return true;
+//   }
+//   return false;
+// };
+
+export const checkRaterMiddleware = (req, res, next) => {
+  const { id: userId } = req.currentUser;
+  const { article } = req;
   if (userId === article.authorId) {
-    return true;
+    return responseGenerator.sendError(
+      res,
+      403,
+      'You cannot rate your article'
+    );
   }
-  return false;
+  next();
 };
 
-export default { userExist, isSelf, checkRater };
+export default { userExist, isSelf, checkRaterMiddleware };

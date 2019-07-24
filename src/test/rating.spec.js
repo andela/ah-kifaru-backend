@@ -97,8 +97,34 @@ describe('PATCH, /api/v1/articles/:id/ratings', () => {
       .set('x-access-token', token)
       .send(ratings);
     expect(response.status).to.equal(200);
-    expect(response.body.data.articleId).to.equal(createdArticle.id);
-    expect(response.body.data.ratings).to.equal(ratings.ratings);
+    expect(response.body.message).to.equal('Article Rated Successfully');
+
+    const numberOfRatings = await BaseRepository.findAll(Rating, {});
+    expect(numberOfRatings.length).to.equal(1);
+  });
+
+  it('Should return status 200 if an existing rating was updated successfully', async () => {
+    const firstUser = await createUser();
+    const token = sign.jwtSigner(firstUser);
+
+    const secondUser = await createUser();
+    const article = await generateArticle({ authorId: secondUser.id });
+
+    const theCreatedArticle = await createArticle(article);
+    expect(secondUser.id).to.equal(theCreatedArticle.authorId);
+    await rateArticle({
+      articleId: theCreatedArticle.id,
+      userId: firstUser.id,
+      ratings: 5
+    });
+    const response = await chai
+      .request(app)
+      .patch(`/api/v1/articles/${theCreatedArticle.id}/ratings`)
+      .set('x-access-token', token)
+      .send({ ratings: 3 });
+    expect(response.status).to.equal(200);
+    expect(response.body.message).to.equal('Article Rated Successfully');
+
     const numberOfRatings = await BaseRepository.findAll(Rating, {});
     expect(numberOfRatings.length).to.equal(1);
   });
