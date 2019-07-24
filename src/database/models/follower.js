@@ -35,11 +35,9 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'followerId',
       as: 'follower'
     });
-  };
-  Follower.associate = models => {
     Follower.belongsTo(models.User, {
       foreignKey: 'followeeId',
-      as: 'followee'
+      as: 'followed'
     });
   };
   return Follower;

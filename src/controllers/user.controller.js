@@ -358,7 +358,6 @@ class UserController {
     const { page } = req.query;
     const paginate = new Pagination(page, req.query.limit);
     const { limit, offset } = paginate.getQueryMetadata();
-
     const {
       count,
       rows: followings
@@ -367,10 +366,11 @@ class UserController {
       options: { followeeId },
       limit,
       offset,
-      alias: 'followee',
+      alias: 'follower',
       associatedModel: db.User,
       attributes: ['id', 'username', 'email']
     });
+
     if (count > 0) {
       return responseGenerator.sendSuccess(
         res,
@@ -410,7 +410,7 @@ class UserController {
       options: { followerId },
       limit,
       offset,
-      alias: 'followee',
+      alias: 'followed',
       associatedModel: db.User,
       attributes: ['id', 'username', 'email']
     });

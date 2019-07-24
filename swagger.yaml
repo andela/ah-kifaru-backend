@@ -278,7 +278,6 @@ paths:
               $ref: '#/components/schemas/response'
     400:
       description: 'Invalid user id'
-
   /articles:
     get: 
       tags: 
@@ -355,6 +354,39 @@ paths:
                 $ref: "#/components/schemas/badResponse" 
           description: 'failed operation'
 
+  /articles/:articleId/ratings:
+    patch:
+      tags:
+        - 'ratings'
+      summary: 'Get all article ratings'
+      description: 'Id of the article to fetch its ratings'
+      operationId: 'bookmark Article'
+      produces:
+        - 'application/xml'
+        - 'application/json'
+    parameters:
+      - name: 'articleId'
+        in: 'params'
+        description: 'Fetch the ratings of an article'
+        schema:
+          type: 'number'
+          required: true
+    responses:
+      200:
+        description: 'successful operation'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/response'
+    400:
+      description: 'Invalid article id'
+    500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/badResponse" 
+          description: 'failed operation'
 components:
   schemas:
     response:

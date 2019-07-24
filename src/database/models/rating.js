@@ -20,11 +20,14 @@ export default (sequelize, DataTypes) => {
   );
   Rating.associate = models => {
     Rating.belongsTo(models.User, {
-      as: 'rater',
+      as: 'user',
       foreignKey: 'userId'
     });
+  };
+
+  Rating.associate = models => {
     Rating.belongsTo(models.Article, {
-      as: 'rating',
+      as: 'article',
       foreignKey: 'articleId'
     });
   };

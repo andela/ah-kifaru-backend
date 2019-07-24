@@ -24,9 +24,23 @@ const articleId = Joi.number()
   .integer()
   .required();
 
+const number = Joi.number()
+  .integer()
+  .required();
+
 const bookmarkArticle = {
   body: {
     articleId
+  }
+};
+
+const fetchRatings = {
+  params: {
+    articleId
+  },
+  query: {
+    page: number,
+    limit: number
   }
 };
 

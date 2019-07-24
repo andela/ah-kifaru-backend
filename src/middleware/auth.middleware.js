@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import responseGenerator from '../helpers/responseGenerator';
 
-const decodeToken = (req, res, next, token) => {
-  jwt.verify(token, process.env.JWT_SECRET, (error, decode) => {
+const decodeToken = async (req, res, next, token) => {
+  await jwt.verify(token, process.env.JWT_SECRET, (error, decode) => {
     if (!error) {
       req.currentUser = decode;
       return next();

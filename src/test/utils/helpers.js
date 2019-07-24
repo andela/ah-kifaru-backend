@@ -44,6 +44,10 @@ export const followUser = async (firstId, secondId) => {
   });
 };
 
+export const rateArticle = async ({ articleId, userId, ratings }) => {
+  await BaseRepository.create(db.Rating, { articleId, userId, ratings });
+};
+
 export const ratings = {
   ratings: faker.random.number({
     min: 1,

@@ -21,6 +21,7 @@ const paginationValidations = (req, res, next) => {
     page,
     limit
   };
+
   next();
 };
 

@@ -47,17 +47,17 @@ module.exports = (sequelize, DataTypes) => {
   User.associate = models => {
     User.belongsToMany(models.User, {
       through: 'Followers',
-      as: 'follower',
+      as: 'users',
       foreignKey: 'followerId'
     });
-  };
-  User.associate = models => {
     User.belongsToMany(models.User, {
       through: 'Followers',
-      as: 'followee',
+      as: 'users',
       foreignKey: 'followeeId'
     });
+  };
 
+  User.associate = models => {
     User.hasMany(models.Rating, {
       foreignKey: 'userId',
       as: 'rating'
@@ -69,7 +69,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'userId',
       as: 'articleId'
     });
+    User.belongsToMany(models.Article, {
+      through: 'Ratings',
+      foreignKey: 'userId',
+      as: 'rater'
+    });
   };
-
   return User;
 };

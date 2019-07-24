@@ -2,6 +2,7 @@ import db from '../database/models';
 import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
 import { checkRater } from '../middleware/users.middleware';
+import Pagination from '../helpers/pagination';
 
 const { Rating } = db;
 
@@ -59,6 +60,41 @@ class RatingsController {
     } catch (error) {
       return responseGenerator.sendError(res, 500, error.message);
     }
+  }
+
+  /**
+   * Get all bookmarked articles
+   * @async
+   * @param {object} req - Request object
+   * @param {object} res - Response object
+   * @return {json} Returns containing all ratings of an article
+   * @static
+   */
+  static async getRatings(req, res) {
+    const { articleId } = req.params;
+
+    const averageRating = await BaseRepository.findAverage(
+      articleId,
+      db.Rating,
+      'articleId',
+      'ratings'
+    );
+    const [response] = averageRating;
+    if (!response) {
+      return responseGenerator.sendError(
+        res,
+        404,
+        'This article has not been rated yet'
+      );
+    }
+
+    const summary = {
+      articleId: response.articleId,
+      averageRating: Number(response.avgRating).toFixed(1),
+      totalNumberOfRatings: Number(response.totalCount)
+    };
+
+    return responseGenerator.sendSuccess(res, 200, { ...summary });
   }
 }
 

@@ -31,17 +31,26 @@ export default (sequelize, DataTypes) => {
       through: 'Articles',
       foreignKey: 'authorId'
     });
-  };
-  Article.associate = models => {
+
     Article.belongsToMany(models.User, {
       through: 'Bookmarks',
       foreignKey: 'articleId',
       as: 'bookmarks'
     });
+  };
+
+  Article.associate = models => {
     Article.hasMany(models.Rating, {
       as: 'articleRatings',
       foreignKey: 'articleId'
     });
+
+    Article.belongsToMany(models.Rating, {
+      through: 'Ratings',
+      foreignKey: 'articleId',
+      as: 'ratings'
+    });
   };
+
   return Article;
 };

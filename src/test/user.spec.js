@@ -19,12 +19,20 @@ chai.use(chaiHttp);
 const server = () => chai.request(app);
 
 describe('Test user login, signup and account verification', () => {
-  describe('POST /auth/signup', () => {
+  beforeEach(async () => {
+    await db.User.destroy({ cascade: true, truncate: true });
+  });
+  describe('POST /auth/signup', async () => {
+    await db.User.destroy({ cascade: true, truncate: true });
+
     beforeEach(async () => {
       await db.User.destroy({ cascade: true, truncate: true });
     });
+
     it('should create a user account', async () => {
-      const newUser = await getUser();
+      const theUser = await getUser();
+      theUser.status = 'active';
+      const newUser = await createUser(theUser);
 
       const res = await server()
         .post('/api/v1/auth/signup')
@@ -215,7 +223,7 @@ describe('Test user login, signup and account verification', () => {
     });
 
     it('should throw an error if an invalid token is provided', async () => {
-      const invalidToken = 'jhfhje88e8';
+      const invalidToken = 'jhfhje88e8dafdfdfdfdfjhdfdfdfhdhfdfdfdfdfd';
       const res = await server().patch(`/api/v1/auth/verify/${invalidToken}`);
 
       expect(res.status).to.equal(400);

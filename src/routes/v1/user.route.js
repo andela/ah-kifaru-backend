@@ -42,6 +42,20 @@ router.patch(
 );
 
 router.get(
+  '/followers',
+  authMiddleware,
+  paginationValidations,
+  UserController.getFollowers
+);
+
+router.get(
+  '/following',
+  authMiddleware,
+  paginationValidations,
+  UserController.getFollowings
+);
+
+router.get(
   '/',
   validateRequest,
   paginationValidations,

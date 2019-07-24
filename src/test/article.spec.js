@@ -131,6 +131,19 @@ describe('PATCH api/v1/articles/bookmark', () => {
     expect(res.status).to.equal(500);
     findAllStub.restore();
   });
+
+  it('should return 404 if article does not exist', async () => {
+    const firstUser = await createUser();
+
+    const token = helper.jwtSigner(firstUser);
+
+    const res = await server()
+      .patch(`${ARTICLES_API}/unbookmark`)
+      .set('token', token)
+      .send({ articleId: 9000 });
+    expect(res.status).to.equal(404);
+    expect(res.body.message).to.equal('The requested article was not found');
+  });
 });
 
 describe('GET api/v1/articles/bookmark', () => {
@@ -232,6 +245,19 @@ describe('GET api/v1/articles/bookmark', () => {
       .set('token', token);
     expect(res.status).to.equal(500);
     findAllStub.restore();
+  });
+
+  it('should return 404 if article does not exist', async () => {
+    const firstUser = await createUser();
+
+    const token = helper.jwtSigner(firstUser);
+
+    const res = await server()
+      .patch(`${ARTICLES_API}/unbookmark`)
+      .set('token', token)
+      .send({ articleId: 9000 });
+    expect(res.status).to.equal(404);
+    expect(res.body.message).to.equal('The requested article was not found');
   });
 });
 

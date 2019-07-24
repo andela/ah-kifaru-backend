@@ -1,3 +1,5 @@
+import db from '../database/models';
+
 /**
  * @class BaseRepository
  */
@@ -73,7 +75,7 @@ class BaseRepository {
    * @memberof BaseRepository
    */
   static async findAll(model, options) {
-    return model.findAll({ ...options });
+    return model.findAll({ where: { ...options } });
   }
 
   /**
@@ -108,9 +110,22 @@ class BaseRepository {
    * @static
    * @param {object} model - database model
    * @param {object} options - column options
+   * @returns {object} - returns a database object
+   * @memberof BaseRepository
+   */
+  static async findRawAndCountAll(model, options) {
+    return model.findAndCountAll({ raw: true, where: { ...options } });
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} model - database model
+   * @param {object} options - column options
    * @param {object} associatedModel - associated database model
    * @param {string} alias - title of the alias
-   * @param {object} associatedOptions - query for the associated model
+   * @param {object} attributes - query for the associated model
    * @returns {object} - returns a database object
    * @memberof BaseRepository
    */
@@ -181,6 +196,29 @@ class BaseRepository {
    */
   static findOne(model, options) {
     return model.findByPk(options);
+  }
+
+  /**
+   * @static
+   * @param {*} articleId - what to searchBy
+   * @param {*} model - model to search
+   * @param {*} searchBy - column name of what to seach by
+   * @param {*} value - column name of what to calculate average by
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static async findAverage(articleId, model, searchBy, value) {
+    return model.findAll({
+      raw: true,
+      where: { articleId },
+      attributes: [
+        searchBy,
+        [model.sequelize.fn('AVG', model.sequelize.col(value)), 'avgRating'],
+        [model.sequelize.fn('COUNT', model.sequelize.col(value)), 'totalCount']
+      ],
+      group: [searchBy],
+      order: [[model.sequelize.fn('AVG', model.sequelize.col(value)), 'DESC']]
+    });
   }
 }
 

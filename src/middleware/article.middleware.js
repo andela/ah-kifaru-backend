@@ -3,8 +3,8 @@ import Baserepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
 
 export const articleExist = async (req, res, next) => {
-  const { articleId } =
-    req.body.articleId !== undefined ? req.body : req.params;
+  const { articleId } = req.params || req.body;
+
   const findArticle = await Baserepository.findOneByField(db.Article, {
     id: articleId
   });

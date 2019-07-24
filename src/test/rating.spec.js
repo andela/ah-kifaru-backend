@@ -8,8 +8,13 @@ import {
   generateArticle,
   ratings,
   createUser,
-  createArticle
+  createArticle,
+  rateArticle
 } from './utils/helpers';
+
+const ARTICLE_API = '/api/v1/articles';
+
+const server = () => chai.request(app);
 
 chai.use(chaiHttp);
 chai.should();
@@ -66,7 +71,7 @@ describe('PATCH, /api/v1/articles/:id/ratings', () => {
     const token = sign.jwtSigner(newUser);
     const article = await generateArticle({ authorId: newUser.id });
     const createdArticle = await createArticle(article);
-    const initialRating = await BaseRepository.findAndCountAll(Rating, {});
+    const initialRating = await BaseRepository.findRawAndCountAll(Rating, {});
     expect(newUser.id).to.equal(createdArticle.authorId);
     const response = await chai
       .request(app)
@@ -75,7 +80,7 @@ describe('PATCH, /api/v1/articles/:id/ratings', () => {
       .send(ratings);
     expect(response.status).to.equal(403);
     expect(response.body.message).to.equal('You cannot rate your article');
-    const finalRating = await BaseRepository.findAndCountAll(Rating, {});
+    const finalRating = await BaseRepository.findRawAndCountAll(Rating, {});
     expect(initialRating.count).to.equal(finalRating.count);
   });
 
@@ -110,5 +115,85 @@ describe('PATCH, /api/v1/articles/:id/ratings', () => {
     expect(response.body.message).to.have.equal(
       'The requested article was not found'
     );
+  });
+});
+
+describe('GET api/v1/article/:articleId/ratings', () => {
+  beforeEach(async () => {
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Article.destroy({ cascade: true, truncate: true });
+    await db.Rating.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should get article ratings', async () => {
+    const firstUser = await createUser();
+    const secondUser = await createUser();
+    const thirdUser = await createUser();
+    const fourthUser = await createUser();
+    const fifthUser = await createUser();
+
+    const article = await createArticle(
+      await generateArticle({ authorId: firstUser.id })
+    );
+    await rateArticle({
+      articleId: article.id,
+      userId: secondUser.id,
+      ratings: 5
+    });
+    await rateArticle({
+      articleId: article.id,
+      userId: thirdUser.id,
+      ratings: 3
+    });
+    await rateArticle({
+      articleId: article.id,
+      userId: fourthUser.id,
+      ratings: 4
+    });
+    await rateArticle({
+      articleId: article.id,
+      userId: fifthUser.id,
+      ratings: 1
+    });
+
+    const numberOfRatings = await BaseRepository.findRawAndCountAll(db.Rating, {
+      articleId: article.id
+    });
+
+    const res = await server().get(`${ARTICLE_API}/ratings/${article.id}`);
+    expect(res.status).to.equal(200);
+    expect(Number(`${res.body.data.totalNumberOfRatings}`)).to.equal(
+      Number(`${numberOfRatings.count}`)
+    );
+    expect(Number(`${res.body.data.averageRating}`)).to.equal(
+      Number(
+        (
+          numberOfRatings.rows.reduce(
+            (sum, current) => sum + current.ratings,
+            0
+          ) / numberOfRatings.count
+        ).toFixed(1)
+      )
+    );
+    expect(res.body.data.articleId).to.equal(article.id);
+  });
+
+  it('should not get ratings if article has not been rated', async () => {
+    const firstUser = await createUser();
+
+    const article = await createArticle(
+      await generateArticle({ authorId: firstUser.id })
+    );
+
+    const res = await server().get(`${ARTICLE_API}/ratings/${article.id}`);
+
+    expect(res.status).to.equal(404);
+    expect(res.body.message).to.equal('This article has not been rated yet');
+  });
+
+  it('should return 404 if article does not exist', async () => {
+    const res = await server().get(`${ARTICLE_API}/ratings/9000000`);
+    expect(res.status).to.equal(404);
+    expect(res.body.message).to.equal('The requested article was not found');
   });
 });

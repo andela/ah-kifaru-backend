@@ -20,7 +20,8 @@
         "exclude": [
             "**/*.spec.js",
             "**/test/utils",
-            "**/helpers/passport/"
+            "**/helpers/passport/",
+            "**/database/"
         ]
     },
     "husky": {
