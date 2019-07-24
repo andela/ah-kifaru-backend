@@ -82,14 +82,50 @@ const ratingSchema = {
   }
 };
 
-export default {
-  '/signup': createAccountSchema,
-  '/login': loginSchema,
-  '/verify/:token': verifyTokenSchema,
-  '/follow': followOrUnfollow,
-  '/unfollow': followOrUnfollow,
-  '/user/:id': updateProfileSchema,
-  '/bookmark': bookmarkArticle,
-  '/unbookmark': bookmarkArticle,
-  '/:articleId/ratings': ratingSchema
-};
+export default [
+  {
+    route: '/signup',
+    method: 'post',
+    schema: createAccountSchema
+  },
+  {
+    route: '/login',
+    method: 'post',
+    schema: loginSchema
+  },
+  {
+    route: '/verify/:token',
+    method: 'patch',
+    schema: verifyTokenSchema
+  },
+  {
+    route: '/follow',
+    method: 'patch',
+    schema: followOrUnfollow
+  },
+  {
+    route: '/unfollow',
+    method: 'patch',
+    schema: followOrUnfollow
+  },
+  {
+    route: '/user/:id',
+    method: 'patch',
+    schema: updateProfileSchema
+  },
+  {
+    route: '/bookmark',
+    method: 'patch',
+    schema: bookmarkArticle
+  },
+  {
+    route: '/unbookmark',
+    method: 'patch',
+    schema: bookmarkArticle
+  },
+  {
+    route: '/:articleId/ratings',
+    method: 'patch',
+    schema: ratingSchema
+  }
+];
