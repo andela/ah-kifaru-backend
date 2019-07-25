@@ -480,6 +480,73 @@ paths:
                 $ref: "#/components/schemas/badResponse" 
           description: 'failed operation'
 
+  /articles/publish:
+    put: 
+      tags: 
+        - articles
+      summary : Publish an Article
+      description: ""
+      operationId: "publishArticle"
+      produces:
+        - 'application/xml'
+        - 'application/json'
+      parameters:
+        - in: header
+          name: x-access-token
+          schema:
+            type: string
+          required: true
+          description: token of user
+        - in: query
+          name: articleId
+          schema:
+            type: integer
+          description: articles Id for article been published
+        - in: body
+          name: title
+          schema:
+            type: string
+          required: true
+          description: title of the article
+        - in: body
+          name: body
+          schema:
+            type: string
+          required: true
+          description: body of the article
+        - in: body
+          name: description
+          schema:
+            type: string
+          required: true
+          description: description for the article
+        - in: body
+          name: image
+          schema:
+            type: string
+          required: true
+          description: url of the image for the article
+      responses:
+        200:
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/goodResponse"    
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/badResponse" 
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/badResponse" 
+          description: 'failed operation'
+
 components:
   schemas:
     response:
@@ -492,8 +559,6 @@ components:
     goodResponse:
       type: object
       properties:
-        status:
-          type: string
         data:
           type: object
     badResponse:

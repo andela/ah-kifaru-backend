@@ -8,10 +8,7 @@ export default (sequelize, DataTypes) => {
     {
       title: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          len: [2]
-        }
+        allowNull: false
       },
       body: DataTypes.TEXT,
       image: DataTypes.STRING,
@@ -32,12 +29,8 @@ export default (sequelize, DataTypes) => {
         defaultValue: new Date(),
         allowNull: false
       },
-      updatedAt: {
-        type: DataTypes.DATE
-      },
-      deletedAt: {
-        type: DataTypes.DATE
-      }
+      deletedAt: DataTypes.DATE,
+      updatedAt: DataTypes.DATE
     },
     {
       paranoid: true

@@ -38,12 +38,18 @@ router.patch(
   articleMiddleware,
   RatingsController.rateArticles
 );
+router.put(
+  '/publish',
+  authMiddleware,
+  validateRequest,
+  ArticleController.publishArticle
+);
 
 router.post(
   '/',
   authMiddleware,
   validateRequest,
-  ArticleController.draftArticle
+  ArticleController.createDraft
 );
 
 router.get(

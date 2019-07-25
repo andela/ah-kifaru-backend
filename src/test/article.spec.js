@@ -3,7 +3,16 @@ import chaiHttp from 'chai-http';
 import sinon from 'sinon';
 import app from '../index';
 import BaseRepository from '../repository/base.repository';
-import { createUser, createArticle, generateArticle } from './utils/helpers';
+import {
+  createUser,
+  createArticle,
+  generateArticle,
+  article,
+  articleWithShortBody,
+  articleWithShortDescription,
+  articleWithShortImage,
+  articleWithShortTitle
+} from './utils/helpers';
 import db from '../database/models';
 import helper from '../helpers/utils';
 import {
@@ -666,5 +675,139 @@ describe('PUT /api/v1/articles/:articleId', () => {
       'Your request cannot be processed right now, Please try again later'
     );
     findAllStub.restore();
+  });
+});
+
+describe('PUT /api/v1/articles/publish?articleId', () => {
+  beforeEach(async () => {
+    await db.Article.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Follower.destroy({ cascade: true, truncate: true });
+  });
+  it('Returns 400 if the article Id is provided but is not a number', async () => {
+    const firstUser = await createUser();
+    const token = await helper.jwtSigner(firstUser);
+
+    const response = await server()
+      .put(`${ARTICLES_API}/publish?articleId=${'men'}`)
+      .set('x-access-token', token)
+      .send(article);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal(
+      'Invalid article id. Article id must be a non-zero positive integer'
+    );
+  });
+  it('Returns 400 if the title provided is less than 3 characters', async () => {
+    const firstUser = await createUser();
+    const token = await helper.jwtSigner(firstUser);
+
+    const response = await server()
+      .put(`${ARTICLES_API}/publish`)
+      .set('x-access-token', token)
+      .send(articleWithShortTitle);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Title is required');
+  });
+  it('Returns 400 if the body of the article provided is less than 3 characters', async () => {
+    const firstUser = await createUser();
+    const token = await helper.jwtSigner(firstUser);
+
+    const response = await server()
+      .put(`${ARTICLES_API}/publish`)
+      .set('x-access-token', token)
+      .send(articleWithShortBody);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('A body is required. . .');
+  });
+  it('Returns 400 if the articles image provided not a valid url', async () => {
+    const firstUser = await createUser();
+    const token = await helper.jwtSigner(firstUser);
+
+    const response = await server()
+      .put(`${ARTICLES_API}/publish`)
+      .set('x-access-token', token)
+      .send(articleWithShortImage);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal('Invalid image url');
+  });
+  it('Returns 400 if the articles description was not provided', async () => {
+    const firstUser = await createUser();
+    const token = await helper.jwtSigner(firstUser);
+
+    const response = await server()
+      .put(`${ARTICLES_API}/publish`)
+      .set('x-access-token', token)
+      .send(articleWithShortDescription);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equal(
+      'Enter a brief description for the article'
+    );
+  });
+  it('Returns 200 if article saved as draft has been published', async () => {
+    const firstUser = await createUser();
+    const token = await helper.jwtSigner(firstUser);
+    const article = await generateArticle({ authorId: firstUser.id });
+    const createdArticle = await createArticle(article);
+
+    const response = await server()
+      .put(`${ARTICLES_API}/publish?articleId=${createdArticle.id}`)
+      .set('x-access-token', token)
+      .send(article);
+    expect(response.status).to.equal(200);
+    expect(response.body.data.title).to.equal(article.title);
+    expect(response.body.data.body).to.equal(article.body);
+    expect(response.body.data.image).to.equal(article.image);
+    expect(response.body.data.authorId).to.equal(article.authorId);
+    expect(response.body.data.description).to.equal(article.description);
+  });
+  it('Publishing an article multiple times fails silently', async () => {
+    const firstUser = await createUser();
+    const token = await helper.jwtSigner(firstUser);
+    const article = await generateArticle({ authorId: firstUser.id });
+    article.publishedDate = '2019-07-22T08:51:47.224Z';
+    const createdArticle = await createArticle(article);
+
+    const response = await server()
+      .put(`${ARTICLES_API}/publish?articleId=${createdArticle.id}`)
+      .set('x-access-token', token)
+      .send(article);
+    expect(response.status).to.equal(200);
+    expect(response.body.data.publishedDate).to.equal(article.publishedDate);
+    expect(response.body.data.title).to.equal(article.title);
+    expect(response.body.data.body).to.equal(article.body);
+    expect(response.body.data.image).to.equal(article.image);
+    expect(response.body.data.authorId).to.equal(article.authorId);
+    expect(response.body.data.description).to.equal(article.description);
+  });
+  it('Returns 201 if the article was published immediately', async () => {
+    const firstUser = await createUser();
+    const token = await helper.jwtSigner(firstUser);
+    const response = await server()
+      .put(`${ARTICLES_API}/publish`)
+      .set('x-access-token', token)
+      .send(article);
+    expect(response.status).to.equal(201);
+    expect(response.body.data.createdArticle).to.not.equal(null);
+    expect(response.body.data.updatedAt).to.not.equal(null);
+    expect(response.body.data.publishedDate).to.not.equal(null);
+    expect(response.body.data.title).to.equal(article.title);
+    expect(response.body.data.body).to.equal(article.body);
+    expect(response.body.data.image).to.equal(article.image);
+    expect(response.body.data.authorId).to.equal(firstUser.id);
+    expect(response.body.data.description).to.equal(article.description);
+  });
+  it('should return error if database error occurs', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+    const createStub = await sinon
+      .stub(BaseRepository, 'create')
+      .rejects(new Error('Server Error'));
+    const response = await server()
+      .put(`${ARTICLES_API}/publish`)
+      .set('x-access-token', token)
+      .send(article);
+    expect(response.status).to.equal(500);
+    expect(response.body.message).to.equal('Server Error');
+    createStub.restore();
   });
 });
