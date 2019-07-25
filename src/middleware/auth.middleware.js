@@ -7,7 +7,7 @@ const decodeToken = (req, res, next, token) => {
       req.currentUser = decode;
       return next();
     }
-    return responseGenerator.sendError(res, 400, 'Token is not valid');
+    return responseGenerator.sendError(res, 401, 'Token is not valid');
   });
 };
 

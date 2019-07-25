@@ -218,7 +218,7 @@ describe('Test user login, signup and account verification', () => {
       const invalidToken = 'jhfhje88e8';
       const res = await server().patch(`/api/v1/auth/verify/${invalidToken}`);
 
-      expect(res.status).to.equal(400);
+      expect(res.status).to.equal(401);
       expect(res.body.message).to.equal('Token is not valid');
     });
 
@@ -231,7 +231,6 @@ describe('Test user login, signup and account verification', () => {
       const token = helper.jwtSigner(createdUser);
 
       const res = await server().patch(`/api/v1/auth/verify/${token}`);
-
       expect(res.status).to.equal(200);
       expect(res.body.message).to.equal('Your account has been activated.');
     });
@@ -245,7 +244,7 @@ describe('Test user login, signup and account verification', () => {
         .request(app)
         .patch(`/api/v1/auth/verify/${invalidToken}`)
         .end((err, res) => {
-          expect(res.status).to.equal(400);
+          expect(res.status).to.equal(401);
           findAllStub.restore();
         });
     });

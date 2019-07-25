@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+import slug from 'slug';
 import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
 import db from '../database/models';
@@ -31,7 +33,7 @@ class ArticleController {
             'title',
             'body',
             'image',
-            'published',
+            'publishedDate',
             'status'
           ]
         }
@@ -148,6 +150,143 @@ class ArticleController {
       );
     } catch (err) {
       return responseGenerator.sendError(res, 500, err.message);
+    }
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} request -- Request object
+   * @param {*} response -- Response object
+   * @returns {json} -- Returns a json object
+   * @memberof ArticleController
+   */
+  static async draftArticle(request, response) {
+    const { id: authorId } = request.currentUser;
+    const { title, description, body, image } = request.body;
+    const createDate = new Date();
+    try {
+      const article = await BaseRepository.create(db.Article, {
+        title,
+        description,
+        body,
+        image,
+        slug: slug(
+          `${title}-${crypto.randomBytes(12).toString('base64')}`
+        ).toLowerCase(),
+        authorId,
+        createdAt: createDate,
+        updatedAt: null
+      });
+      return responseGenerator.sendSuccess(
+        response,
+        201,
+        article,
+        'Artilcle successfully created'
+      );
+    } catch (error) {
+      return responseGenerator.sendError(response, 500, error.message);
+    }
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} request - - express request parameter
+   * @param {*} response - - express response parameter
+   * @returns {object} - - article object
+   * @memberof ArticleController
+   */
+  static async fetchSpecificArticle(request, response) {
+    const { article } = request;
+    return responseGenerator.sendSuccess(response, 200, article);
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} request - - express request parameter
+   * @param {*} response - - express response parameter
+   * @returns  {object} - - article object
+   * @memberof ArticleController
+   */
+  static async deleteArticle(request, response) {
+    const { articleId } = request.params;
+    const { id, role } = request.currentUser;
+    try {
+      const article = await BaseRepository.findOneByField(db.Article, {
+        id: articleId
+      });
+
+      if (article) {
+        if (article.authorId !== id && role !== 'superadmin') {
+          return responseGenerator.sendError(
+            response,
+            403,
+            'Unauthorized: You cannot delete this article'
+          );
+        }
+
+        await BaseRepository.remove(db.Article, { id: article.id });
+      }
+
+      return responseGenerator.sendSuccess(
+        response,
+        200,
+        null,
+        'Article successfully deleted'
+      );
+    } catch (error) {
+      return responseGenerator.sendError(response, 500, error.message);
+    }
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} request - - express request parameter
+   * @param {*} response - - express response parameter
+   * @returns {object} - - article object
+   * @memberof ArticleController
+   */
+  static async updateOneArticle(request, response) {
+    const { articleId } = request.params;
+    const { id: authorId } = request.currentUser;
+    const { title, description, body, image } = request.body;
+    const newUpdateDate = new Date();
+
+    try {
+      const updatedArticle = await BaseRepository.update(
+        db.Article,
+        {
+          title,
+          description,
+          body,
+          image,
+          updatedAt: newUpdateDate
+        },
+        { id: articleId, authorId }
+      );
+
+      if (updatedArticle[0]) {
+        return responseGenerator.sendSuccess(
+          response,
+          200,
+          updatedArticle[1][0].dataValues,
+          'Article successfully updated'
+        );
+      }
+      return responseGenerator.sendError(
+        response,
+        404,
+        'The requested article was not found'
+      );
+    } catch (error) {
+      return responseGenerator.sendError(response, 500, error.message);
     }
   }
 }

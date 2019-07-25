@@ -6,24 +6,42 @@ export default (sequelize, DataTypes) => {
   const Article = sequelize.define(
     'Article',
     {
-      title: DataTypes.STRING,
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          len: [2]
+        }
+      },
       body: DataTypes.TEXT,
       image: DataTypes.STRING,
-      published: DataTypes.BOOLEAN,
-      publisheddate: {
-        type: DataTypes.DATE,
-        field: 'published_date',
-        defaultValue: new Date()
-      },
+      publishedDate: DataTypes.DATE,
       status: {
-        type: DataTypes.ENUM('draft', 'active', 'deactivated'),
-        defaultValue: 'draft'
+        type: DataTypes.ENUM('active', 'deactivated'),
+        defaultValue: 'active'
       },
       authorId: DataTypes.INTEGER,
-      slug: DataTypes.STRING,
-      description: DataTypes.STRING
+      slug: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+      },
+      description: DataTypes.STRING,
+      createdAt: {
+        type: DataTypes.DATE,
+        defaultValue: new Date(),
+        allowNull: false
+      },
+      updatedAt: {
+        type: DataTypes.DATE
+      },
+      deletedAt: {
+        type: DataTypes.DATE
+      }
     },
-    {}
+    {
+      paranoid: true
+    }
   );
 
   Article.associate = models => {
