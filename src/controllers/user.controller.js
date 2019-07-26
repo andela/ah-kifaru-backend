@@ -200,17 +200,25 @@ class UserController {
    */
   static async updateProfile(req, res) {
     try {
-      const { avatar, bio } = req.body;
+      const { firstname, lastname, avatar, bio } = req.body;
       const { id: userId } = req.currentUser;
-
-      await BaseRepository.update(db.User, { avatar, bio }, { id: userId });
-
-      return responseGenerator.sendSuccess(
-        res,
-        200,
-        null,
-        'Record successfully updated'
-      );
+      const userExist = await BaseRepository.findOneByField(db.User, {
+        id: userId
+      });
+      if (userExist) {
+        await BaseRepository.update(
+          db.User,
+          { firstname, lastname, avatar, bio },
+          { id: userId }
+        );
+        return responseGenerator.sendSuccess(
+          res,
+          200,
+          null,
+          'Record successfully updated'
+        );
+      }
+      return responseGenerator.sendSuccess(res, 404, null, 'User not found');
     } catch (error) {
       return responseGenerator.sendError(res, 500, error.message);
     }

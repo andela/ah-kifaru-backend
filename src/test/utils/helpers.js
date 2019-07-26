@@ -21,7 +21,14 @@ export const createUser = async theUser => {
   const plain = await created.get({ plain: true });
   return plain;
 };
-
+export const generateUser = async ({ username }) => ({
+  username,
+  email: faker.internet.email().toLowerCase(),
+  avatar: faker.image.imageUrl().toLowerCase(),
+  password: faker.internet.password().toLowerCase(),
+  role: 'user',
+  status: 'unverified'
+});
 export const generateArticle = async ({ authorId }) => ({
   title: faker.lorem.word(),
   body: faker.lorem.sentences(),
@@ -88,4 +95,15 @@ export const articleWithShortDescription = {
   body: faker.lorem.paragraphs(),
   image: faker.image.imageUrl(),
   description: 'ak'
+};
+export const createTag = async theTag => {
+  const created = await BaseRepository.create(db.Tags, theTag);
+  const plain = await created.get({ plain: true });
+  return plain;
+};
+
+export const createArticleTag = async theArticleTag => {
+  const created = await BaseRepository.create(db.ArticleTags, theArticleTag);
+  const plain = await created.get({ plain: true });
+  return plain;
 };
