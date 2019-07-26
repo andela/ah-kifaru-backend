@@ -2,6 +2,7 @@ import db from '../database/models';
 import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
 import { checkRater } from '../middleware/users.middleware';
+import Pagination from '../helpers/pagination';
 
 const { Rating } = db;
 

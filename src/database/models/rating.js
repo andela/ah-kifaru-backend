@@ -23,6 +23,8 @@ export default (sequelize, DataTypes) => {
       as: 'rater',
       foreignKey: 'userId'
     });
+  };
+  Rating.associate = models => {
     Rating.belongsTo(models.Article, {
       as: 'rating',
       foreignKey: 'articleId'

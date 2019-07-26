@@ -247,6 +247,53 @@ class BaseRepository {
   static bulkCreate(model, data) {
     return model.bulkCreate(data);
   }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} page - page to render
+   * @param {*} limit - number of articles to display per request
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static async findByRatingsAndReviews(page = 0, limit = 9) {
+    const offset = page * 9;
+    return sequelize.query(
+      `SELECT a.id, a.title, a."publishedDate", a.title, a.image, a.description, AVG(r.ratings) avg_rating, COUNT(r."userId") count_rating, u.username
+      FROM "Articles" a
+      LEFT OUTER JOIN "Users" u ON u.id = a."authorId"
+      LEFT OUTER JOIN "Ratings" r ON r."articleId" = a.id
+      GROUP BY a.id, u.username
+      ORDER BY count_rating desc, avg_rating desc
+      LIMIT :limit OFFSET :offset`,
+      { replacements: { offset, limit }, type: sequelize.QueryTypes.SELECT }
+    );
+  }
+
+  /**
+   * @static
+   * @param {*} articleId - what to searchBy
+   * @param {*} model - model to search
+   * @param {*} searchBy - column name of what to seach by
+   * @param {*} value - column name of what to calculate average by
+   * @param {*} associatedModel - associated model name
+   * @param {*} alias - alias for the relationship
+   * @param {*} attributes - attributes to load from associated table
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static async findAverage(articleId) {
+    return sequelize.query(
+      `SELECT a.id, a.title, a.title, a.image, a.description, a.body, a."publishedDate", AVG(r.ratings) avg_rating, COUNT(r."userId") count_rating, u.username
+      FROM "Articles" a
+      LEFT OUTER JOIN "Users" u ON u.id = a."authorId"
+      LEFT OUTER JOIN "Ratings" r ON r."articleId" = a.id
+      WHERE a.id = :articleId and a."publishedDate" is not null
+      GROUP BY a.id, u.username;`,
+      { replacements: { articleId }, type: sequelize.QueryTypes.SELECT }
+    );
+  }
 }
 
 export default BaseRepository;

@@ -7,6 +7,7 @@ import RatingsController from '../../controllers/rating.controller';
 const validateRequest = validationMiddleware();
 
 const router = Router();
+
 router.patch(
   '/:articleId/ratings',
   authMiddleware,
