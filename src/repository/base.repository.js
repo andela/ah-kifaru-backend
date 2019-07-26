@@ -1,3 +1,17 @@
+import dotenv from 'dotenv';
+import Sequelize from 'sequelize';
+
+dotenv.config();
+
+const sequelize = new Sequelize({
+  username: process.env.DB_TEST_USERNAME,
+  password: process.env.DB_TEST_PASSWORD || '',
+  database: process.env.DB_TEST_DATABASE,
+  host: process.env.DB_TEST_HOST,
+  port: process.env.DB_PORT,
+  dialect: 'postgres'
+});
+
 /**
  * @class BaseRepository
  */
@@ -184,6 +198,41 @@ class BaseRepository {
    */
   static findOne(model, options) {
     return model.findByPk(options);
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object}  searchModified
+   * @returns {object} - returns a database object
+   * @memberof BaseRepository
+   */
+  static async searchAll(searchModified) {
+    return sequelize.query(
+      `SELECT a.id, a.title, a.body, a.description, u.username,
+    (similarity(?, u.username)) as user_score,
+    (similarity(?, a.title)) as title_score,
+    (similarity(?, tg.name)) as tag_score
+    from "Articles" a
+    JOIN "Users" u ON u.id = a."authorId"
+    JOIN "ArticleTags" at1 ON at1."articleId" = a.id
+    JOIN "Tags" tg ON tg.id = at1."tagId"
+    WHERE 
+    a."publishedDate" is not null
+    and a.status = 'active' and a."publishedDate" <= NOW()
+    and (u.username ilike ?
+    or a.title ilike ?
+    or tg.name ilike ?)
+    ORDER BY user_score, title_score, tag_score desc
+    LIMIT 10 OFFSET 0`,
+      {
+        replacements: new Array(3)
+          .fill(searchModified)
+          .concat(new Array(3).fill(`%${searchModified}%`)),
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
   }
 }
 

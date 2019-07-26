@@ -9,6 +9,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         unique: true
       },
+      firstname: DataTypes.STRING,
+      lastname: DataTypes.STRING,
       avatar: DataTypes.STRING,
       bio: DataTypes.STRING,
       password: DataTypes.STRING,
@@ -70,6 +72,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'articleId'
     });
   };
-
+  User.associate = models => {
+    User.hasMany(models.Article, {
+      foreignKey: 'authorId',
+      as: 'Article'
+    });
+  };
   return User;
 };

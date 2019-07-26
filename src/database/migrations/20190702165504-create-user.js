@@ -15,6 +15,12 @@ module.exports = {
         type: Sequelize.STRING,
         unique: true
       },
+      firstname: {
+        type: Sequelize.STRING
+      },
+      lastname: {
+        type: Sequelize.STRING
+      },
       avatar: {
         type: Sequelize.STRING
       },

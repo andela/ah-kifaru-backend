@@ -19,6 +19,8 @@ tags:
     description: 'API for articles' 
   - name : ratings
     description: 'API for ratings of Articles'
+  - name: 'search'
+    description: 'API for search'
 
 paths:
   /:
@@ -545,6 +547,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/badResponse" 
+          description: 'failed operation'
+  /search:
+    get: 
+      tags: 
+        - 'search'
+      summary : Do all searches
+      parameters:
+        - in: query
+          name: search
+          required: false
+          schema:
+            type: string
+          allowReserved: false 
+      responses:
+        200:
+          description: 'Successfull'
+          content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/response"      
+        400:          
           description: 'failed operation'
 
 components:
