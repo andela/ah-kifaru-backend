@@ -10,7 +10,8 @@ export const getUser = async () => ({
   avatar: faker.image.imageUrl().toLowerCase(),
   password: faker.internet.password().toLowerCase(),
   role: 'user',
-  status: 'unverified'
+  status: 'unverified',
+  emailNotify: false
 });
 
 export const createUser = async theUser => {
@@ -49,7 +50,7 @@ export const createArticle = async article => {
 };
 
 export const followUser = async (firstId, secondId) => {
-  await BaseRepository.create({
+  await BaseRepository.create(db.Follower, {
     followerId: secondId,
     followeeId: firstId
   });
@@ -106,4 +107,23 @@ export const createArticleTag = async theArticleTag => {
   const created = await BaseRepository.create(db.ArticleTags, theArticleTag);
   const plain = await created.get({ plain: true });
   return plain;
+};
+
+export const addNotification = async (receiverId, read, payload) => {
+  const notification = {
+    payload: payload || {},
+    read,
+    receiverId
+  };
+
+  const createNotification = await BaseRepository.create(
+    db.Notification,
+    notification
+  );
+  return createNotification;
+};
+
+export const newNotification = {
+  receiverId: 1,
+  payload: {}
 };
