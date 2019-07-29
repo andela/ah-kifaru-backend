@@ -67,7 +67,8 @@ export const article = {
   title: faker.lorem.sentence(),
   body: faker.lorem.paragraphs(),
   image: faker.image.imageUrl(),
-  description: faker.lorem.sentence()
+  description: faker.lorem.sentence(),
+  tag: 'javascript java ruby'
 };
 
 export const articleWithShortTitle = {

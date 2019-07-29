@@ -32,6 +32,7 @@ describe('PATCH api/v1/articles/bookmark', () => {
     await db.Bookmark.destroy({ cascade: true, truncate: true });
     await db.Article.destroy({ cascade: true, truncate: true });
     await db.User.destroy({ cascade: true, truncate: true });
+    await db.Article.destroy({ cascade: true, truncate: true });
   });
   it('should bookmark an article', async () => {
     const firstUser = await createUser();
@@ -683,6 +684,8 @@ describe('PUT /api/v1/articles/publish?articleId', () => {
     await db.Article.destroy({ cascade: true, truncate: true });
     await db.User.destroy({ cascade: true, truncate: true });
     await db.Follower.destroy({ cascade: true, truncate: true });
+    await db.Tags.destroy({ cascade: true, truncate: true });
+    await db.ArticleTags.destroy({ cascade: true, truncate: true });
   });
   it('Returns 400 if the article Id is provided but is not a number', async () => {
     const firstUser = await createUser();
@@ -748,11 +751,14 @@ describe('PUT /api/v1/articles/publish?articleId', () => {
     const token = await helper.jwtSigner(firstUser);
     const newArticle = await generateArticle({ authorId: firstUser.id });
     const createdArticle = await createArticle(newArticle);
+    const tags = article.tag.split(' ');
 
     const response = await server()
       .put(`${ARTICLES_API}/publish?articleId=${createdArticle.id}`)
       .set('x-access-token', token)
       .send(article);
+    const tagged = await BaseRepository.findAndCountAll(db.ArticleTags, {});
+    expect(tagged.count).to.equal(tags.length);
     expect(response.status).to.equal(200);
     expect(response.body.data.title).to.equal(article.title);
     expect(response.body.data.body).to.equal(article.body);
@@ -765,11 +771,14 @@ describe('PUT /api/v1/articles/publish?articleId', () => {
     const newArticle = await generateArticle({ authorId: firstUser.id });
     newArticle.publishedDate = '2019-07-22T08:51:47.224Z';
     const createdArticle = await createArticle(newArticle);
+    const tags = article.tag.split(' ');
 
     const response = await server()
       .put(`${ARTICLES_API}/publish?articleId=${createdArticle.id}`)
       .set('x-access-token', token)
       .send(article);
+    const tagged = await BaseRepository.findAndCountAll(db.ArticleTags, {});
+    expect(tagged.count).to.equal(tags.length);
     expect(response.status).to.equal(200);
     expect(response.body.data.publishedDate).to.equal(newArticle.publishedDate);
     expect(response.body.data.title).to.equal(article.title);
@@ -781,12 +790,15 @@ describe('PUT /api/v1/articles/publish?articleId', () => {
   it('Returns 201 if the article was published immediately', async () => {
     const firstUser = await createUser();
     const token = await helper.jwtSigner(firstUser);
+    const tags = article.tag.split(' ');
     const response = await server()
       .put(`${ARTICLES_API}/publish`)
       .set('x-access-token', token)
       .send(article);
+    const tagged = await BaseRepository.findAndCountAll(db.ArticleTags, {});
+    expect(tagged.count).to.equal(tags.length);
     expect(response.status).to.equal(201);
-    expect(response.body.data.createdArticle).to.not.equal(null);
+    expect(response.body.data.createdAt).to.not.equal(null);
     expect(response.body.data.updatedAt).to.not.equal(null);
     expect(response.body.data.publishedDate).to.not.equal(null);
     expect(response.body.data.title).to.equal(article.title);

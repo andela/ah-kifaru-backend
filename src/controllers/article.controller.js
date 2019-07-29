@@ -3,6 +3,7 @@ import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
 import db from '../database/models';
 import Pagination from '../helpers/pagination';
+import { articleTag } from '../helpers/tagArticle';
 
 /**
  * @class UserController
@@ -293,11 +294,10 @@ class ArticleController {
    * @returns {object} - article object
    * @memberof ArticleController
    */
-
   static async publishArticle(req, res) {
     const { articleId } = req.query;
     const { id: authorId } = req.currentUser;
-    const { title, description, body, image } = req.body;
+    const { title, description, body, image, tag } = req.body;
 
     let article, publishedArticle;
     try {
@@ -324,6 +324,7 @@ class ArticleController {
             id: articleId
           }
         );
+        await articleTag(tag, publishedArticle[1][0].dataValues.id);
         return responseGenerator.sendSuccess(
           res,
           200,
@@ -339,6 +340,7 @@ class ArticleController {
         image
       });
 
+      await articleTag(tag, publishedArticle.id);
       return responseGenerator.sendSuccess(res, 201, publishedArticle);
     } catch (error) {
       return responseGenerator.sendError(res, 500, error.message);

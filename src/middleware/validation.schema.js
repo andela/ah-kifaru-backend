@@ -147,19 +147,46 @@ const publishedArticle = {
     title: Joi.string()
       .min(3)
       .required()
+      .trim()
       .error(new Error('Title is required')),
     body: Joi.string()
       .min(3)
       .required()
+      .trim()
       .error(new Error('A body is required. . .')),
     image: Joi.string()
       .uri()
       .required()
+      .trim()
       .error(new Error('Invalid image url')),
     description: Joi.string()
       .min(3)
       .required()
-      .error(new Error('Enter a brief description for the article'))
+      .trim()
+      .error(new Error('Enter a brief description for the article')),
+    tag: Joi.string()
+      .min(2)
+      .error(new Error('Tag must be provided and should contain only letters'))
+  }
+};
+
+const createTag = {
+  body: {
+    tag: Joi.string()
+      .min(2)
+      .required()
+      .error(new Error('Tag must be provided and should contain only letters'))
+  }
+};
+
+const deleteTag = {
+  params: {
+    id: Joi.number()
+      .min(1)
+      .required()
+      .error(
+        new Error('Invalid tag id. Tag id must be a non-zero positive integer')
+      )
   }
 };
 
@@ -259,5 +286,15 @@ export default [
     route: '/opt',
     method: 'patch',
     schema: emailNotification
+  },
+  {
+    route: '/create',
+    method: 'put',
+    schema: createTag
+  },
+  {
+    route: '/:id/delete',
+    method: 'delete',
+    schema: deleteTag
   }
 ];

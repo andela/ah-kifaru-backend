@@ -4,6 +4,7 @@ import articleRoutes from './article.route';
 import ratingRoutes from './rating.route';
 import searchRoute from './search.route';
 import noitificationsRoute from './notification.route';
+import tagRoutes from './tag.route';
 
 export default app => {
   app.use('/auth', authRoutes);
@@ -13,4 +14,5 @@ export default app => {
   app.use('/api/v1/articles', ratingRoutes);
   app.use('/api/v1', searchRoute);
   app.use('/api/v1/notifications', noitificationsRoute);
+  app.use('/api/v1/tags', tagRoutes);
 };
