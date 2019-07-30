@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import ArticleController from '../../controllers/article.controller';
+import RatingsController from '../../controllers/rating.controller';
 import authMiddleware from '../../middleware/auth.middleware';
 import articleMiddleware from '../../middleware/article.middleware';
 import validationMiddleware from '../../middleware/validation.middleware';
@@ -72,6 +73,14 @@ router.get(
   '/:articleId',
   validateRequest,
   ArticleController.fetchSpecificArticle
+);
+
+router.patch(
+  '/:articleId/ratings',
+  authMiddleware,
+  validateRequest,
+  articleMiddleware,
+  RatingsController.rateArticles
 );
 
 export default router;

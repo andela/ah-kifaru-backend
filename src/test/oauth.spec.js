@@ -11,7 +11,7 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/facebook')
       .reply(200, { message: 'hit the route' });
 
-    const res = await chai.request(app).get('/auth/facebook');
+    const res = await chai.request(app).get('/api/v1/auth/facebook');
     expect(res.body.message).to.include('hit the route');
     expect(res.status).to.eql(200);
   });
@@ -22,7 +22,7 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/facebook/callback')
       .reply(200, { message: 'hit the route' });
 
-    const res = await chai.request(app).get('/auth/facebook/callback');
+    const res = await chai.request(app).get('/api/v1/auth/facebook/callback');
     expect(res.body.message).to.include('hit the route');
     expect(res.status).to.eql(200);
   });
@@ -33,7 +33,7 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/google')
       .reply(200, { message: 'hit the route' });
 
-    const res = await chai.request(app).get('/auth/google');
+    const res = await chai.request(app).get('/api/v1/auth/google');
     expect(res.body.message).to.include('hit the route');
     expect(res.status).to.eql(200);
   });
@@ -44,7 +44,7 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/google/callback')
       .reply(200, { message: 'hit the route' });
 
-    const res = await chai.request(app).get('/auth/google/redirect');
+    const res = await chai.request(app).get('/api/v1/auth/google/redirect');
     expect(res.body.message).to.include('hit the route');
     expect(res.status).to.eql(200);
   });
@@ -54,7 +54,7 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/github')
       .reply(200, 'hit the route');
 
-    const res = await chai.request(app).get('/auth/github');
+    const res = await chai.request(app).get('/api/v1/auth/github');
     expect(res.body).to.an('object');
   });
 
@@ -63,7 +63,7 @@ describe('SOCIAL LOGIN', () => {
       .get('/auth/github/callback')
       .reply(200, { message: 'hit the route' });
 
-    const res = await chai.request(app).get('/auth/github/callback');
+    const res = await chai.request(app).get('/api/v1/auth/github/callback');
     expect(res.body).to.an('object');
   });
 });

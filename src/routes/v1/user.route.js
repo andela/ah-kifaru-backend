@@ -9,10 +9,6 @@ import superAdminCheck from '../../middleware/permission.middleware';
 const router = Router();
 const validateRequest = validationMiddleware();
 
-router.post('/signup', validateRequest, UserController.createAccount);
-
-router.post('/login', validateRequest, UserController.loginUser);
-
 router.put(
   '/:id',
   validateRequest,
@@ -32,13 +28,6 @@ router.get(
   authMiddleware,
   paginationValidations,
   UserController.getFollowings
-);
-
-router.patch(
-  '/verify/:token',
-  validateRequest,
-  authMiddleware,
-  UserController.verifyUser
 );
 
 router.get('/', paginationValidations, UserController.listUsers);
