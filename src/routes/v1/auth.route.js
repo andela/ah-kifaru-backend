@@ -4,8 +4,23 @@ import '../../helpers/passport/google';
 import '../../helpers/passport/facebook';
 import { respondCallback } from '../../helpers/passport/callback';
 import responseGenerator from '../../helpers/responseGenerator';
+import validationMiddleware from '../../middleware/validation.middleware';
+import authMiddleware from '../../middleware/auth.middleware';
+import UserController from '../../controllers/user.controller';
 
 const router = express.Router();
+const validateRequest = validationMiddleware();
+
+router.post('/signup', validateRequest, UserController.createAccount);
+
+router.post('/login', validateRequest, UserController.loginUser);
+
+router.patch(
+  '/verify/:token',
+  validateRequest,
+  authMiddleware,
+  UserController.verifyUser
+);
 
 router.get(
   '/google',
