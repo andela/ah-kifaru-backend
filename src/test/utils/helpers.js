@@ -30,11 +30,12 @@ export const generateUser = async ({ username }) => ({
   role: 'user',
   status: 'unverified'
 });
-export const generateArticle = async ({ authorId }) => ({
+
+export const generateArticle = async ({ authorId, publishedDate = null }) => ({
   title: faker.lorem.word(),
   body: faker.lorem.sentences(),
   image: faker.image.imageUrl(),
-  publishedDate: null,
+  publishedDate,
   authorId,
   slug: slug(
     `${faker.lorem.word()}-${crypto.randomBytes(12).toString('base64')}`
@@ -54,6 +55,10 @@ export const followUser = async (firstId, secondId) => {
     followerId: secondId,
     followeeId: firstId
   });
+};
+
+export const rateArticle = async ({ articleId, userId, ratings }) => {
+  await BaseRepository.create(db.Rating, { articleId, userId, ratings });
 };
 
 export const ratings = {

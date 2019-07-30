@@ -186,17 +186,28 @@ class ArticleController {
   }
 
   /**
-   *
-   *
+   * Retunrs the specific article
+   * @async
+   * @param {object} req - Request object
+   * @param {object} res - Response object
+   * @return {json} Returns json object
    * @static
-   * @param {*} request - - express request parameter
-   * @param {*} response - - express response parameter
-   * @returns {object} - - article object
-   * @memberof ArticleController
    */
-  static async fetchSpecificArticle(request, response) {
-    const { article } = request;
-    return responseGenerator.sendSuccess(response, 200, article);
+  static async fetchSpecificArticle(req, res) {
+    const { articleId } = req.params;
+    try {
+      const theArticle = await BaseRepository.findAverage(articleId);
+      if (theArticle.length < 1) {
+        return responseGenerator.sendError(
+          res,
+          404,
+          'The requested article was not found'
+        );
+      }
+      return responseGenerator.sendSuccess(res, 200, theArticle);
+    } catch (err) {
+      return responseGenerator.sendError(res, 500, err.message);
+    }
   }
 
   /**
@@ -344,6 +355,37 @@ class ArticleController {
       return responseGenerator.sendSuccess(res, 201, publishedArticle);
     } catch (error) {
       return responseGenerator.sendError(res, 500, error.message);
+    }
+  }
+
+  /**
+   * Retunrs articles in descending order based on number of reviews and ratings
+   * @async
+   * @param {object} req - Request object
+   * @param {object} res - Response object
+   * @return {json} Returns json object
+   * @static
+   */
+  static async fetchArticlesByRatings(req, res) {
+    try {
+      const { page } = req.query;
+      const paginate = new Pagination(page, req.query.limit);
+      const { offset } = paginate.getQueryMetadata();
+
+      const fetchArticles = await BaseRepository.findByRatingsAndReviews(
+        offset
+      );
+      if (fetchArticles.length < 1) {
+        return responseGenerator.sendSuccess(
+          res,
+          200,
+          fetchArticles,
+          'There are no articles at the moment'
+        );
+      }
+      return responseGenerator.sendSuccess(res, 200, fetchArticles);
+    } catch (err) {
+      return responseGenerator.sendError(res, 500, err.message);
     }
   }
 }

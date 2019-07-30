@@ -11,7 +11,8 @@ import {
   articleWithShortBody,
   articleWithShortDescription,
   articleWithShortImage,
-  articleWithShortTitle
+  articleWithShortTitle,
+  rateArticle
 } from './utils/helpers';
 import db from '../database/models';
 import helper from '../helpers/utils';
@@ -290,7 +291,6 @@ describe('GET api/v1/articles', () => {
 
     const numberOfArticles = await BaseRepository.findAndCountAll(db.Article);
     const token = helper.jwtSigner(firstUser);
-    expect(numberOfArticles.count).to.equal(5);
     const page = 2;
     const limit = 2;
     const res = await server()
@@ -417,19 +417,62 @@ describe('GET /api/v1/articles/:articleId', () => {
   });
 
   it('should successfully get a specific article', async () => {
-    const validArticle = await BaseRepository.create(db.Article, articleSample);
-    const article = await BaseRepository.findOne(db.Article, validArticle.id);
+    const firstUser = await createUser();
+    const secondUser = await createUser();
+    const thirdUser = await createUser();
+    const fourthUser = await createUser();
 
-    const response = await server().get(`/api/v1/articles/${validArticle.id}`);
-    expect(response.status).to.equal(200);
-    expect(response.body.data.title).to.equal(article.title);
-    expect(response.body.data.description).to.equal(article.description);
-    expect(response.body.data.body).to.equal(article.body);
-    expect(response.body.data.image).to.equal(article.image);
-    expect(response.body.data.slug).to.equal(article.slug);
-    expect(response.body.data.slug).to.be.a('string');
-    expect(response.body.data.authorId).to.equal(article.authorId);
-    expect(response.body.data.publishedDate).to.equal(null);
+    const firstArticle = await createArticle(
+      await generateArticle({
+        authorId: firstUser.id,
+        publishedDate: new Date()
+      })
+    );
+
+    await createArticle(await generateArticle({ authorId: firstUser.id }));
+
+    await rateArticle({
+      articleId: firstArticle.id,
+      userId: secondUser.id,
+      ratings: 5
+    });
+
+    await rateArticle({
+      articleId: firstArticle.id,
+      userId: thirdUser.id,
+      ratings: 3
+    });
+
+    await rateArticle({
+      articleId: firstArticle.id,
+      userId: fourthUser.id,
+      ratings: 3
+    });
+
+    const totalRatings = await BaseRepository.findAndCountAll(db.Rating, {
+      where: { articleId: firstArticle.id }
+    });
+
+    const res = await server().get(`${ARTICLES_API}/${firstArticle.id}`);
+    expect(res.status).to.equal(200);
+    expect(res.body.data[0].id).to.equal(firstArticle.id);
+    expect(res.body.data[0].title).to.equal(firstArticle.title);
+    expect(res.body.data[0].description).to.equal(firstArticle.description);
+    expect(Number(res.body.data[0].count_rating)).to.equal(totalRatings.count);
+    expect(res.body.data[0].username).to.equal(firstUser.username);
+    expect(res.body.data[0].image).to.equal(firstArticle.image);
+    expect(res.body.data[0].body).to.equal(firstArticle.body);
+
+    expect(
+      Number(Number(`${res.body.data[0].avg_rating}`).toFixed(1))
+    ).to.equal(
+      Number(
+        (
+          totalRatings.rows.reduce((sum, current) => sum + current.ratings, 0) /
+          totalRatings.count
+        ).toFixed(1)
+      )
+    );
   });
 
   it('should throw a 404 status code when a specific article is not found', async () => {
@@ -450,6 +493,36 @@ describe('GET /api/v1/articles/:articleId', () => {
     expect(response.body.message).to.equal(
       'Invalid Article ID. Article ID must be a positive integer'
     );
+  });
+
+  it('should return an error if database error occurs', async () => {
+    const firstUser = await createUser();
+    const secondUser = await createUser();
+
+    const firstArticle = await createArticle(
+      await generateArticle({
+        authorId: firstUser.id,
+        publishedDate: new Date()
+      })
+    );
+
+    await createArticle(await generateArticle({ authorId: firstUser.id }));
+
+    await rateArticle({
+      articleId: firstArticle.id,
+      userId: secondUser.id,
+      ratings: 5
+    });
+
+    const findAllStub = sinon.stub(BaseRepository, 'findAverage');
+    findAllStub.rejects(new Error('Server Error'));
+
+    const res = await server().get(`${ARTICLES_API}/${firstArticle.id}`);
+
+    expect(res.status).to.equal(500);
+    expect(res.body.message).to.equal('Server Error');
+
+    findAllStub.restore();
   });
 });
 
@@ -820,5 +893,107 @@ describe('PUT /api/v1/articles/publish?articleId', () => {
     expect(response.status).to.equal(500);
     expect(response.body.message).to.equal('Server Error');
     createStub.restore();
+  });
+});
+
+describe('GET /api/v1/articles/popular', () => {
+  beforeEach(async () => {
+    await db.Rating.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Article.destroy({ cascade: true, truncate: true });
+  });
+  it('should get article by ratings', async () => {
+    const firstUser = await createUser();
+    const secondUser = await createUser();
+    const thirdUser = await createUser();
+    const fourthUser = await createUser();
+    const fifthUser = await createUser();
+
+    const firstArticle = await createArticle(
+      await generateArticle({ authorId: firstUser.id })
+    );
+    const secondArticle = await createArticle(
+      await generateArticle({ authorId: firstUser.id })
+    );
+    await rateArticle({
+      articleId: firstArticle.id,
+      userId: secondUser.id,
+      ratings: 5
+    });
+    await rateArticle({
+      articleId: firstArticle.id,
+      userId: thirdUser.id,
+      ratings: 3
+    });
+    await rateArticle({
+      articleId: firstArticle.id,
+      userId: fourthUser.id,
+      ratings: 4
+    });
+    await rateArticle({
+      articleId: secondArticle.id,
+      userId: fifthUser.id,
+      ratings: 1
+    });
+
+    const page = 1;
+    const limit = 3;
+
+    const numberOfRatings = await BaseRepository.findAndCountAll(db.Rating, {
+      where: { articleId: firstArticle.id }
+    });
+
+    const res = await server().get(
+      `${ARTICLES_API}/popular?page=${page}&limit=${limit}`
+    );
+    expect(res.status).to.equal(200);
+    expect(Number(`${res.body.data[0].count_rating}`)).to.equal(
+      Number(`${numberOfRatings.count}`)
+    );
+    expect(
+      Number(Number(`${res.body.data[0].avg_rating}`).toFixed(1))
+    ).to.equal(
+      Number(
+        (
+          numberOfRatings.rows.reduce(
+            (sum, current) => sum + current.ratings,
+            0
+          ) / numberOfRatings.count
+        ).toFixed(1)
+      )
+    );
+    expect(res.body.data[1].id).to.equal(secondArticle.id);
+    expect(res.body.data[1].title).to.equal(secondArticle.title);
+    expect(res.body.data[1].username).to.equal(firstUser.username);
+    expect(res.body.data[0].id).to.equal(firstArticle.id);
+    expect(res.body.data[0].title).to.equal(firstArticle.title);
+    expect(res.body.data[0].username).to.equal(firstUser.username);
+  });
+
+  it('should return appropriate message if there are no articles', async () => {
+    const page = 1;
+    const limit = 3;
+
+    const res = await server().get(
+      `${ARTICLES_API}/popular?page=${page}&limit=${limit}`
+    );
+    expect(res.status).to.equal(200);
+    expect(res.body.message).to.equal('There are no articles at the moment');
+  });
+
+  it('should return an error if database error occurs', async () => {
+    const findAllStub = sinon.stub(BaseRepository, 'findByRatingsAndReviews');
+    findAllStub.rejects(new Error('Server Error'));
+
+    const page = 1;
+    const limit = 1;
+    const res = await server().get(
+      `${ARTICLES_API}/popular?page=${page}&limit=${limit}`
+    );
+
+    expect(res.status).to.equal(500);
+    expect(res.body.message).to.equal('Server Error');
+
+    findAllStub.restore();
   });
 });

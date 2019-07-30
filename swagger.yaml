@@ -687,6 +687,25 @@ paths:
                   $ref: "#/components/schemas/response"      
         400:          
           description: 'failed operation'
+  /articles/popular:
+    patch:
+      tags:
+        - 'popular articles'
+      summary: 'Fetch articles by populairty and number of reviewers'
+      description: 'Most popular articles on error swag are displayed in descending order'
+      produces:
+        - 'application/xml'
+        - 'application/json'
+    responses:
+      200:
+        description: 'successful operation'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/response'
+    404:
+      description: 'No available articles on errorswad'
+
 
   /tags:
     get: 

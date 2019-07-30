@@ -4,12 +4,18 @@ import authMiddleware from '../../middleware/auth.middleware';
 import articleMiddleware from '../../middleware/article.middleware';
 import validationMiddleware from '../../middleware/validation.middleware';
 import paginationValidations from '../../middleware/pagination.validation';
-import RatingsController from '../../controllers/rating.controller';
 
 const validateRequest = validationMiddleware();
 
 const router = Router();
+
 router.get('/', paginationValidations, ArticleController.fetchAllArticles);
+
+router.get(
+  '/popular',
+  paginationValidations,
+  ArticleController.fetchArticlesByRatings
+);
 
 router.get(
   '/bookmarks',
@@ -17,6 +23,7 @@ router.get(
   authMiddleware,
   ArticleController.getBookMarks
 );
+
 router.patch(
   '/bookmark',
   validateRequest,
@@ -24,6 +31,7 @@ router.patch(
   authMiddleware,
   ArticleController.addBookMark
 );
+
 router.patch(
   '/unbookmark',
   validateRequest,
@@ -31,13 +39,7 @@ router.patch(
   authMiddleware,
   ArticleController.removeBookMark
 );
-router.patch(
-  '/:articleId/ratings',
-  authMiddleware,
-  validateRequest,
-  articleMiddleware,
-  RatingsController.rateArticles
-);
+
 router.put(
   '/publish',
   authMiddleware,
@@ -52,13 +54,6 @@ router.post(
   ArticleController.createDraft
 );
 
-router.get(
-  '/:articleId',
-  validateRequest,
-  articleMiddleware,
-  ArticleController.fetchSpecificArticle
-);
-
 router.delete(
   '/:articleId',
   authMiddleware,
@@ -71,6 +66,12 @@ router.put(
   authMiddleware,
   validateRequest,
   ArticleController.updateOneArticle
+);
+
+router.get(
+  '/:articleId',
+  validateRequest,
+  ArticleController.fetchSpecificArticle
 );
 
 export default router;
