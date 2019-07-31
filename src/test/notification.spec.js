@@ -58,7 +58,10 @@ describe('Notification helper functions', () => {
         type: 'new_follower'
       };
 
-      await onFollowNotification(follower, followee.id);
+      await onFollowNotification(
+        { protocol: null, currentUser: follower },
+        followee.id
+      );
       const notification = await BaseRepository.findAll(db.Notification, {
         receiverId: followee.id
       });
@@ -82,7 +85,10 @@ describe('Notification helper functions', () => {
         type: 'new_comment'
       };
 
-      await onCommentNotification(commenter, article.id);
+      await onCommentNotification(
+        { protocol: null, currentUser: commenter },
+        article.id
+      );
 
       const notification = await BaseRepository.findAll(db.Notification, {
         receiverId: author.id
@@ -113,10 +119,13 @@ describe('Notification helper functions', () => {
         type: 'new_article'
       };
 
-      await onPublishArticleNotification({
-        userId: author.id,
-        articleId: article.id
-      });
+      await onPublishArticleNotification(
+        { protocol: null },
+        {
+          userId: author.id,
+          articleId: article.id
+        }
+      );
 
       const notification = await BaseRepository.findAll(db.Notification, {});
 

@@ -63,7 +63,7 @@ class UserController {
         receiver: email,
         subject: 'Welcome to ErrorSwag',
         templateName: 'confirm_account',
-        confirm_account_url: `${protocol}://${req.get(
+        buttonUrl: `${protocol}://${req.get(
           'host'
         )}/api/v1/auth/verify/${token}`
       });
@@ -115,7 +115,7 @@ class UserController {
               receiver: email,
               subject: 'Welcome to ErrorSwag',
               templateName: 'confirm_account',
-              confirm_account_url: `${protocol}://${req.get(
+              buttonUrl: `${protocol}://${req.get(
                 'host'
               )}/api/v1/auth/verify/${token}`
             });
@@ -392,7 +392,7 @@ class UserController {
       const [user, created] = followedUser;
 
       if (created) {
-        await onFollowNotification(req.currentUser, followeeId);
+        await onFollowNotification(req, followeeId);
 
         return responseGenerator.sendSuccess(
           res,

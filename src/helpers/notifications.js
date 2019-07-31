@@ -2,6 +2,7 @@ import Pusher from 'pusher';
 import dotenv from 'dotenv';
 import BaseRepository from '../repository/base.repository';
 import db from '../database/models';
+import mailer from './mailer';
 
 dotenv.config();
 
@@ -31,12 +32,31 @@ const createInAppNotification = async ({ receiverId, payload }) => {
 };
 
 // ON FOLLOW NOTICATION
-const onFollowNotification = async (sender, followeeId) => {
-  const receiverId = followeeId;
+const onFollowNotification = async (req, followeeId) => {
+  const { protocol, currentUser: sender } = req;
+
+  const receiver = await BaseRepository.findOneByField(db.User, {
+    id: followeeId
+  });
+
   const payload = {
     follower: sender.username,
     type: 'new_follower'
   };
+
+  const { id: receiverId, username, email, emailNotify } = receiver;
+
+  // SEND EMAIL TO THE FOLLOWED USER
+  if (emailNotify) {
+    mailer({
+      name: username,
+      receiver: email,
+      subject: `<b>${sender.username}</b> just followed you.`,
+      templateName: 'new_notification',
+      buttonUrl: `${protocol}://${req.get('host')}/profile/${sender.username}`
+    });
+  }
+
   await createInAppNotification({
     receiverId,
     payload
@@ -45,7 +65,8 @@ const onFollowNotification = async (sender, followeeId) => {
 };
 
 // ON COMMENT NOTICATION
-const onCommentNotification = async (sender, articleId) => {
+const onCommentNotification = async (req, articleId) => {
+  const { protocol, currentUser: sender } = req;
   const article = await BaseRepository.findAndInclude({
     model: db.Article,
     options: { id: articleId },
@@ -60,6 +81,19 @@ const onCommentNotification = async (sender, articleId) => {
     type: 'new_comment'
   };
 
+  // SEND EMAIL TO THE AUTHOR
+  if (article[0]['author.emailNotify']) {
+    mailer({
+      name: article[0]['author.username'],
+      receiver: article[0]['author.email'],
+      subject: `<b>${sender.username}</b> just commented on <b>${article[0].title}</b>`,
+      templateName: 'new_notification',
+      buttonUrl: `${protocol}://${req.get('host')}/article/${
+        article[0].slug
+      }/#commentId`
+    });
+  }
+
   await createInAppNotification({
     receiverId: article[0]['author.id'],
     payload
@@ -69,7 +103,7 @@ const onCommentNotification = async (sender, articleId) => {
 };
 
 // ON PUBLISH NOTICATION
-const onPublishArticleNotification = async ({ userId, articleId }) => {
+const onPublishArticleNotification = async (req, { userId, articleId }) => {
   const followers = await BaseRepository.findAndInclude({
     model: db.Follower,
     options: { followeeId: userId },
@@ -84,6 +118,8 @@ const onPublishArticleNotification = async ({ userId, articleId }) => {
     alias: 'author'
   });
 
+  const followerEmails = followers.filter(follower => follower.emailNotify);
+
   const followerIds = followers.map(follower => follower.followerId);
   const payload = {
     author: article[0]['author.username'],
@@ -91,6 +127,20 @@ const onPublishArticleNotification = async ({ userId, articleId }) => {
     slug: article[0].slug,
     type: 'new_article'
   };
+
+  // SEND EMAIL TO ALL FOLLOWERS
+  const { protocol } = req || {};
+  followerEmails.forEach(email => {
+    mailer({
+      name: article[0]['author.username'],
+      receiver: email,
+      subject: `<b>${article[0]['author.username']}</b> just published <b>${
+        article[0].title
+      }</b>`,
+      templateName: 'new_notification',
+      buttonUrl: `${protocol}://${req.get('host')}/article/${article[0].slug}`
+    });
+  });
 
   const data = followerIds.map(id => ({
     receiverId: id,
