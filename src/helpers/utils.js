@@ -32,8 +32,9 @@ export default {
    * @param {*} payload - payload for jwt
    * @returns {string} - return jwt token
    */
-  jwtSigner(payload) {
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
+
+  jwtSigner(payload, expiresIn = '24h') {
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn });
   },
 
   /**

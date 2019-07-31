@@ -48,6 +48,16 @@ const loginSchema = {
     password
   }
 };
+const resetPasswordSchema = {
+  body: {
+    email
+  }
+};
+const resetSchema = {
+  body: {
+    email
+  }
+};
 
 const verifyTokenSchema = {
   params: {
@@ -216,6 +226,16 @@ export default [
     route: '/login',
     method: 'post',
     schema: loginSchema
+  },
+  {
+    route: '/reset-password',
+    method: 'post',
+    schema: resetSchema
+  },
+  {
+    route: '/auth/reset-password',
+    method: 'post',
+    schema: resetPasswordSchema
   },
   {
     route: '/verify/:token',

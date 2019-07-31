@@ -421,6 +421,10 @@ describe('GET /api/v1/articles/:articleId', () => {
     const secondUser = await createUser();
     const thirdUser = await createUser();
     const fourthUser = await createUser();
+    const validArticle = await BaseRepository.create(db.Article, articleSample);
+    const article = await BaseRepository.findOne(db.Article, {
+      id: validArticle.id
+    });
 
     const firstArticle = await createArticle(
       await generateArticle({

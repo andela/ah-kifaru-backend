@@ -5,11 +5,12 @@ import nock from 'nock';
 import { config } from 'dotenv';
 import jwt from 'jsonwebtoken';
 import app from '../index';
-
 import BaseRepository from '../repository/base.repository';
 import { createUser, getUser } from './utils/helpers';
 import db from '../database/models';
 import helper from '../helpers/utils';
+
+const faketoken = 'somefaketoken56789032';
 
 const USER_API = '/api/v1/users';
 
@@ -201,7 +202,6 @@ describe('Test user login, signup and account verification', () => {
           email: user.email,
           password: user.password
         });
-
       expect(res.status).to.equal(200);
       expect(res.body.message).to.equal(
         'Account has not been activated. Kindly check your email address for a verification link.'
@@ -888,5 +888,117 @@ describe('GET /api/v1/users/followings', () => {
     expect(res.body.metadata.prev).to.equal(null);
     expect(res.body.metadata.currentPage).to.equal(page);
     expect(res.body.metadata.totalItems).to.equal(numberOfFollowing.count);
+  });
+});
+
+describe(' POST /api/v1/auth/reset-password', async () => {
+  const newUser = await createUser();
+  const user = await BaseRepository.findAll(db.User, {
+    id: newUser.email
+  });
+  it('it should send password reset link to the email provided if it is associated with a registered email', done => {
+    const token = helper.jwtSigner(
+      { email: 'olorunwalawrence5@gmail.com' },
+      600
+    );
+    chai
+      .request(app)
+      .post('/api/v1/auth/reset-password')
+      .set('x-access-token', token)
+      .send({
+        email: 'olorunwalawrence5@gmail.com'
+      })
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.body.message).to.be.equal(
+          'A password reset link would be sent to the email provided if it is associated with a registered email'
+        );
+      });
+
+    done();
+  });
+
+  it('should return invalid email credential', done => {
+    const token = helper.jwtSigner(
+      { email: 'olorunwalawrence5@gmail.com' },
+      600
+    );
+    chai
+      .request(app)
+      .post('/api/v1/auth/reset-password')
+      .set('x-access-token', token)
+      .send({
+        email: '1example@gmail.com'
+      })
+      .end((err, res) => {
+        expect(res.status).to.equal(401);
+        expect(res.body.message).to.be.equal(
+          'Email does not match any account in our record'
+        );
+        done();
+      });
+  });
+
+  it('should return invalid verification link', async () => {
+    const users = await getUser();
+    const token = helper.jwtSigner(users);
+    chai
+      .request(app)
+      .put(`/api/v1/auth/reset-password/${token}`)
+      .set('x-access-token', 'faketoken')
+      .send({
+        password: 'Somepassword'
+      })
+      .end((err, res) => {
+        expect(res.status).to.equal(400);
+        expect(res.body).to.have.property('message');
+        expect(res.body.message).to.equal('Token is not valid');
+      });
+  });
+
+  it('fail to authenticate when password is not provided', async () => {
+    const users = await getUser();
+    const token = helper.jwtSigner(users);
+    chai
+      .request(app)
+      .put(`/api/v1/auth/reset-password/${token}`)
+      .send({})
+      .end((err, res) => {
+        expect(res.status).to.equal(400);
+        expect(res.body).to.have.property('message');
+        expect(res.body.message).to.equal('password is required');
+      });
+  });
+
+  it('throw validation error if password is not provided', async () => {
+    const users = await createUser();
+    user.password = '';
+
+    const token = helper.jwtSigner(users);
+    chai
+      .request(app)
+      .put(`/api/v1/auth/reset-password/${token}`)
+      .set('x-access-token', token)
+      .send({})
+      .end((err, res) => {
+        expect(res.status).to.equal(400);
+        expect(res.body.message).to.equal('password is required');
+      });
+  });
+
+  it('should return invalid token if the token is invalid', done => {
+    chai
+      .request(app)
+      .put(`/api/v1/auth/reset-password/${faketoken}`)
+      .set('x-access-token', 'faketoken')
+      .send({
+        password: 'Userboyboy'
+      })
+      .end((err, res) => {
+        expect(res.status).to.equal(400);
+        expect(res.body).to.have.property('message');
+        expect(res.body.message).to.equal('Token is not valid');
+        done();
+      });
   });
 });

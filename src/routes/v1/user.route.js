@@ -8,6 +8,19 @@ import superAdminCheck from '../../middleware/permission.middleware';
 
 const router = Router();
 const validateRequest = validationMiddleware();
+const { resetPassword, reset } = UserController;
+
+router.post('/signup', validateRequest, UserController.createAccount);
+
+router.post('/login', validateRequest, UserController.loginUser);
+router.post('/reset-password', resetPassword);
+router.patch(
+  '/verify/:token',
+  validateRequest,
+  authMiddleware,
+  UserController.verifyUser
+);
+router.put('/reset-password/:token', validateRequest, authMiddleware, reset);
 
 router.put(
   '/:id',

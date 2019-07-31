@@ -23,7 +23,6 @@ const mailer = data => {
       reset_password_url: data.reset_password_url
     }
   };
-
   return sgMail.send(msg);
 };
 

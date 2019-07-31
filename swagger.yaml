@@ -783,6 +783,82 @@ paths:
       security:
         - api_key: []
 
+  /tags:
+    get: 
+      tags: 
+        - 'Tags'
+      summary : Fetch All Tags
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: The current page
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: The numbers of items to return
+      responses:
+        200:
+          description: 'Successfull'
+          content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/response"      
+        400:          
+          description: 'failed operation'  
+    post:
+      tags:
+        - 'Tags'
+      summary: Create an tags on errorswag
+      description: Create a tag
+      operationId: createTag
+      parameters:
+        - in: body
+          name: body
+          description: Information to be sent to create an article
+          required: true
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              title:
+                type: string
+      responses:
+        '201':
+          description: ag has been created
+        '200':
+          description: Tag exists
+        '401':
+          description: Not authorized to create a tag
+        '500':
+          description: Server error
+      security:
+        - api_key: []
+  /:id/delete:
+    delete:
+      tags:
+        - 'Tags'
+      summary: Delete tags
+      description: Delete tags
+      operationId: DeleteTags
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: tagId
+          required: true
+          type: number
+      responses:
+        '200':
+          description: Tag successfully deleted
+        '500':
+          description: Server error
+      security:
+        - api_key: []
+
 components:
   schemas:
     response:
@@ -800,4 +876,3 @@ components:
       properties:
         message:
           type: string
-

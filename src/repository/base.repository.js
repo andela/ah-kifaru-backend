@@ -54,6 +54,17 @@ class BaseRepository {
 
   /**
    * @static
+   * @param {*} model
+   * @param {*} options
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static async find(model, options) {
+    return model.find({ where: options });
+  }
+
+  /**
+   * @static
    * @param {object} model - database model
    * @param {object} options - data to sprcific to the rows to be deleted in the database
    * @returns {*} - data of the user, and a boolean for whether or not it was just created
@@ -197,7 +208,31 @@ class BaseRepository {
    * @memberof BaseRepository
    */
   static findOne(model, options) {
-    return model.findByPk(options);
+    return model.findOne(options);
+  }
+
+  /**
+   * @static
+   * @param {*} model
+   * @param {*} options
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static findOneByEmail(model, options) {
+    return model.findOne(options);
+  }
+
+  /**
+   * @static
+   * @param {*} model
+   * @param {*} options
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static async delete(model, options) {
+    return model.destory({
+      where: options
+    });
   }
 
   /**
