@@ -14,11 +14,7 @@ module.exports = {
         references: {
           model: 'Users',
           key: 'id',
-<<<<<<< HEAD
           as: 'userId'
-=======
-          as: 'reporterId'
->>>>>>> reportArticle(): create article report
         }
       },
       articleId: {
@@ -37,19 +33,12 @@ module.exports = {
           'Discrimination',
           'Plagiarism',
           'Sexual Content',
-<<<<<<< HEAD
           'Others',
-=======
->>>>>>> reportArticle(): create article report
           'Offensive Language'
         )
       },
       description: {
-<<<<<<< HEAD
         allowNull: true,
-=======
-        allowNull: false,
->>>>>>> reportArticle(): create article report
         type: Sequelize.STRING
       },
       resolved: {

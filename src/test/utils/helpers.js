@@ -53,9 +53,6 @@ export const generateReport = async ({
   reporterId,
   articleId,
   description,
-});
-export const generateReport = async ({ violation }) => ({
-  description: faker.lorem.sentences(),
   violation
 });
 
