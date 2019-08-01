@@ -44,6 +44,36 @@ export const generateArticle = async ({ authorId, publishedDate = null }) => ({
   status: 'active'
 });
 
+export const generateReport = async ({
+  reporterId,
+  articleId,
+  violation,
+  description = faker.lorem.word()
+}) => ({
+  reporterId,
+  articleId,
+  description,
+  violation
+});
+
+export const reportArticle = async (articleId, report) => {
+  const created = await BaseRepository.findOrCreate(
+    db.Report,
+    { articleId },
+    report
+  );
+  return created;
+};
+
+export const createArticle2 = async article => {
+  const created = await BaseRepository.findOrCreate(
+    db.Article,
+    { id: article.id },
+    article
+  );
+  return created;
+};
+
 export const createArticle = async article => {
   const created = await BaseRepository.create(db.Article, article);
   const plain = await created.get({ plain: true });
