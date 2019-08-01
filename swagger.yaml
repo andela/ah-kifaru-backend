@@ -859,6 +859,38 @@ paths:
       security:
         - api_key: []
 
+  "/api/v1/articles/{articleId}/report":
+  post:
+    tags:
+    - Articles
+    summary: Route for authenticated users to report articles
+    description: Returns a message on the status of the case
+    parameters:
+    - in: body
+      name: body
+      description: object containing the violation details of the article
+      required: true
+      schema:
+        "$ref": "#/definitions/report"
+    - in: path
+      name: articleId
+      description: The id for the article to be reported
+      required: true
+    - in: header
+      name: authorization
+      description: user token
+      required: true
+    responses:
+      '201':
+        description: article successfully reported
+        schema:
+          "$ref": "#/definitions/reportRes1"
+      '401':
+        description: User access required
+      '409':
+        description: article has been reported by authenticated user before
+        schema:
+          "$ref": "#/definitions/reportRes2"
 components:
   schemas:
     response:
