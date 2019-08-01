@@ -62,6 +62,7 @@ describe('GET api/v1/search', () => {
     const res = await server().get(
       `${SEARCH_API}?search=${firstUser.username}`
     );
+
     expect(res.status).to.equal(200);
     expect(res.body.data).to.be.an('array');
     expect(res.body.data[0].username).to.equal(firstUser.username);

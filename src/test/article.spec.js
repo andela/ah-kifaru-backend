@@ -12,7 +12,10 @@ import {
   articleWithShortDescription,
   articleWithShortImage,
   articleWithShortTitle,
-  rateArticle
+  rateArticle,
+  createArticle2,
+  reportArticle,
+  generateReport
 } from './utils/helpers';
 import db from '../database/models';
 import helper from '../helpers/utils';
@@ -753,6 +756,201 @@ describe('PUT /api/v1/articles/:articleId', () => {
       'Your request cannot be processed right now, Please try again later'
     );
     findAllStub.restore();
+  });
+});
+
+describe('POST api/v1/articles/:articleId/report', () => {
+  beforeEach(async () => {
+    await db.User.destroy({ cascade: true, truncate: true });
+    await db.Article.destroy({ cascade: true, truncate: true });
+    await db.Report.destroy({ cascade: true, truncate: true });
+  });
+  it('should report an article', async () => {
+    const reporter = await createUser();
+    const author = await createUser();
+
+    const article = await BaseRepository.create(db.Article, {
+      ...articleSample,
+      authorId: author.id
+    });
+
+    const token = helper.jwtSigner(reporter);
+    const res = await server()
+      .post(`/api/v1/articles/${article.id}/report`)
+      .set('x-access-token', token)
+      .send({
+        reporterId: reporter.id,
+        articleId: createArticle.id,
+        violation: 'Discrimination',
+        description: 'description'
+      });
+    expect(res.status).to.equal(201);
+    expect(res.body.message).to.equal(
+      'We received your report and our support staff will attend to it. Thank you'
+    );
+    expect(res.body.data.violation).to.equal('Discrimination');
+    expect(res.body.data.description).to.equal('description');
+  });
+
+  it('should fail if article id does not exist', async () => {
+    const reporter = await createUser();
+    const token = helper.jwtSigner(reporter);
+    const res = await server()
+      .post(`/api/v1/articles/1000/report`)
+      .set('x-access-token', token)
+      .send({
+        reporterId: reporter.id,
+        articleId: createArticle.id,
+        violation: 'Discrimination',
+        description: 'description'
+      });
+    expect(res.status).to.equal(404);
+    expect(res.body.message).to.equal('The requested article was not found');
+  });
+
+  it('should return a 400 if article ID is invalid or not a non-zero positive an integer', async () => {
+    const reporter = await createUser();
+    const author = await createUser();
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+    const createdReport = await reportArticle(
+      createdArticle.id,
+      await generateReport({
+        reporterId: reporter.id,
+        articleId: createArticle.id,
+        violation: 'Discrimination',
+        description: 'description'
+      })
+    );
+    const { violation, description } = createdReport[0].dataValues;
+
+    const token = helper.jwtSigner({ id: reporter.id });
+    const res = await server()
+      .post(`/api/v1/articles/sometest/report`)
+      .set('token', token)
+      .send({ violation, description });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.equal(
+      'Invalid Article ID. Article ID must be a positive integer'
+    );
+  });
+
+  it('should fail if token is not provided', async () => {
+    const reporter = await createUser();
+    const author = await createUser();
+
+    const article = await BaseRepository.create(db.Article, {
+      ...articleSample,
+      authorId: author.id
+    });
+
+    const fakeToken = 'asdfghu8765432';
+    const res = await server()
+      .post(`/api/v1/articles/${article.id}/report`)
+      .set('x-access-token', fakeToken)
+      .send({
+        reporterId: reporter.id,
+        articleId: createArticle.id,
+        violation: 'Discrimination',
+        description: 'description'
+      });
+    expect(res.status).to.equal(401);
+    expect(res.body.message).to.equal('Token is not valid');
+  });
+
+  it('should return validation error if violation a is not provided', async () => {
+    const reporter = await createUser();
+    const author = await createUser();
+
+    const article = await BaseRepository.create(db.Article, {
+      ...articleSample,
+      authorId: author.id
+    });
+    const token = helper.jwtSigner(reporter);
+    const res = await server()
+      .post(`/api/v1/articles/${article.id}/report`)
+      .set('x-access-token', token)
+      .send({
+        reporterId: reporter.id,
+        articleId: createArticle.id,
+        violation: '',
+        description: 'description'
+      });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.equal('violation is not allowed to be empty');
+  });
+
+  it(`should return success if
+    Discrimination
+    Sexual Content
+    Offensive Language
+    Plagiarism violation is provided`, async () => {
+    const reporter = await createUser();
+    const author = await createUser();
+
+    const article = await BaseRepository.create(db.Article, {
+      ...articleSample,
+      authorId: author.id
+    });
+    const token = helper.jwtSigner(reporter);
+    const res = await server()
+      .post(`/api/v1/articles/${article.id}/report`)
+      .set('x-access-token', token)
+      .send({
+        reporterId: reporter.id,
+        articleId: createArticle.id,
+        violation: 'Discrimination',
+        description: ''
+      });
+    expect(res.status).to.equal(201);
+    expect(res.body.message).to.equal(
+      'We received your report and our support staff will attend to it. Thank you'
+    );
+  });
+  it('should return description validation error if the violation specified is Other', async () => {
+    const reporter = await createUser();
+    const author = await createUser();
+
+    const article = await BaseRepository.create(db.Article, {
+      ...articleSample,
+      authorId: author.id
+    });
+
+    const token = helper.jwtSigner(reporter);
+    const res = await server()
+      .post(`/api/v1/articles/${article.id}/report`)
+      .set('x-access-token', token)
+      .send({
+        reporterId: reporter.id,
+        articleId: createArticle.id,
+        violation: 'Others',
+        description: ''
+      });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.equal('description is not allowed to be empty');
+  });
+
+  it('should return validation error if violation sis not provided', async () => {
+    const reporter = await createUser();
+    const author = await createUser();
+
+    const article = await BaseRepository.create(db.Article, {
+      ...articleSample,
+      authorId: author.id
+    });
+
+    const token = helper.jwtSigner(reporter);
+    const res = await server()
+      .post(`/api/v1/articles/${article.id}/report`)
+      .set('x-access-token', token)
+      .send({
+        reporterId: reporter.id,
+        articleId: createArticle.id,
+        description: ''
+      });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.equal('violation is required');
   });
 });
 

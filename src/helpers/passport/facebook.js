@@ -2,6 +2,7 @@ import passport from 'passport';
 import FacebookStrategy from 'passport-facebook';
 import dotenv from 'dotenv';
 import { callback, respondCallback } from './callback';
+import hostUrl from './hostUrl';
 
 dotenv.config();
 
@@ -10,7 +11,7 @@ passport.use(
     {
       clientID: process.env.fbk_id,
       clientSecret: process.env.fbk_secret,
-      callbackURL: 'http://localhost:3000/auth/facebook/callback',
+      callbackURL: `${hostUrl}auth/facebook/callback`,
       profileFields: ['id', 'displayName', 'photos', 'emails', 'name'],
       enableProof: false
     },
