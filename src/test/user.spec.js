@@ -890,7 +890,6 @@ describe('GET /api/v1/users/followings', () => {
     expect(res.body.metadata.totalItems).to.equal(numberOfFollowing.count);
   });
 });
-
 describe(' POST /api/v1/auth/reset-password', async () => {
   const newUser = await createUser();
   const user = await BaseRepository.findAll(db.User, {

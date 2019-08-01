@@ -14,16 +14,20 @@ dotenv.config();
 
 const app = express();
 
+app.use(cors());
+
 app.use(passport.initialize());
 
 const swaggerdoc = yaml.load('./swagger.yaml');
 
-app.use(cors());
-
 app.use(require('morgan')('dev'));
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+  bodyParser.urlencoded({
+    extended: true
+  })
+);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerdoc));
 
 Routes(app);

@@ -1,4 +1,3 @@
-import responseGenerator from '../responseGenerator';
 import helpers from '../utils';
 import Baserepository from '../../repository/base.repository';
 import db from '../../database/models';
@@ -14,6 +13,7 @@ export const callback = async (accessToken, refreshToken, payload, done) => {
         username: displayName,
         avatar: photos[0].value,
         role: 'user',
+        status: 'active',
         email: userEmail,
         password
       }
@@ -41,15 +41,14 @@ export const callback = async (accessToken, refreshToken, payload, done) => {
 };
 
 export const respondCallback = (req, res) => {
-  if (req.user.created) {
-    responseGenerator.sendSuccess(
-      res,
-      201,
-      req.user,
-      'Account created successfully. Welcome to errorSwag.'
+  if (req.user) {
+    const {
+      user: { token }
+    } = req;
+    return res.redirect(
+      `https://font-errorswag.herokuapp.com/login?token=${token}`
     );
   }
-  responseGenerator.sendSuccess(res, 200, req.user);
 };
 
 export default callback;
