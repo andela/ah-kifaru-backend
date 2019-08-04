@@ -14,7 +14,11 @@
     "build:server": "babel src --copy-files --out-dir build",
     "build": "npm run build:server",
     "start": "node build/index.js",
-    "start:dev": "nodemon --exec babel-node src/index"
+    "start:dev": "nodemon --exec babel-node src/index",
+    "seed": "babel-node src/database/seed/index.js",
+    "seeddb": "sequelize db:migrate:undo:all && sequelize db:migrate && npm run seed",
+    "seed:prod": "node build/src/database/seed/index",
+    "heroku-postbuild": "npm run build && sequelize db:migrate:undo:all && sequelize db:migrate && npm run seed"
   },
   "nyc": {
     "exclude": [
