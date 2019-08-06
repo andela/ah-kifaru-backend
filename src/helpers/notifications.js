@@ -40,6 +40,7 @@ const onFollowNotification = async (req, followeeId) => {
   });
 
   const payload = {
+    id: sender.id,
     follower: sender.username,
     type: 'new_follower'
   };
@@ -53,7 +54,7 @@ const onFollowNotification = async (req, followeeId) => {
       receiver: email,
       subject: `<b>${sender.username}</b> just followed you.`,
       templateName: 'new_notification',
-      buttonUrl: `${protocol}://${req.get('host')}/profile/${sender.username}`
+      buttonUrl: `${protocol}://${req.get('host')}/profile/${sender.id}`
     });
   }
 
@@ -75,6 +76,7 @@ const onCommentNotification = async (req, articleId) => {
   });
 
   const payload = {
+    id: sender.id,
     commenter: sender.username,
     title: article[0].title,
     slug: article[0].slug,
@@ -89,7 +91,7 @@ const onCommentNotification = async (req, articleId) => {
       subject: `<b>${sender.username}</b> just commented on <b>${article[0].title}</b>`,
       templateName: 'new_notification',
       buttonUrl: `${protocol}://${req.get('host')}/article/${
-        article[0].slug
+        article[0].id
       }/#commentId`
     });
   }
@@ -122,9 +124,9 @@ const onPublishArticleNotification = async (req, { userId, articleId }) => {
 
   const followerIds = followers.map(follower => follower.followerId);
   const payload = {
+    id: article[0].authorId,
     author: article[0]['author.username'],
     title: article[0].title,
-    slug: article[0].slug,
     type: 'new_article'
   };
 
@@ -138,7 +140,7 @@ const onPublishArticleNotification = async (req, { userId, articleId }) => {
         article[0].title
       }</b>`,
       templateName: 'new_notification',
-      buttonUrl: `${protocol}://${req.get('host')}/article/${article[0].slug}`
+      buttonUrl: `${protocol}://${req.get('host')}/article/${article[0].id}`
     });
   });
 

@@ -115,7 +115,7 @@ describe('Notification helper functions', () => {
       const payload = {
         author: author.username,
         title: article.title,
-        slug: article.slug,
+        id: article.authorId,
         type: 'new_article'
       };
 
@@ -134,12 +134,12 @@ describe('Notification helper functions', () => {
       expect(notification[0].receiverId).to.equal(firstFollower.id);
       expect(notification[0].payload.author).to.equal(payload.author);
       expect(notification[0].payload.title).to.equal(payload.title);
-      expect(notification[0].payload.slug).to.equal(payload.slug);
+      expect(notification[0].payload.id).to.equal(payload.id);
 
       expect(notification[1].receiverId).to.equal(secondFollower.id);
       expect(notification[1].payload.author).to.equal(payload.author);
       expect(notification[1].payload.title).to.equal(payload.title);
-      expect(notification[1].payload.slug).to.equal(payload.slug);
+      expect(notification[1].payload.id).to.equal(payload.id);
     });
   });
 });
@@ -150,20 +150,40 @@ describe('GET /api/v1/notifications', () => {
     await Follower.destroy({ truncate: true, cascade: true });
     await Notification.destroy({ truncate: true, cascade: true });
   });
+  it('Returns 200 and number of notifications requested notifications', async () => {
+    const newUser = await createUser();
+    const token = helper.jwtSigner(newUser);
+    const notify = await addNotification(newUser.id);
+    await addNotification(newUser.id);
+    await addNotification(newUser.id);
+    await addNotification(newUser.id);
+    await addNotification(newUser.id);
+    await addNotification(newUser.id);
+    await addNotification(newUser.id);
+    await addNotification(newUser.id);
+    const response = await chai
+      .request(app)
+      .get(`/api/v1/notifications?page=1&limit=4`)
+      .set('x-access-token', token);
+    expect(response.status).to.equal(200);
+    expect(response.body.data.rows[0].id).to.equal(notify.id);
+    expect(response.body.data.rows[0].read).to.equal(notify.read);
+    expect(response.body.data.rows[0].payload).to.be.a('object');
+    expect(response.body.data.rows[0].recieverId).to.equal(notify.recieverId);
+  });
   it('Returns 200 and notifications found', async () => {
     const newUser = await createUser();
     const token = helper.jwtSigner(newUser);
-    const secondUser = await createUser();
-    const notify = await addNotification(secondUser.id);
+    const notify = await addNotification(newUser.id);
     const response = await chai
       .request(app)
       .get('/api/v1/notifications')
       .set('x-access-token', token);
     expect(response.status).to.equal(200);
-    expect(response.body.data[0].id).to.equal(notify.id);
-    expect(response.body.data[0].read).to.equal(notify.read);
-    expect(response.body.data[0].payload).to.be.a('object');
-    expect(response.body.data[0].recieverId).to.equal(notify.recieverId);
+    expect(response.body.data.rows[0].id).to.equal(notify.id);
+    expect(response.body.data.rows[0].read).to.equal(notify.read);
+    expect(response.body.data.rows[0].payload).to.be.a('object');
+    expect(response.body.data.rows[0].recieverId).to.equal(notify.recieverId);
   });
   it('Returns 200 and empty array if notification was not found', async () => {
     const newUser = await createUser();
@@ -173,12 +193,12 @@ describe('GET /api/v1/notifications', () => {
       .get('/api/v1/notifications')
       .set('x-access-token', token);
     expect(response.status).to.equal(200);
-    expect(response.body.data.length).to.equal(0);
+    expect(response.body.data.rows.length).to.equal(0);
   });
   it('should return error if database error occurs', async () => {
     const newUser = await createUser();
     const token = helper.jwtSigner(newUser);
-    const findAllStub = sinon.stub(BaseRepository, 'findAll');
+    const findAllStub = sinon.stub(BaseRepository, 'findAndCountAll');
     findAllStub.rejects(new Error('Server Error'));
     const response = await chai
       .request(app)

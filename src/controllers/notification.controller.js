@@ -1,6 +1,7 @@
 import BaseRepository from '../repository/base.repository';
 import responseGenerator from '../helpers/responseGenerator';
 import db from '../database/models';
+import Pagination from '../helpers/pagination';
 
 const { User, Notification } = db;
 
@@ -17,13 +18,21 @@ class NotificationController {
    * @static
    */
   static async getNotifications(req, res) {
-    const { id: recieverId } = req.currentUser;
+    const { id: receiverId } = req.currentUser;
     try {
-      const notification = await BaseRepository.findAll(Notification, {
-        recieverId
-      });
+      const { page } = req.query;
+      const paginate = new Pagination(page, req.query.limit);
+      const { limit, offset } = paginate.getQueryMetadata();
+      const { count, rows } = await BaseRepository.findAndCountAll(
+        Notification,
+        {
+          where: { receiverId },
+          limit,
+          offset
+        }
+      );
 
-      return responseGenerator.sendSuccess(res, 200, notification);
+      return responseGenerator.sendSuccess(res, 200, { count, rows });
     } catch (error) {
       return responseGenerator.sendError(res, 500, error.message);
     }
