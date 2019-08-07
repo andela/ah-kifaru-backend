@@ -42,6 +42,7 @@ node_modules
  .nyc_output 
 #build
 ./build
+build/
 
 .nyc_output
 .vscode
