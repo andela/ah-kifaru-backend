@@ -6,7 +6,7 @@ const secret = process.env.SENDGRID_API_KEY;
 sgMail.setApiKey(secret);
 
 const templates = {
-  password_reset: 'd-3fa45363fe634b418146f72cbe03942b',
+  reset_password: 'd-3fa45363fe634b418146f72cbe03942b',
   confirm_account: 'd-84376bbc49e24647ab77848bcb926eb5',
   new_notification: 'd-2a54c072315e4b45a215c74344f0cb4d'
 };
