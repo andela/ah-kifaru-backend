@@ -254,13 +254,11 @@ class UserController {
 
       const { protocol } = req;
       mailer({
-        name: user.dataValues.email,
+        name: user.dataValues.username,
         receiver: user.dataValues.email,
         subject: 'Password reset',
         templateName: 'reset_password',
-        confirm_account_url: `${protocol}://${req.get(
-          'host'
-        )}/api/v1/auth/reset-password/${token}`
+        buttonUrl: `${protocol}://${req.get('host')}/reset-password/${token}`
       });
       return responseGenerator.sendSuccess(
         res,
@@ -269,11 +267,7 @@ class UserController {
         'A password reset link would be sent to the email provided if it is associated with a registered email'
       );
     } catch (error) {
-      return responseGenerator.sendError(
-        res,
-        500,
-        `Request could not be processed. Please try again`
-      );
+      return responseGenerator.sendError(res, 500, error.message);
     }
   }
 
@@ -365,11 +359,7 @@ class UserController {
         'Password reset successful'
       );
     } catch (err) {
-      return responseGenerator.sendError(
-        res,
-        500,
-        `Request could not be processed. Please try again`
-      );
+      return responseGenerator.sendError(res, 500, err.message);
     }
   }
 

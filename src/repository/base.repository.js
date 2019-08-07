@@ -60,7 +60,7 @@ class BaseRepository {
    * @memberof BaseRepository
    */
   static async find(model, options) {
-    return model.find({ where: options });
+    return model.findOne({ where: options });
   }
 
   /**
