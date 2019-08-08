@@ -57,10 +57,13 @@ const loginSchema = {
 };
 const resetPasswordSchema = {
   body: {
-    email
+    password
+  },
+  params: {
+    token
   }
 };
-const resetSchema = {
+const requestPasswordSchema = {
   body: {
     email
   }
@@ -268,11 +271,11 @@ export default [
   {
     route: '/reset-password',
     method: 'post',
-    schema: resetSchema
+    schema: requestPasswordSchema
   },
   {
-    route: '/auth/reset-password',
-    method: 'post',
+    route: '/reset-password/:token',
+    method: 'put',
     schema: resetPasswordSchema
   },
   {
