@@ -8,6 +8,11 @@ import mailer from '../helpers/mailer';
 
 const { User } = db;
 
+const BASE_URL =
+  process.NODE_ENV === 'development'
+    ? 'localhost:3000'
+    : 'https://errorswagfrontend-staging.herokuapp.com';
+
 const { jwtSigner, verifyPassword } = utility;
 const { onFollowNotification } = NotificationHelper;
 /**
@@ -57,15 +62,12 @@ class UserController {
         role
       });
 
-      const { protocol } = req;
       mailer({
         name: username,
         receiver: email,
         subject: 'Welcome to ErrorSwag',
         templateName: 'confirm_account',
-        buttonUrl: `${protocol}://${req.get(
-          'host'
-        )}/api/v1/auth/verify/${token}`
+        buttonUrl: `${BASE_URL}/verify/${token}`
       });
 
       return responseGenerator.sendSuccess(
@@ -108,16 +110,12 @@ class UserController {
           });
 
           if (user.status === 'unverified') {
-            const { protocol } = req;
-
             mailer({
               name: username,
               receiver: email,
               subject: 'Welcome to ErrorSwag',
               templateName: 'confirm_account',
-              buttonUrl: `${protocol}://${req.get(
-                'host'
-              )}/api/v1/auth/verify/${token}`
+              buttonUrl: `${BASE_URL}/verify/${token}`
             });
 
             return responseGenerator.sendSuccess(
@@ -252,13 +250,12 @@ class UserController {
         time: { expiresIn: 600 }
       });
 
-      const { protocol } = req;
       mailer({
         name: user.dataValues.username,
         receiver: user.dataValues.email,
         subject: 'Password reset',
         templateName: 'reset_password',
-        buttonUrl: `${protocol}://${req.get('host')}/reset-password/${token}`
+        buttonUrl: `${BASE_URL}/reset-password/${token}`
       });
       return responseGenerator.sendSuccess(
         res,

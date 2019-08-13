@@ -14,6 +14,10 @@ const password = Joi.string()
   .required()
   .strict();
 
+const loginPassword = Joi.string()
+  .required()
+  .strict();
+
 const descriptionRequired = Joi.string()
   .min(10)
   .required()
@@ -52,7 +56,7 @@ const createAccountSchema = {
 const loginSchema = {
   body: {
     email,
-    password
+    password: loginPassword
   }
 };
 const resetPasswordSchema = {

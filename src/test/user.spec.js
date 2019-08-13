@@ -122,24 +122,6 @@ describe('Test user login, signup and account verification', () => {
       expect(res.body.message).to.equal('email must be a valid email');
     });
 
-    it('should throw an error if password is not up to 8', done => {
-      const user = {
-        email: 'sholabola@gmail.com',
-        password: 'pass'
-      };
-      chai
-        .request(app)
-        .post('/api/v1/auth/login')
-        .send(user)
-        .end((err, res) => {
-          expect(res.status).to.equal(400);
-          expect(res.body.message).to.equal(
-            'password length must be at least 8 characters long'
-          );
-          done();
-        });
-    });
-
     it('should throw if wrong credential is passed', done => {
       const user = {
         email: 'sholabola@yahoo.com',
