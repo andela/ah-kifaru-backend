@@ -15,7 +15,11 @@ import {
   rateArticle,
   createArticle2,
   reportArticle,
-  generateReport
+  generateReport,
+  createComment,
+  generateComment,
+  generateLiker,
+  createLiker
 } from './utils/helpers';
 import db from '../database/models';
 import helper from '../helpers/utils';
@@ -1197,5 +1201,94 @@ describe('GET /api/v1/articles/popular', () => {
     expect(res.body.message).to.equal('Server Error');
 
     findAllStub.restore();
+  });
+});
+describe('POST api/v1/:articleId/comments/:commentId/like', () => {
+  beforeEach(async () => {
+    await db.Article.destroy({ cascade: true, truncate: true });
+    await db.User.destroy({ cascade: true, truncate: true });
+    // await db.Commentlike.destroy({ cascade: true, truncate: true });
+  });
+
+  it('should like a comment', async () => {
+    const author = await createUser();
+    const commenter = await createUser();
+    const liker = await createUser();
+
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+
+    const createdComment = await createComment(
+      createdArticle.id,
+      await generateComment({ userId: commenter.id })
+    );
+    const { id: commentId } = createdComment[0].dataValues;
+
+    const token = helper.jwtSigner({ id: liker.id });
+    const res = await server()
+      .post(`/api/v1/${createdArticle.id}/comments/${commentId}/like`)
+      .set('token', token)
+      .send({ type: 'comment' });
+    expect(res.status).to.equal(201);
+    expect(res.body.data).to.be.equal('Comment liked');
+  });
+
+  it('should throw error if article id is invalid', async () => {
+    const liker = await createUser();
+
+    const token = helper.jwtSigner({ id: liker.id });
+    const res = await server()
+      .post(`/api/v1/234/comments/7/like`)
+      .set('token', token)
+      .send({ type: 'comment' });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.be.equal(
+      'The specified comment id does not exist'
+    );
+  });
+
+  it('sshould unlike a comment for an article', async () => {
+    const author = await createUser();
+    const commenter = await createUser();
+    const liker = await createUser();
+
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+
+    const createdComment = await createComment(
+      createdArticle.id,
+      await generateComment({ userId: commenter.id })
+    );
+    const { id: commentId } = createdComment[0].dataValues;
+
+    const token = helper.jwtSigner({ id: liker.id });
+    const res = await server()
+      .post(`/api/v1/${createdArticle.id}/comments/${commentId}/like`)
+      .set('token', token)
+      .send({ type: 'comment' });
+    expect(res.status).to.equal(201);
+    expect(res.body.data).to.be.equal('Comment liked');
+  });
+
+  it('should throw error if comment id is invalid', async () => {
+    const author = await createUser();
+    const commenter = await createUser();
+    const liker = await createUser();
+
+    const createdArticle = await createArticle(
+      await generateArticle({ authorId: author.id })
+    );
+
+    const token = helper.jwtSigner({ id: liker.id });
+    const res = await server()
+      .post(`/api/v1/${createdArticle.id}/comments/234/like`)
+      .set('token', token)
+      .send({ type: 'comment' });
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.be.equal(
+      'The specified comment id does not exist'
+    );
   });
 });
