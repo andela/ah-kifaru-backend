@@ -1,3 +1,6 @@
+import { config } from 'dotenv';
+
+config();
 let hostUrl;
 
 if (process.env.NODE_ENV === 'production') {
