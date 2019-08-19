@@ -41,6 +41,7 @@ export const callback = async (accessToken, refreshToken, payload, done) => {
 };
 
 export const respondCallback = (req, res) => {
+  console.log(req.user);
   if (req.user) {
     const {
       user: { token }
