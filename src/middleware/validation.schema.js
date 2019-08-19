@@ -31,7 +31,8 @@ const followeeId = Joi.number()
   .integer()
   .required();
 
-const articleId = Joi.number().required()
+const articleId = Joi.number()
+  .required()
   .integer()
   .required();
 
@@ -78,6 +79,29 @@ const requestPasswordSchema = {
 const verifyTokenSchema = {
   params: {
     token
+  }
+};
+
+const commentSchema = {
+  body: {
+    content: Joi.string()
+      .min(3)
+      .trim()
+      .required()
+      .error(
+        new Error(
+          'Please provide body for your comment with minimum of 3 characters'
+        )
+      )
+  },
+  params: {
+    articleId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(
+        new Error('Invalid CommentID, commentID must be a positive integer')
+      )
   }
 };
 
@@ -131,6 +155,18 @@ const articleParamsSchema = {
       .required()
       .error(
         new Error('Invalid Article ID. Article ID must be a positive integer')
+      )
+  }
+};
+
+const commentParamSchesma = {
+  params: {
+    commentId: Joi.number()
+      .integer()
+      .positive()
+      .required()
+      .error(
+        new Error('Invalid comment ID. comment ID must be a positive integer')
       )
   }
 };
@@ -405,9 +441,16 @@ export default [
     schema: articleParamsSchema
   },
   { route: '/:articleId/report', method: 'post', schema: reportArticle },
-  
-   { route: '/:articleId/comments/:commentId/like',
+
+  {
+    route: '/:articleId/comments/:commentId/like',
     method: 'post',
     schema: commentLikeSchema
+  },
+  {
+    route: '/:articleId',
+    method: 'post',
+    schema: commentSchema
+    // commentParamSchesma
   }
 ];

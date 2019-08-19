@@ -6,7 +6,6 @@ import db from '../database/models';
 import Pagination from '../helpers/pagination';
 import { articleTag } from '../helpers/tagArticle';
 
-const { Report } = db;
 /**
  * @class UserController
  */
@@ -356,7 +355,7 @@ class ArticleController {
       await articleTag(tag, publishedArticle.id);
       return responseGenerator.sendSuccess(res, 201, publishedArticle);
     } catch (error) {
-      return responseGenerator.sendError(res, 500, error.message);
+      return responseGenerator.sendError(response, 500, error.message);
     }
   }
 
@@ -409,7 +408,7 @@ class ArticleController {
       description
     };
     try {
-      await BaseRepository.create(Report, options);
+      await BaseRepository.create(db.Report, options);
       return responseGenerator.sendSuccess(
         res,
         201,

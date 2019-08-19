@@ -71,6 +71,21 @@ export const createArticle2 = async article => {
     { id: article.id },
     article
   );
+};
+export const generateComment = async ({ userId }) => ({
+  userId,
+  content: faker.lorem.word()
+});
+
+export const createComment = async (
+  articleId,
+  content = faker.lorem.sentences()
+) => {
+  const created = await BaseRepository.findOrCreate(
+    db.Comments,
+    { articleId },
+    content
+  );
   return created;
 };
 
@@ -79,20 +94,7 @@ export const createArticle = async article => {
   const plain = await created.get({ plain: true });
   return plain;
 };
-export const generateComment = async ({ userId }) => ({
-  userId,
-  content: faker.lorem.word()
-});
 
-export const createComment = async (articleId, content) => {
-  const created = await BaseRepository.findOrCreate(
-    db.Comments,
-    { articleId },
-    content
-  );
-  // const plain = await created.get({ plain: true });
-  return created;
-};
 export const generateLiker = async ({ userId }) => ({
   userId,
   liked: true

@@ -13,5 +13,5 @@ export default app => {
   app.use('/api/v1/search', searchRoute);
   app.use('/api/v1/notifications', noitificationsRoute);
   app.use('/api/v1/tags', tagRoutes);
-  app.use('/api/v1', commentRoute);
+  app.use('/api/v1/comments', commentRoute);
 };

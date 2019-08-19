@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 import dotenv from 'dotenv';
 import Sequelize from 'sequelize';
 
@@ -328,6 +329,17 @@ class BaseRepository {
       GROUP BY a.id, u.username;`,
       { replacements: { articleId }, type: sequelize.QueryTypes.SELECT }
     );
+  }
+
+  /*
+   * @static
+   * @param {*} model
+   * @param {*} options
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static find(model, options) {
+    return model.findOne(options);
   }
 }
 
