@@ -6,8 +6,6 @@ import articleMiddleware from '../../middleware/article.middleware';
 import validationMiddleware from '../../middleware/validation.middleware';
 import paginationValidations from '../../middleware/pagination.validation';
 
-
-
 const validateRequest = validationMiddleware();
 
 const router = Router();
