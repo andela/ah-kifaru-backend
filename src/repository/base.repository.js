@@ -309,15 +309,25 @@ class BaseRepository {
    * @memberof BaseRepository
    */
   static async findAverage(articleId) {
-    return sequelize.query(
-      `SELECT a.id, a.title, a.title, a.image, a.description, a.body, a."publishedDate", AVG(r.ratings) avg_rating, COUNT(r."userId") count_rating, u.username
-      FROM "Articles" a
-      LEFT OUTER JOIN "Users" u ON u.id = a."authorId"
-      LEFT OUTER JOIN "Ratings" r ON r."articleId" = a.id
-      WHERE a.id = :articleId and a."publishedDate" is not null
-      GROUP BY a.id, u.username;`,
-      { replacements: { articleId }, type: sequelize.QueryTypes.SELECT }
-    );
+    const query = `SELECT a.id, a.title, a.image, a.description, a.body, a."publishedDate",
+    ARRAY(SELECT t.name
+    FROM "Tags" t
+    JOIN "ArticleTags" at ON at."tagId" = t.id
+    JOIN "Articles" a ON a.id = at."articleId"
+    WHERE a.id = :articleId
+    )as tags, u.username, AVG(r.ratings) avg_rating, COUNT(r."userId") count_rating
+    FROM "Articles" a
+    LEFT OUTER JOIN "Users" u ON u.id = a."authorId"
+    LEFT OUTER JOIN "Ratings" r ON r."articleId" = a.id
+    WHERE a.id = :articleId
+    GROUP BY a.id, u.username;`;
+
+    const options = {
+      replacements: { articleId },
+      type: sequelize.QueryTypes.SELECT
+    };
+
+    return sequelize.query(query, options);
   }
 
   /*
