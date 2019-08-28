@@ -70,6 +70,6 @@ router.patch(
   superAdminCheck,
   UserController.updateRole
 );
-router.get('/:id', validateRequest, authMiddleware, UserController.viewProfile);
+router.get('/:id', validateRequest, UserController.viewProfile);
 
 export default router;

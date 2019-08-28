@@ -320,18 +320,18 @@ class BaseRepository {
    * @memberof BaseRepository
    */
   static async findAverage(articleId) {
-    const query = `SELECT a.id, a.title, a.image, a.description, a.body, a."publishedDate",
+    const query = `SELECT a.id, a.title, a.image, a.description, a.body, a."publishedDate", a."authorId",
     ARRAY(SELECT t.name
     FROM "Tags" t
     JOIN "ArticleTags" at ON at."tagId" = t.id
     JOIN "Articles" a ON a.id = at."articleId"
     WHERE a.id = :articleId
-    )as tags, u.username, AVG(r.ratings) avg_rating, COUNT(r."userId") count_rating
+    )as tags, u.username, u.avatar, AVG(r.ratings) avg_rating, COUNT(r."userId") count_rating
     FROM "Articles" a
     LEFT OUTER JOIN "Users" u ON u.id = a."authorId"
     LEFT OUTER JOIN "Ratings" r ON r."articleId" = a.id
     WHERE a.id = :articleId
-    GROUP BY a.id, u.username;`;
+    GROUP BY a.id, u.username, u.avatar;`;
 
     const options = {
       replacements: { articleId },
