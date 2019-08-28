@@ -11,7 +11,7 @@ module.exports = {
     port: process.env.DB_PORT,
     dialect: 'postgres',
     ssl: true,
-    logging: false,
+    logging: true,
     define: {
       timestamps: false
     },
