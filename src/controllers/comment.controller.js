@@ -49,6 +49,7 @@ class CommentsController {
       userId,
       articleId: article.id
     };
+
     try {
       const comment = await Baserepository.create(Comments, userComment);
       return responseGerator.sendSuccess(

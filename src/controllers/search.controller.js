@@ -20,6 +20,7 @@ class SearchController {
       let searchResult;
       if (req.query.search) {
         const { search } = req.query;
+
         const searchModified = search.toLowerCase();
         searchResult = await BaseRepository.searchAll(searchModified);
         return responseGenerator.sendSuccess(res, 200, searchResult, null);

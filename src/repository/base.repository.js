@@ -1,17 +1,6 @@
-/* eslint-disable require-jsdoc */
-import dotenv from 'dotenv';
-import Sequelize from 'sequelize';
+import models from '../database/models';
 
-dotenv.config();
-
-const sequelize = new Sequelize({
-  username: process.env.DB_TEST_USERNAME,
-  password: process.env.DB_TEST_PASSWORD || '',
-  database: process.env.DB_TEST_DATABASE,
-  host: process.env.DB_TEST_HOST,
-  port: process.env.DB_PORT,
-  dialect: 'postgres'
-});
+const { sequelize } = models;
 
 /**
  * @class BaseRepository

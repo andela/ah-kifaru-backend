@@ -90,6 +90,7 @@
     "eslint-config-prettier": "^5.1.0",
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-prettier": "^3.1.0",
+    "eslint-utils": "^1.4.2",
     "husky": "^2.5.0",
     "mocha": "^6.1.4",
     "nodemon": "^1.19.1",
