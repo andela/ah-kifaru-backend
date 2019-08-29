@@ -355,7 +355,7 @@ class ArticleController {
       await articleTag(tag, publishedArticle.id);
       return responseGenerator.sendSuccess(res, 201, publishedArticle);
     } catch (error) {
-      return responseGenerator.sendError(response, 500, error.message);
+      return responseGenerator.sendError(res, 500, error.message);
     }
   }
 
