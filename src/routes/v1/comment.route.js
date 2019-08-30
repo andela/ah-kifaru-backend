@@ -23,13 +23,7 @@ commentRouter.post(
   likeController
 );
 
-commentRouter.get(
-  '/:articleId',
-  authMiddleware,
-  validateRequest,
-  articleMiddleware,
-  getComments
-);
+commentRouter.get('/:articleId', articleMiddleware, getComments);
 
 commentRouter.post(
   '/:articleId',
