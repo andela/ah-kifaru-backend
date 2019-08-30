@@ -5,12 +5,7 @@ import paginationValidations from '../../middleware/pagination.validation';
 
 const router = Router();
 
-router.get('/?search', SearchController.generateSearchQuery);
-
-router.get(
-  '/articles/',
-  //   paginationValidations,
-  SearchDbController.findArticles
-);
+router.get('/articles/', SearchDbController.findArticles);
+router.get('/', SearchController.generateSearchQuery);
 
 export default router;

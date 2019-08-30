@@ -24,7 +24,8 @@
     "exclude": [
       "**/*.spec.js",
       "**/test/utils",
-      "**/helpers/passport/"
+      "**/helpers/passport/",
+      "**/controllers/search.controller.js/"
     ]
   },
   "husky": {
