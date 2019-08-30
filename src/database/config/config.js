@@ -42,10 +42,10 @@ module.exports = {
     dialect: 'postgres',
     logging: false,
     port: 5432,
-    ssl: true,
+    ssl: false,
     operatorsAliases: false,
     dialectOption: {
-      ssl: true,
+      ssl: false,
       native: true
     }
   }
