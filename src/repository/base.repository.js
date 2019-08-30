@@ -309,7 +309,7 @@ class BaseRepository {
    * @memberof BaseRepository
    */
   static async findAverage(articleId) {
-    const query = `SELECT a.id, a.title, a.image, a.description, a.body, a."publishedDate",
+    const query = `SELECT a.id, a.title, a.image, a.description, a.body, a."publishedDate", a."authorId",
     ARRAY(SELECT t.name
     FROM "Tags" t
     JOIN "ArticleTags" at ON at."tagId" = t.id
