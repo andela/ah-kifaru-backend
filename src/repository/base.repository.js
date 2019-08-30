@@ -297,6 +297,26 @@ class BaseRepository {
   }
 
   /**
+   *
+   *
+   * @static
+   * @param {*} parameter - the search parameter
+   * @returns {object} - returns an database object
+   * @memberof BaseRepository
+   */
+  static async findSearchArticle(parameter) {
+    const params = `${parameter}%`;
+    return sequelize.query(
+      `SELECT a.id, a.title, a."publishedDate", u.username, a.title, a.image, a.description, u.avatar
+      FROM "Articles" a
+      LEFT OUTER JOIN "Users" u ON u.id = a."authorId"
+      WHERE title ILIKE :params
+      GROUP BY a.id, u.username, u.avatar`,
+      { replacements: { params }, type: sequelize.QueryTypes.SELECT }
+    );
+  }
+
+  /**
    * @static
    * @param {*} articleId - what to searchBy
    * @param {*} model - model to search

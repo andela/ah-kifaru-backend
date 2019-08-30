@@ -371,10 +371,11 @@ class ArticleController {
     try {
       const { page } = req.query;
       const paginate = new Pagination(page, req.query.limit);
-      const { offset } = paginate.getQueryMetadata();
+      const { offset, limit = 15 } = paginate.getQueryMetadata();
 
       const fetchArticles = await BaseRepository.findByRatingsAndReviews(
-        offset
+        offset,
+        limit
       );
       if (fetchArticles.length < 1) {
         return responseGenerator.sendSuccess(
@@ -384,7 +385,14 @@ class ArticleController {
           'There are no articles at the moment'
         );
       }
-      return responseGenerator.sendSuccess(res, 200, fetchArticles);
+
+      return responseGenerator.sendSuccess(
+        res,
+        200,
+        fetchArticles,
+        null
+        // paginate.getPageMetadata(count, '/api/v1/articles/popular')
+      );
     } catch (err) {
       return responseGenerator.sendError(res, 500, err.message);
     }
